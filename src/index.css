@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand palette */
+  --color-background-main: #efefef;
+  --color-background-card: #ffffff;
+  --color-background-bg: #1d29390a;
+  --color-text-primary: #1d2939;
+  --color-text-secondary: #899098;
+  --color-border: #eaecf0;
+
+  --color-help-success: #29c184;
+  --color-help-success-16: #29c18429;
+  --color-help-success-10: #29c1841a;
+  --color-help-red: #ff2400;
+  --color-help-red-16: #ff639329;
+  --color-help-red-10: #ff24001a;
+  --color-help-blue: #1570ef;
+  --color-help-blue-violet: #7a5af8;
+  --color-help-white: #ffffff;
+
+  --sheets-action: #ffffff;
+  --screen-action: linear-gradient(360deg, #efefefb3 70.32%, #efefef00 100%);
+
+  /* Shadcn token mappings */
+  --background: var(--color-background-main);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-background-card);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-background-card);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-help-success);
+  --primary-foreground: var(--color-help-white);
+  --secondary: var(--color-background-bg);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-background-bg);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-background-bg);
+  --accent-foreground: var(--color-text-primary);
+  --destructive: var(--color-help-red);
+  --destructive-foreground: var(--color-help-white);
+  --success: var(--color-help-success);
+  --success-foreground: var(--color-help-white);
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--color-help-success);
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Branded helper colors exposed as Tailwind utilities */
+  --color-brand-blue: var(--color-help-blue);
+  --color-brand-blue-violet: var(--color-help-blue-violet);
+  --color-brand-success: var(--color-help-success);
+  --color-brand-success-soft: var(--color-help-success-16);
+  --color-brand-success-faint: var(--color-help-success-10);
+  --color-brand-danger: var(--color-help-red);
+  --color-brand-danger-soft: var(--color-help-red-16);
+  --color-brand-danger-faint: var(--color-help-red-10);
+  --color-brand-text: var(--color-text-primary);
+  --color-brand-text-muted: var(--color-text-secondary);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    user-select: auto;
+  }
+
+  button,
+  [role="button"] {
+    -webkit-touch-callout: none;
+  }
+
+  /* Disable hover state effects on touch devices for native feel. */
+  @media (hover: none) {
+    .group:hover :is(.group-hover\:bg-accent) {
+      background-color: transparent;
+    }
+  }
+}
+
+@utility screen-action-overlay {
+  background: var(--screen-action);
+}
+
+@utility sheet-surface {
+  background: var(--sheets-action);
+}
+
+@utility safe-top {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+
+@utility safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+@utility press {
+  transition:
+    transform 80ms ease-out,
+    opacity 80ms ease-out;
+}
+
+.press:active {
+  transform: scale(0.98);
+  opacity: 0.85;
+}
+
+@keyframes hb-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes hb-sheet-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes hb-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hb-overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@utility animate-sheet-in {
+  animation: hb-sheet-in 220ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+@utility animate-sheet-out {
+  animation: hb-sheet-out 180ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+@utility animate-overlay-in {
+  animation: hb-overlay-in 180ms ease-out;
+}
+@utility animate-overlay-out {
+  animation: hb-overlay-out 160ms ease-out;
+}

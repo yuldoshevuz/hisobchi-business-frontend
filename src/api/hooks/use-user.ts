@@ -1,0 +1,25 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { userApi } from '@/api/user.api';
+import { queryKeys } from '@/api/query-keys';
+import { tokenStore } from '@/store/token-store';
+import type { UpdateProfileRequest, User } from '@/types/user.types';
+
+export function useMe(): ReturnType<typeof useQuery<User, Error>> {
+  return useQuery<User, Error>({
+    queryKey: queryKeys.user.me,
+    queryFn: () => userApi.getMe(),
+    enabled: Boolean(tokenStore.getAccessToken()),
+  });
+}
+
+export function useUpdateMe(): ReturnType<
+  typeof useMutation<User, Error, UpdateProfileRequest>
+> {
+  const queryClient = useQueryClient();
+  return useMutation<User, Error, UpdateProfileRequest>({
+    mutationFn: (body) => userApi.updateMe(body),
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKeys.user.me, data);
+    },
+  });
+}
