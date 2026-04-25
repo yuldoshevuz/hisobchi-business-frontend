@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/auth.api';
+import { tgClose } from '@/lib/telegram';
 import { tokenStore } from '@/store/token-store';
 import { queryKeys } from '@/api/query-keys';
 import type {
@@ -59,6 +60,12 @@ export function useLogout(): ReturnType<typeof useMutation<void, Error, void>> {
     onSettled: () => {
       tokenStore.clear();
       queryClient.clear();
+      // Close the Mini App so Telegram releases the cached WebView and
+      // provides a fresh `initData` on the NEXT launch. Otherwise the user
+      // would land on /login here with empty initData (one-shot per launch
+      // on most clients) and be unable to re-authenticate without manually
+      // killing the Telegram chat.
+      tgClose();
     },
   });
 }

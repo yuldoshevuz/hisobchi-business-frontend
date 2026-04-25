@@ -54,9 +54,36 @@ export function LoginPage(): React.ReactElement {
 
       <div className="mt-8 w-full max-w-sm space-y-3">
         {!initData ? (
-          <p className="text-[13px] text-muted-foreground">
-            Iltimos, ushbu ilovani Telegram bot orqali oching.
-          </p>
+          <>
+            <p className="text-[13px] text-muted-foreground">
+              Iltimos, ushbu ilovani Telegram bot orqali oching.
+            </p>
+            <pre className="mt-3 max-h-72 overflow-auto rounded bg-muted p-2 text-left text-[10px] leading-tight">
+              {(() => {
+                const tg = (window as { Telegram?: { WebApp?: Record<string, unknown> } })
+                  .Telegram?.WebApp;
+                return JSON.stringify(
+                  {
+                    hasWindowTelegram:
+                      typeof (window as { Telegram?: unknown }).Telegram !== 'undefined',
+                    hasWebApp: tg !== undefined,
+                    platform: (tg?.platform as string | undefined) ?? '<undef>',
+                    version: (tg?.version as string | undefined) ?? '<undef>',
+                    initDataLen: ((tg?.initData as string | undefined) ?? '').length,
+                    initDataPreview: ((tg?.initData as string | undefined) ?? '').slice(0, 80),
+                    user:
+                      (tg?.initDataUnsafe as { user?: unknown } | undefined)?.user ?? null,
+                    href: window.location.href,
+                    hashLen: window.location.hash.length,
+                    searchLen: window.location.search.length,
+                    userAgent: navigator.userAgent.slice(0, 80),
+                  },
+                  null,
+                  2,
+                );
+              })()}
+            </pre>
+          </>
         ) : login.isPending ? (
           <div className="flex items-center justify-center gap-2 text-[14px] text-muted-foreground">
             <Spinner /> Telegram orqali kirilmoqda…
