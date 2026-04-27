@@ -4,6 +4,7 @@ import {
   Archive,
   ArrowLeftRight,
   Building2,
+  Contact,
   Eye,
   EyeOff,
   FolderTree,
@@ -124,6 +125,19 @@ export function DashboardPage(): React.ReactElement {
               subtitle="Chiqim, kirim va mahsulot turlari"
               showChevron
               onClick={() => navigate('/categories')}
+            />
+          </Can>
+          <Can slug={PermissionSlug.CLIENTS_READ}>
+            <ListItem
+              leading={
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Contact className="h-4 w-4" />
+                </div>
+              }
+              title="Klientlar"
+              subtitle="Mijozlar va yetkazib beruvchilar"
+              showChevron
+              onClick={() => navigate('/clients')}
             />
           </Can>
           <Can slug={PermissionSlug.TRANSACTIONS_READ}>

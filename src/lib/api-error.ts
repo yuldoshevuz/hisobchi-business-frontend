@@ -39,6 +39,13 @@ const MESSAGE_KEY_TO_UZ: Record<string, string> = {
   SYSTEM_CATEGORY_CODE_EXISTS: 'Bu kod bilan tizim kategoriyasi mavjud',
   SYSTEM_CATEGORY_NOT_FOUND: 'Tizim kategoriyasi topilmadi',
   TRANSLATION_LOCALE_UNSUPPORTED: 'Bu til qo‘llab-quvvatlanmaydi',
+  CLIENT_NOT_FOUND: 'Klient topilmadi',
+  CLIENT_PHONE_EXISTS: 'Bu telefon raqamli klient allaqachon mavjud',
+  CLIENT_IN_USE:
+    'Bu klient faol tranzaksiyalarda ishlatilmoqda. O‘chirish o‘rniga arxivlang',
+  CLIENT_INVALID_TYPE: 'Klient turi noto‘g‘ri',
+  CLIENT_INVALID_STATUS: 'Klient statusi noto‘g‘ri',
+  CLIENT_CREDIT_LIMIT_NEGATIVE: 'Kredit limiti manfiy bo‘lishi mumkin emas',
 };
 
 export function getApiErrorCode(error: unknown): string | undefined {
