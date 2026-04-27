@@ -5,6 +5,7 @@ import type {
 } from '@/types/category.types';
 import type { ListClientsQuery } from '@/types/client.types';
 import type { ListMembersQuery } from '@/types/member.types';
+import type { ListProductsQuery } from '@/types/product.types';
 
 export const queryKeys = {
   user: {
@@ -58,5 +59,14 @@ export const queryKeys = {
     ],
     detail: (id: number): readonly unknown[] => ['clients', 'detail', id],
     balance: (id: number): readonly unknown[] => ['clients', 'balance', id],
+  },
+  products: {
+    all: ['products'] as const,
+    list: (query: ListProductsQuery): readonly unknown[] => [
+      'products',
+      'list',
+      query,
+    ],
+    detail: (id: number): readonly unknown[] => ['products', 'detail', id],
   },
 };
