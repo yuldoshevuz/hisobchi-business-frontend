@@ -1,6 +1,12 @@
 import { useMemo } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, ShieldCheck, User as UserIcon } from 'lucide-react';
+import {
+  FolderTree,
+  LayoutDashboard,
+  Users,
+  ShieldCheck,
+  User as UserIcon,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { tgHapticSelection } from '@/lib/telegram';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -16,6 +22,12 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Asosiy', icon: LayoutDashboard },
+  {
+    to: '/categories',
+    label: 'Kategoriya',
+    icon: FolderTree,
+    requireAny: [PermissionSlug.CATEGORIES_MANAGE],
+  },
   {
     to: '/members',
     label: "A'zolar",
@@ -45,13 +57,15 @@ export function AppShell(): React.ReactElement {
 
   // Tailwind grid-cols-N must be statically known; pick from a fixed set.
   const colsClass =
-    visibleItems.length >= 4
-      ? 'grid-cols-4'
-      : visibleItems.length === 3
-        ? 'grid-cols-3'
-        : visibleItems.length === 2
-          ? 'grid-cols-2'
-          : 'grid-cols-1';
+    visibleItems.length >= 5
+      ? 'grid-cols-5'
+      : visibleItems.length === 4
+        ? 'grid-cols-4'
+        : visibleItems.length === 3
+          ? 'grid-cols-3'
+          : visibleItems.length === 2
+            ? 'grid-cols-2'
+            : 'grid-cols-1';
 
   return (
     <div className="flex min-h-screen flex-col bg-background">

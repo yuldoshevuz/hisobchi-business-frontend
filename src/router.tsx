@@ -6,6 +6,7 @@ import { OrganizationsPage } from '@/pages/OrganizationsPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { MembersPage } from '@/pages/MembersPage';
 import { RolesPage } from '@/pages/RolesPage';
+import { CategoriesPage } from '@/pages/CategoriesPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 
 export const router = createBrowserRouter([
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
               { index: true, element: <DashboardPage /> },
               { path: 'members', element: <MembersPage /> },
               { path: 'roles', element: <RolesPage /> },
+              { path: 'categories', element: <CategoriesPage /> },
               { path: 'profile', element: <ProfilePage /> },
             ],
           },
