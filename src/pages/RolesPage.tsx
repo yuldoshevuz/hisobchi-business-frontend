@@ -16,14 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ListItem, Section } from '@/components/ui/list-item';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { useTelegramMainButton } from '@/hooks/use-tg-main-button';
+import { Modal } from '@/components/ui/modal';
 import { usePermissions as useViewerPermissions } from '@/hooks/use-permissions';
 import { PermissionSlug } from '@/lib/permission-slugs';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
@@ -114,48 +107,57 @@ export function RolesPage(): React.ReactElement {
         </Button>
       </ScreenAction>
 
-      <Sheet open={createOpen} onOpenChange={setCreateOpen}>
-        <SheetContent>
-          <RoleForm mode="create" onClose={() => setCreateOpen(false)} />
-        </SheetContent>
-      </Sheet>
+      <Modal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        title="Yangi rol"
+        description="Rol nomi va ruxsatlarni tanlang"
+      >
+        <RoleForm mode="create" onClose={() => setCreateOpen(false)} />
+      </Modal>
 
-      <Sheet
+      <Modal
         open={Boolean(editing)}
         onOpenChange={(o) => {
           if (!o) setEditing(null);
         }}
+        title={editing?.name}
+        description={
+          editing?.isSystem
+            ? "Tizim roli — faqat ko'rish uchun"
+            : 'Rol nomi va ruxsatlarni tanlang'
+        }
       >
-        <SheetContent>
-          {editing ? (
-            <RoleForm
-              mode="edit"
-              role={editing}
-              onClose={() => setEditing(null)}
-              onAskDelete={() => {
-                setDeleting(editing);
-                setEditing(null);
-              }}
-            />
-          ) : null}
-        </SheetContent>
-      </Sheet>
+        {editing ? (
+          <RoleForm
+            mode="edit"
+            role={editing}
+            onClose={() => setEditing(null)}
+            onAskDelete={() => {
+              setDeleting(editing);
+              setEditing(null);
+            }}
+          />
+        ) : null}
+      </Modal>
 
-      <Sheet
+      <Modal
         open={Boolean(deleting)}
         onOpenChange={(o) => {
           if (!o) setDeleting(null);
         }}
+        title="Rolni o'chirish"
+        description={
+          deleting ? `"${deleting.name}" — bu amal qaytarib bo'lmaydi` : undefined
+        }
       >
-        <SheetContent>
-          {deleting ? (
-            <DeleteRoleConfirm
-              role={deleting}
-              onClose={() => setDeleting(null)}
-            />
-          ) : null}
-        </SheetContent>
-      </Sheet>
+        {deleting ? (
+          <DeleteRoleConfirm
+            role={deleting}
+            onClose={() => setDeleting(null)}
+          />
+        ) : null}
+      </Modal>
     </div>
   );
 }
@@ -227,33 +229,21 @@ function RoleForm({
   const error = create.error ?? update.error;
   const isSystem = role?.isSystem ?? false;
 
-  useTelegramMainButton({
-    text: 'Saqlash',
-    onClick: submit,
-    enabled: !pending && !isSystem && name.trim().length >= 2,
-    showProgress: pending,
-  });
+  // useTelegramMainButton({
+  //   text: 'Saqlash',
+  //   onClick: submit,
+  //   enabled: !pending && !isSystem && name.trim().length >= 2,
+  //   showProgress: pending,
+  // });
 
   return (
-    <>
-      <SheetHeader>
-        <SheetTitle>
-          {mode === 'create' ? 'Yangi rol' : `${role?.name}`}
-        </SheetTitle>
-        <SheetDescription>
-          {isSystem
-            ? "Tizim roli — faqat ko'rish uchun"
-            : 'Rol nomi va ruxsatlarni tanlang'}
-        </SheetDescription>
-      </SheetHeader>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          submit();
-        }}
-        className="space-y-4"
-      >
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+      className="space-y-4"
+    >
         <div className="space-y-1.5">
           <Label htmlFor="role-name">Nomi</Label>
           <Input
@@ -328,10 +318,9 @@ function RoleForm({
             onClick={onAskDelete}
           >
             Rolni o'chirish
-          </Button>
-        ) : null}
-      </form>
-    </>
+        </Button>
+      ) : null}
+    </form>
   );
 }
 
@@ -358,35 +347,27 @@ function DeleteRoleConfirm({
   }
 
   return (
-    <>
-      <SheetHeader>
-        <SheetTitle>Rolni o'chirish</SheetTitle>
-        <SheetDescription>
-          "{role.name}" — bu amal qaytarib bo'lmaydi
-        </SheetDescription>
-      </SheetHeader>
-      <div className="space-y-2">
-        <Button
-          variant="destructive"
-          size="lg"
-          className="w-full"
-          onClick={confirm}
-          disabled={remove.isPending}
-        >
-          {remove.isPending ? <Spinner /> : null}
-          O'chirish
-        </Button>
-        <Button
-          variant="ghost"
-          size="lg"
-          className="w-full"
-          onClick={onClose}
-          disabled={remove.isPending}
-        >
-          Bekor qilish
-        </Button>
-      </div>
-    </>
+    <div className="space-y-2">
+      <Button
+        variant="destructive"
+        size="lg"
+        className="w-full"
+        onClick={confirm}
+        disabled={remove.isPending}
+      >
+        {remove.isPending ? <Spinner /> : null}
+        O'chirish
+      </Button>
+      <Button
+        variant="ghost"
+        size="lg"
+        className="w-full"
+        onClick={onClose}
+        disabled={remove.isPending}
+      >
+        Bekor qilish
+      </Button>
+    </div>
   );
 }
 

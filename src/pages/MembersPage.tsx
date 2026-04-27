@@ -18,14 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ListItem, Section } from '@/components/ui/list-item';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { useTelegramMainButton } from '@/hooks/use-tg-main-button';
+import { Modal } from '@/components/ui/modal';
 import { useCan, usePermissions } from '@/hooks/use-permissions';
 import { PermissionSlug } from '@/lib/permission-slugs';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
@@ -115,49 +108,52 @@ export function MembersPage(): React.ReactElement {
         </ScreenAction>
       ) : null}
 
-      <Sheet open={inviteOpen} onOpenChange={setInviteOpen}>
-        <SheetContent>
-          <InviteMemberForm onClose={() => setInviteOpen(false)} />
-        </SheetContent>
-      </Sheet>
+      <Modal
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+        title="A'zo taklif qilish"
+        description="Telefon raqami bo'yicha taklif yuboring"
+      >
+        <InviteMemberForm onClose={() => setInviteOpen(false)} />
+      </Modal>
 
-      <Sheet
+      <Modal
         open={Boolean(actionMember)}
         onOpenChange={(o) => {
           if (!o) setActionMember(null);
         }}
+        title={actionMember?.user.fullName}
+        description={actionMember?.user.phoneNumber ?? '—'}
       >
-        <SheetContent>
-          {actionMember ? (
-            <MemberActions
-              member={actionMember}
-              onClose={() => setActionMember(null)}
-              onEditRoles={() => {
-                setActionMember(null);
-                setEditing(actionMember);
-              }}
-            />
-          ) : null}
-        </SheetContent>
-      </Sheet>
+        {actionMember ? (
+          <MemberActions
+            member={actionMember}
+            onClose={() => setActionMember(null)}
+            onEditRoles={() => {
+              setActionMember(null);
+              setEditing(actionMember);
+            }}
+          />
+        ) : null}
+      </Modal>
 
-      <Sheet
+      <Modal
         open={Boolean(editing)}
         onOpenChange={(o) => {
           if (!o) setEditing(null);
         }}
+        title="Rollar"
+        description={editing?.user.fullName}
       >
-        <SheetContent>
-          {editing ? (
-            <EditRolesForm
-              member={editing}
-              roles={roles.data ?? []}
-              rolesLoading={roles.isPending}
-              onClose={() => setEditing(null)}
-            />
-          ) : null}
-        </SheetContent>
-      </Sheet>
+        {editing ? (
+          <EditRolesForm
+            member={editing}
+            roles={roles.data ?? []}
+            rolesLoading={roles.isPending}
+            onClose={() => setEditing(null)}
+          />
+        ) : null}
+      </Modal>
     </div>
   );
 }
@@ -254,37 +250,31 @@ function MemberActions({
   }
 
   return (
-    <div className="space-y-3">
-      <SheetHeader>
-        <SheetTitle>{member.user.fullName}</SheetTitle>
-        <SheetDescription>{member.user.phoneNumber ?? '—'}</SheetDescription>
-      </SheetHeader>
-      <div className="-mx-4 divide-y divide-border bg-card">
-        <ActionRow
-          title="Rollarni o'zgartirish"
-          subtitle={`${member.roles.length} rol`}
-          onClick={onEditRoles}
-        />
-        <ActionRow
-          title={
-            member.status === 'active' ? 'A\'zoni to\'xtatish' : 'Faollashtirish'
-          }
-          subtitle={
-            member.status === 'active'
-              ? 'A\'zo tashkilotga kira olmaydi'
-              : 'A\'zoga kirish ruxsatini qaytaring'
-          }
-          onClick={toggleStatus}
-          loading={updateStatus.isPending}
-        />
-        <ActionRow
-          title="A'zoni o'chirish"
-          subtitle="Bu amal qaytarib bo'lmaydi"
-          destructive
-          onClick={handleRemove}
-          loading={remove.isPending}
-        />
-      </div>
+    <div className="-mx-4 divide-y divide-border bg-card">
+      <ActionRow
+        title="Rollarni o'zgartirish"
+        subtitle={`${member.roles.length} rol`}
+        onClick={onEditRoles}
+      />
+      <ActionRow
+        title={
+          member.status === 'active' ? "A'zoni to'xtatish" : 'Faollashtirish'
+        }
+        subtitle={
+          member.status === 'active'
+            ? "A'zo tashkilotga kira olmaydi"
+            : "A'zoga kirish ruxsatini qaytaring"
+        }
+        onClick={toggleStatus}
+        loading={updateStatus.isPending}
+      />
+      <ActionRow
+        title="A'zoni o'chirish"
+        subtitle="Bu amal qaytarib bo'lmaydi"
+        destructive
+        onClick={handleRemove}
+        loading={remove.isPending}
+      />
     </div>
   );
 }
@@ -363,65 +353,57 @@ function InviteMemberForm({
     );
   }, [invite, phone, name, onClose]);
 
-  useTelegramMainButton({
-    text: 'Taklif qilish',
-    onClick: submit,
-    enabled: phone.trim().length >= 9 && !invite.isPending,
-    showProgress: invite.isPending,
-  });
+  // useTelegramMainButton({
+  //   text: 'Taklif qilish',
+  //   onClick: submit,
+  //   enabled: phone.trim().length >= 9 && !invite.isPending,
+  //   showProgress: invite.isPending,
+  // });
 
   return (
-    <>
-      <SheetHeader>
-        <SheetTitle>A'zo taklif qilish</SheetTitle>
-        <SheetDescription>
-          Telefon raqami bo'yicha taklif yuboring
-        </SheetDescription>
-      </SheetHeader>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          submit();
-        }}
-        className="space-y-4"
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+      className="space-y-4"
+    >
+      <div className="space-y-1.5">
+        <Label htmlFor="invite-phone">Telefon</Label>
+        <Input
+          id="invite-phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="+998901234567"
+          inputMode="tel"
+          required
+          autoFocus
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="invite-name">Ism (ixtiyoriy)</Label>
+        <Input
+          id="invite-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Azizbek Karimov"
+        />
+      </div>
+      {invite.isError ? (
+        <p className="text-[13px] text-destructive">
+          {getApiErrorMessage(invite.error)}
+        </p>
+      ) : null}
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={invite.isPending || phone.trim().length < 9}
       >
-        <div className="space-y-1.5">
-          <Label htmlFor="invite-phone">Telefon</Label>
-          <Input
-            id="invite-phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="+998901234567"
-            inputMode="tel"
-            required
-            autoFocus
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="invite-name">Ism (ixtiyoriy)</Label>
-          <Input
-            id="invite-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Azizbek Karimov"
-          />
-        </div>
-        {invite.isError ? (
-          <p className="text-[13px] text-destructive">
-            {getApiErrorMessage(invite.error)}
-          </p>
-        ) : null}
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full"
-          disabled={invite.isPending || phone.trim().length < 9}
-        >
-          {invite.isPending ? <Spinner /> : null}
-          Taklif qilish
-        </Button>
-      </form>
-    </>
+        {invite.isPending ? <Spinner /> : null}
+        Taklif qilish
+      </Button>
+    </form>
   );
 }
 
@@ -466,20 +448,15 @@ function EditRolesForm({
     );
   }, [assign, member.id, selected, onClose]);
 
-  useTelegramMainButton({
-    text: 'Saqlash',
-    onClick: submit,
-    enabled: !assign.isPending,
-    showProgress: assign.isPending,
-  });
+  // useTelegramMainButton({
+  //   text: 'Saqlash',
+  //   onClick: submit,
+  //   enabled: !assign.isPending,
+  //   showProgress: assign.isPending,
+  // });
 
   return (
     <>
-      <SheetHeader>
-        <SheetTitle>Rollar</SheetTitle>
-        <SheetDescription>{member.user.fullName}</SheetDescription>
-      </SheetHeader>
-
       {rolesLoading ? (
         <div className="flex justify-center py-8">
           <Spinner />

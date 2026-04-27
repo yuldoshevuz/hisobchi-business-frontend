@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, Phone, Send, ShieldCheck } from 'lucide-react';
 import { useMe, useUpdateMe } from '@/api/hooks/use-user';
 import { useLogout } from '@/api/hooks/use-auth';
-import { useTelegramMainButton } from '@/hooks/use-tg-main-button';
+// import { useTelegramMainButton } from '@/hooks/use-tg-main-button';
 import { usePermissions } from '@/hooks/use-permissions';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ListItem, Section } from '@/components/ui/list-item';
@@ -13,13 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Modal } from '@/components/ui/modal';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import type { SupportedLocale, User } from '@/types/user.types';
@@ -117,15 +111,18 @@ export function ProfilePage(): React.ReactElement {
             </Button>
           </div>
 
-          <Sheet open={editOpen} onOpenChange={setEditOpen}>
-            <SheetContent>
-              <ProfileForm
-                key={me.data.id}
-                user={me.data}
-                onClose={() => setEditOpen(false)}
-              />
-            </SheetContent>
-          </Sheet>
+          <Modal
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            title="Profilni tahrirlash"
+            description="Ism, email va tilni o'zgartiring"
+          >
+            <ProfileForm
+              key={me.data.id}
+              user={me.data}
+              onClose={() => setEditOpen(false)}
+            />
+          </Modal>
         </>
       ) : null}
     </div>
@@ -186,75 +183,69 @@ function ProfileForm({
     );
   }, [email, fullName, locale, onClose, update]);
 
-  useTelegramMainButton({
-    text: 'Saqlash',
-    onClick: submit,
-    enabled: !update.isPending && fullName.trim().length >= 2,
-    showProgress: update.isPending,
-  });
+  // useTelegramMainButton({
+  //   text: 'Saqlash',
+  //   onClick: submit,
+  //   enabled: !update.isPending && fullName.trim().length >= 2,
+  //   showProgress: update.isPending,
+  // });
 
   return (
-    <>
-      <SheetHeader>
-        <SheetTitle>Profilni tahrirlash</SheetTitle>
-        <SheetDescription>Ism, email va tilni o'zgartiring</SheetDescription>
-      </SheetHeader>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          submit();
-        }}
-        className="space-y-4"
-      >
-        <div className="space-y-1.5">
-          <Label htmlFor="profile-name">To'liq ism</Label>
-          <Input
-            id="profile-name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            required
-            minLength={2}
-            maxLength={100}
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="profile-email">Email</Label>
-          <Input
-            id="profile-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="email@example.com"
-            inputMode="email"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="profile-locale">Til</Label>
-          <select
-            id="profile-locale"
-            value={locale}
-            onChange={(e) => setLocale(e.target.value as SupportedLocale)}
-            className="h-11 w-full rounded-xl border border-input bg-card px-3 text-[15px] text-foreground"
-          >
-            <option value="uz">O'zbekcha</option>
-            <option value="ru">Русский</option>
-          </select>
-        </div>
-        {update.isError ? (
-          <p className="text-[13px] text-destructive">
-            {getApiErrorMessage(update.error)}
-          </p>
-        ) : null}
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full"
-          disabled={update.isPending || fullName.trim().length < 2}
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+      className="space-y-4"
+    >
+      <div className="space-y-1.5">
+        <Label htmlFor="profile-name">To'liq ism</Label>
+        <Input
+          id="profile-name"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          required
+          minLength={2}
+          maxLength={100}
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="profile-email">Email</Label>
+        <Input
+          id="profile-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="email@example.com"
+          inputMode="email"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="profile-locale">Til</Label>
+        <select
+          id="profile-locale"
+          value={locale}
+          onChange={(e) => setLocale(e.target.value as SupportedLocale)}
+          className="h-11 w-full rounded-xl border border-input bg-card px-3 text-[15px] text-foreground"
         >
-          {update.isPending ? <Spinner /> : null}
-          Saqlash
-        </Button>
-      </form>
-    </>
+          <option value="uz">O'zbekcha</option>
+          <option value="ru">Русский</option>
+        </select>
+      </div>
+      {update.isError ? (
+        <p className="text-[13px] text-destructive">
+          {getApiErrorMessage(update.error)}
+        </p>
+      ) : null}
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={update.isPending || fullName.trim().length < 2}
+      >
+        {update.isPending ? <Spinner /> : null}
+        Saqlash
+      </Button>
+    </form>
   );
 }

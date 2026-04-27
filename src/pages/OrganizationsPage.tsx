@@ -1,11 +1,15 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus } from 'lucide-react';
+import { Building2, Plus, Star } from 'lucide-react';
 import {
   useCreateOrganization,
   useMyOrganizations,
 } from '@/api/hooks/use-organizations';
 import { useSelectOrganization, useLogout } from '@/api/hooks/use-auth';
+import {
+  usePrimaryOrganizationId,
+  useSetPrimaryOrganization,
+} from '@/api/hooks/use-user';
 import { useTelegramMainButton } from '@/hooks/use-tg-main-button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScreenAction } from '@/components/layout/ScreenAction';
@@ -13,13 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Badge } from '@/components/ui/badge';
 import { ListItem, Section } from '@/components/ui/list-item';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getApiErrorMessage } from '@/lib/api-error';
@@ -30,6 +28,8 @@ export function OrganizationsPage(): React.ReactElement {
   const orgs = useMyOrganizations();
   const select = useSelectOrganization();
   const logout = useLogout();
+  const primaryOrgId = usePrimaryOrganizationId();
+  const setPrimary = useSetPrimaryOrganization();
   const [createOpen, setCreateOpen] = useState<boolean>(false);
 
   const handleSelect = useCallback(
@@ -47,6 +47,20 @@ export function OrganizationsPage(): React.ReactElement {
       );
     },
     [navigate, select],
+  );
+
+  const handleSetPrimary = useCallback(
+    (orgId: number) => {
+      tgHapticImpact('light');
+      setPrimary.mutate(
+        { organizationId: orgId },
+        {
+          onSuccess: () => tgHapticNotify('success'),
+          onError: () => tgHapticNotify('error'),
+        },
+      );
+    },
+    [setPrimary],
   );
 
   return (
@@ -88,38 +102,83 @@ export function OrganizationsPage(): React.ReactElement {
           </Section>
         ) : orgs.data && orgs.data.length > 0 ? (
           <Section title="Tashkilotlar">
-            {orgs.data.map((org) => (
-              <ListItem
-                key={org.id}
-                showChevron
-                onClick={() => handleSelect(org.id)}
-                leading={
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Building2 className="h-5 w-5" />
-                  </div>
-                }
-                title={org.name}
-                subtitle={
-                  <span className="flex flex-wrap items-center gap-1.5">
-                    <span>{org.baseCurrency}</span>
-                    {(org.roleNames ?? []).map((r) => (
-                      <Badge
-                        key={r}
-                        variant="success"
-                        className="text-[10px]"
+            {orgs.data.map((org) => {
+              const isPrimary = org.id === primaryOrgId;
+              const isSelectPending =
+                select.isPending && select.variables?.organizationId === org.id;
+              const isPrimaryPending =
+                setPrimary.isPending &&
+                setPrimary.variables?.organizationId === org.id;
+              return (
+                <ListItem
+                  key={org.id}
+                  showChevron
+                  onClick={() => handleSelect(org.id)}
+                  leading={
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                  }
+                  title={
+                    <span className="flex items-center gap-1.5">
+                      <span>{org.name}</span>
+                      {isPrimary ? (
+                        <Badge variant="secondary" className="text-[10px]">
+                          Asosiy
+                        </Badge>
+                      ) : null}
+                    </span>
+                  }
+                  subtitle={
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <span>{org.baseCurrency}</span>
+                      {(org.roleNames ?? []).map((r) => (
+                        <Badge
+                          key={r}
+                          variant="success"
+                          className="text-[10px]"
+                        >
+                          {r}
+                        </Badge>
+                      ))}
+                    </span>
+                  }
+                  trailing={
+                    isSelectPending ? (
+                      <Spinner />
+                    ) : (
+                      <button
+                        type="button"
+                        aria-label={
+                          isPrimary
+                            ? 'Asosiy tashkilot'
+                            : 'Asosiy qilib belgilash'
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isPrimary || isPrimaryPending) return;
+                          handleSetPrimary(org.id);
+                        }}
+                        disabled={isPrimary || isPrimaryPending}
+                        className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-primary disabled:opacity-100"
                       >
-                        {r}
-                      </Badge>
-                    ))}
-                  </span>
-                }
-                trailing={
-                  select.isPending && select.variables?.organizationId === org.id ? (
-                    <Spinner />
-                  ) : null
-                }
-              />
-            ))}
+                        {isPrimaryPending ? (
+                          <Spinner />
+                        ) : (
+                          <Star
+                            className={
+                              isPrimary
+                                ? 'h-4 w-4 fill-primary text-primary'
+                                : 'h-4 w-4'
+                            }
+                          />
+                        )}
+                      </button>
+                    )
+                  }
+                />
+              );
+            })}
           </Section>
         ) : (
           <div className="px-6 py-12 text-center">
@@ -198,60 +257,57 @@ function CreateOrgSheet({
   );
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Yangi tashkilot</SheetTitle>
-          <SheetDescription>
-            Tashkilot nomi va asosiy valyutani kiriting
-          </SheetDescription>
-        </SheetHeader>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            submit();
-          }}
-          className="space-y-4"
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Yangi tashkilot"
+      description="Tashkilot nomi va asosiy valyutani kiriting"
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit();
+        }}
+        className="space-y-4"
+      >
+        <div className="space-y-1.5">
+          <Label htmlFor="org-name">Nomi</Label>
+          <Input
+            id="org-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Hisobchi LLC"
+            required
+            minLength={2}
+            maxLength={50}
+            autoFocus
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="org-currency">Valyuta</Label>
+          <Input
+            id="org-currency"
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+            placeholder="UZS"
+            maxLength={3}
+          />
+        </div>
+        {create.isError ? (
+          <p className="text-[13px] text-destructive">
+            {getApiErrorMessage(create.error)}
+          </p>
+        ) : null}
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          disabled={create.isPending || name.trim().length < 2}
         >
-          <div className="space-y-1.5">
-            <Label htmlFor="org-name">Nomi</Label>
-            <Input
-              id="org-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Hisobchi LLC"
-              required
-              minLength={2}
-              maxLength={50}
-              autoFocus
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="org-currency">Valyuta</Label>
-            <Input
-              id="org-currency"
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-              placeholder="UZS"
-              maxLength={3}
-            />
-          </div>
-          {create.isError ? (
-            <p className="text-[13px] text-destructive">
-              {getApiErrorMessage(create.error)}
-            </p>
-          ) : null}
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full"
-            disabled={create.isPending || name.trim().length < 2}
-          >
-            {create.isPending ? <Spinner /> : null}
-            Yaratish
-          </Button>
-        </form>
-      </SheetContent>
-    </Sheet>
+          {create.isPending ? <Spinner /> : null}
+          Yaratish
+        </Button>
+      </form>
+    </Modal>
   );
 }
