@@ -8,6 +8,7 @@ export interface User {
   locale: string;
   hasPassword: boolean;
   telegramConnected: boolean;
+  primaryOrganizationId: number | null;
   createdAt: string;
 }
 
@@ -15,4 +16,8 @@ export interface UpdateProfileRequest {
   fullName?: string;
   email?: string;
   locale?: SupportedLocale;
+}
+
+export interface SetPrimaryOrganizationRequest {
+  organizationId: number;
 }
