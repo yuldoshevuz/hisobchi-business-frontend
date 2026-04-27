@@ -4,8 +4,8 @@ import type {
   CreateCategoryRequest,
   ListCategoriesQuery,
   ListSystemCategoriesQuery,
-  MergedCategory,
-  SystemCategory,
+  PaginatedCategories,
+  PaginatedSystemCategories,
   UpdateCategoryRequest,
 } from '@/types/category.types';
 
@@ -13,8 +13,8 @@ const BASE = '/web/categories';
 const SYSTEM_BASE = '/web/system-categories';
 
 export const categoriesApi = {
-  async list(query: ListCategoriesQuery = {}): Promise<MergedCategory[]> {
-    const { data } = await api.get<MergedCategory[]>(BASE, { params: query });
+  async list(query: ListCategoriesQuery = {}): Promise<PaginatedCategories> {
+    const { data } = await api.get<PaginatedCategories>(BASE, { params: query });
     return data;
   },
   async getById(id: number): Promise<Category> {
@@ -39,13 +39,13 @@ export const categoriesApi = {
     );
     return data;
   },
-  async remove(id: number): Promise<void> {
+  async archive(id: number): Promise<void> {
     await api.delete(`${BASE}/${id}`);
   },
   async listSystem(
     query: ListSystemCategoriesQuery = {},
-  ): Promise<SystemCategory[]> {
-    const { data } = await api.get<SystemCategory[]>(SYSTEM_BASE, {
+  ): Promise<PaginatedSystemCategories> {
+    const { data } = await api.get<PaginatedSystemCategories>(SYSTEM_BASE, {
       params: query,
     });
     return data;

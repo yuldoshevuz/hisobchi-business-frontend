@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Archive, FolderTree, Plus, RotateCcw } from 'lucide-react';
 import {
   useCategories,
+  useCategoriesInfinite,
   useCustomizeSystemCategory,
   useDeleteCategory,
   useUpdateCategory,
@@ -23,6 +24,10 @@ import {
   type CategoryEditorMode,
 } from '@/components/categories/CategoryEditor';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
+import {
+  useInfiniteScroll,
+  useViewportPageSize,
+} from '@/hooks/use-infinite-scroll';
 import { useCan, usePermissions } from '@/hooks/use-permissions';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { PermissionSlug } from '@/lib/permission-slugs';
@@ -41,29 +46,45 @@ export function CategoriesPage(): React.ReactElement {
   const [editorMode, setEditorMode] = useState<CategoryEditorMode | null>(null);
   const [actionItem, setActionItem] = useState<MergedCategory | null>(null);
 
-  const categories = useCategories(
-    { includeArchived: true },
+  // Initial page size scales with the user's viewport — fill the visible
+  // area in one fetch instead of leaving empty whitespace under a short
+  // response. ~64px per ListItem.
+  const pageSize = useViewportPageSize(64);
+
+  // Active list: infinite-paginated per type tab. Each tab maintains its own
+  // query cache, so switching tabs keeps already-loaded pages.
+  const categories = useCategoriesInfinite(
+    { type: activeType, includeArchived: false, limit: pageSize },
     { enabled: canManage },
   );
 
-  const { active, archived } = useMemo(() => {
-    const list = categories.data ?? [];
-    return {
-      active: list.filter((c) => !c.isArchived && c.type === activeType),
-      archived: list.filter((c) => c.isArchived),
-    };
-  }, [categories.data, activeType]);
+  const sentinelRef = useInfiniteScroll({
+    hasNextPage: categories.hasNextPage,
+    isFetchingNextPage: categories.isFetchingNextPage,
+    fetchNextPage: categories.fetchNextPage,
+  });
 
-  const sortedActive = useMemo(
-    () =>
-      [...active].sort((a, b) => {
-        if (a.isCustom !== b.isCustom) return a.isCustom ? 1 : -1;
-        const ao = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
-        const bo = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
-        if (ao !== bo) return ao - bo;
-        return a.name.localeCompare(b.name);
-      }),
-    [active],
+  // Archive sub-view fetches a single page with high limit; archived sets are
+  // typically small, so pagination is overkill and a flat list is cleaner.
+  const archivedQuery = useCategories(
+    { includeArchived: true, limit: 100 },
+    { enabled: canManage && archiveOpen },
+  );
+
+  const sortedActive = useMemo(() => {
+    const flat = (categories.data?.pages ?? []).flatMap((p) => p.data);
+    return [...flat].sort((a, b) => {
+      if (a.isCustom !== b.isCustom) return a.isCustom ? 1 : -1;
+      const ao = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
+      const bo = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
+      if (ao !== bo) return ao - bo;
+      return a.name.localeCompare(b.name);
+    });
+  }, [categories.data]);
+
+  const archived = useMemo(
+    () => (archivedQuery.data?.data ?? []).filter((c) => c.isArchived),
+    [archivedQuery.data],
   );
 
   if (isReady && !canManage) {
@@ -164,19 +185,30 @@ export function CategoriesPage(): React.ReactElement {
             />
           </Section>
         ) : sortedActive.length > 0 ? (
-          <Section title={CATEGORY_TYPE_LABEL[activeType]}>
-            {sortedActive.map((c) => (
-              <CategoryRow
-                key={
-                  c.id !== null
-                    ? `id-${c.id}`
-                    : `sys-${c.systemCategoryId ?? 'x'}`
-                }
-                category={c}
-                onTap={() => openActions(c)}
-              />
-            ))}
-          </Section>
+          <>
+            <Section title={CATEGORY_TYPE_LABEL[activeType]}>
+              {sortedActive.map((c) => (
+                <CategoryRow
+                  key={
+                    c.id !== null
+                      ? `id-${c.id}`
+                      : `sys-${c.systemCategoryId ?? 'x'}`
+                  }
+                  category={c}
+                  onTap={() => openActions(c)}
+                />
+              ))}
+            </Section>
+            {categories.hasNextPage ? (
+              <div
+                ref={sentinelRef}
+                className="flex justify-center py-4"
+                aria-hidden="true"
+              >
+                {categories.isFetchingNextPage ? <Spinner /> : null}
+              </div>
+            ) : null}
+          </>
         ) : (
           <div className="px-6 py-12 text-center">
             <FolderTree className="mx-auto h-10 w-10 text-muted-foreground" />
@@ -186,24 +218,22 @@ export function CategoriesPage(): React.ReactElement {
           </div>
         )}
 
-        {archived.length > 0 ? (
-          <Section>
-            <ListItem
-              showChevron
-              onClick={() => {
-                tgHapticImpact('light');
-                setArchiveOpen(true);
-              }}
-              leading={
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                  <Archive className="h-4 w-4" />
-                </div>
-              }
-              title="Arxiv"
-              subtitle={`${archived.length} ta arxivlangan kategoriya`}
-            />
-          </Section>
-        ) : null}
+        <Section>
+          <ListItem
+            showChevron
+            onClick={() => {
+              tgHapticImpact('light');
+              setArchiveOpen(true);
+            }}
+            leading={
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <Archive className="h-4 w-4" />
+              </div>
+            }
+            title="Arxiv"
+            subtitle="Arxivlangan kategoriyalar"
+          />
+        </Section>
       </div>
 
       <ScreenAction>
@@ -266,9 +296,17 @@ export function CategoriesPage(): React.ReactElement {
         open={archiveOpen}
         onOpenChange={setArchiveOpen}
         title="Arxiv"
-        description={`${archived.length} ta arxivlangan kategoriya`}
+        description={
+          archivedQuery.isPending
+            ? undefined
+            : `${archived.length} ta arxivlangan kategoriya`
+        }
       >
-        {archived.length > 0 ? (
+        {archivedQuery.isPending ? (
+          <div className="flex justify-center py-8">
+            <Spinner />
+          </div>
+        ) : archived.length > 0 ? (
           <div className="-mx-4 divide-y divide-border bg-card">
             {archived.map((c) => (
               <ArchivedCategoryRow

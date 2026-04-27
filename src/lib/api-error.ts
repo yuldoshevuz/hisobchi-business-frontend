@@ -46,6 +46,21 @@ const MESSAGE_KEY_TO_UZ: Record<string, string> = {
   CLIENT_INVALID_TYPE: 'Klient turi noto‘g‘ri',
   CLIENT_INVALID_STATUS: 'Klient statusi noto‘g‘ri',
   CLIENT_CREDIT_LIMIT_NEGATIVE: 'Kredit limiti manfiy bo‘lishi mumkin emas',
+  PRODUCT_NOT_FOUND: 'Mahsulot topilmadi',
+  PRODUCT_IN_USE:
+    'Bu mahsulot tranzaksiyalarda ishlatilmoqda. O‘chirish o‘rniga arxivlang',
+  PRODUCT_NAME_EXISTS: 'Bu nomli mahsulot allaqachon mavjud',
+  PRODUCT_INVALID_STATUS: 'Mahsulot statusi noto‘g‘ri',
+  PRODUCT_CATEGORY_TYPE_MISMATCH:
+    'Tanlangan kategoriya mahsulotlar uchun emas',
+  PRODUCT_DEFAULT_PRICE_NEGATIVE: 'Narx manfiy bo‘lishi mumkin emas',
+  PRODUCT_DEFAULT_COST_NEGATIVE: 'Tannarx manfiy bo‘lishi mumkin emas',
+  STOCK_NOT_TRACKED: 'Bu mahsulot uchun ombor hisobi yuritilmaydi',
+  STOCK_TRACKING_TOGGLE_FORBIDDEN:
+    'Ombor hisobini yoqib/o‘chirib bo‘lmaydi. Mahsulotni qayta yarating',
+  NEGATIVE_STOCK: 'Bunday qoldiqqa ruxsat berilmagan (manfiy bo‘ladi)',
+  STOCK_ADJUSTMENT_ZERO: 'Tuzatish miqdori 0 bo‘lishi mumkin emas',
+  CATEGORY_ONE_OF_REQUIRED: 'Kategoriya tanlash majburiy',
 };
 
 export function getApiErrorCode(error: unknown): string | undefined {

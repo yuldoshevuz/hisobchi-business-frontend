@@ -8,6 +8,7 @@ import {
   Eye,
   EyeOff,
   FolderTree,
+  Package,
   Plus,
   ShieldCheck,
   Users,
@@ -138,6 +139,19 @@ export function DashboardPage(): React.ReactElement {
               subtitle="Mijozlar va yetkazib beruvchilar"
               showChevron
               onClick={() => navigate('/clients')}
+            />
+          </Can>
+          <Can slug={PermissionSlug.PRODUCTS_READ}>
+            <ListItem
+              leading={
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Package className="h-4 w-4" />
+                </div>
+              }
+              title="Mahsulotlar"
+              subtitle="Tovar va xizmatlar katalogi"
+              showChevron
+              onClick={() => navigate('/products')}
             />
           </Can>
           <Can slug={PermissionSlug.TRANSACTIONS_READ}>

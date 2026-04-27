@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from './member.types';
+
 export type CategoryType = 'EXPENSE' | 'INCOME' | 'PRODUCT';
 
 export const CATEGORY_TYPE_VALUES: readonly CategoryType[] = [
@@ -55,14 +57,28 @@ export interface SystemCategory {
 }
 
 export interface ListCategoriesQuery {
+  page?: number;
+  limit?: number;
   type?: CategoryType;
   includeArchived?: boolean;
+  /**
+   * Bypass pagination and return the whole merged catalog in one page. Backend
+   * still wraps it in `PaginatedResponse`, with `meta.total === data.length`.
+   * Used by pickers (product / transaction create forms).
+   */
+  all?: boolean;
 }
 
 export interface ListSystemCategoriesQuery {
+  page?: number;
+  limit?: number;
   type?: CategoryType;
   locale?: string;
+  all?: boolean;
 }
+
+export type PaginatedCategories = PaginatedResponse<MergedCategory>;
+export type PaginatedSystemCategories = PaginatedResponse<SystemCategory>;
 
 export interface CreateCategoryRequest {
   name: string;
