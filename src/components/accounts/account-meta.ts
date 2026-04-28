@@ -2,18 +2,18 @@ import { Banknote, CreditCard, Landmark, Smartphone } from 'lucide-react';
 import type { AccountType } from '@/types/account.types';
 
 export const ACCOUNT_TYPE_LABEL: Record<AccountType, string> = {
-  CASH: 'Naqd kassa',
-  BANK: 'Bank hisobi',
-  E_WALLET: 'Elektron hamyon',
-  CARD: 'Plastik karta',
+  cash: 'Naqd kassa',
+  bank: 'Bank hisobi',
+  e_wallet: 'Elektron hamyon',
+  card: 'Plastik karta',
 };
 
 export const ACCOUNT_TYPE_ICON: Record<
   AccountType,
   React.ComponentType<{ className?: string }>
 > = {
-  CASH: Banknote,
-  BANK: Landmark,
-  E_WALLET: Smartphone,
-  CARD: CreditCard,
+  cash: Banknote,
+  bank: Landmark,
+  e_wallet: Smartphone,
+  card: CreditCard,
 };

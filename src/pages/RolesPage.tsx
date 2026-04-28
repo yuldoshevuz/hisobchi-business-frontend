@@ -24,7 +24,14 @@ import { getApiErrorMessage } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import type { PermissionGroup, Role } from '@/types/rbac.types';
 
-export function RolesPage(): React.ReactElement {
+interface RolesPageProps {
+  /** When true, skips the top PageHeader so the page can be embedded inside Sozlamalar. */
+  embedded?: boolean;
+}
+
+export function RolesPage({
+  embedded = false,
+}: RolesPageProps = {}): React.ReactElement {
   const viewerPerms = useViewerPermissions();
   const canManage = viewerPerms.has(PermissionSlug.ROLES_MANAGE);
   const isReady = viewerPerms.isReady;
@@ -45,11 +52,13 @@ export function RolesPage(): React.ReactElement {
 
   return (
     <div className="pb-32">
-      <PageHeader
-        title="Rollar"
-        description="Tashkilot rollari va ruxsatlari"
-        large
-      />
+      {embedded ? null : (
+        <PageHeader
+          title="Rollar"
+          description="Tashkilot rollari va ruxsatlari"
+          large
+        />
+      )}
 
       <div className="space-y-3">
         {roles.isPending ? (

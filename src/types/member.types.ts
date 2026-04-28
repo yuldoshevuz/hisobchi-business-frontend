@@ -38,6 +38,8 @@ export interface ListMembersQuery {
   page?: number;
   limit?: number;
   status?: MemberStatus;
+  /** Bypass pagination — return every matching member in one page. */
+  all?: boolean;
 }
 
 export interface InviteMemberRequest {

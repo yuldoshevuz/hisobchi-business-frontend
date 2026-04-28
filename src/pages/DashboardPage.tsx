@@ -2,15 +2,13 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Archive,
-  ArrowLeftRight,
   Building2,
   Contact,
   Eye,
   EyeOff,
-  FolderTree,
+  ListChecks,
   Package,
   Plus,
-  ShieldCheck,
   Users,
 } from 'lucide-react';
 import { useCurrentOrganization } from '@/api/hooks/use-organizations';
@@ -36,6 +34,12 @@ import { getApiErrorMessage } from '@/lib/api-error';
 import { formatMoney } from '@/lib/format';
 import { PermissionSlug } from '@/lib/permission-slugs';
 import { tgHapticImpact } from '@/lib/telegram';
+import {
+  DASHBOARD_USE_CASES,
+  TRANSACTION_USE_CASES,
+  type TransactionUseCase,
+} from '@/lib/transaction-use-cases';
+import { cn } from '@/lib/utils';
 import type { Account } from '@/types/account.types';
 
 const HIDDEN_BALANCE_PLACEHOLDER = '••••••';
@@ -88,44 +92,22 @@ export function DashboardPage(): React.ReactElement {
 
         {org.data ? <ViewerRoleBadges roleNames={org.data.viewer.roleNames} /> : null}
 
+        <Can slug={PermissionSlug.TRANSACTIONS_CREATE}>
+          <TransactionTypesGrid />
+        </Can>
+
         <Section title="Tezkor amallar">
-          <Can slug={PermissionSlug.MEMBERS_MANAGE}>
+          <Can slug={PermissionSlug.TRANSACTIONS_READ}>
             <ListItem
               leading={
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Users className="h-4 w-4" />
+                  <ListChecks className="h-4 w-4" />
                 </div>
               }
-              title="A'zolar"
-              subtitle="Tashkilot a'zolari va rollari"
+              title="Tranzaktsiyalar"
+              subtitle="Barcha tranzaktsiyalar tarixi"
               showChevron
-              onClick={() => navigate('/members')}
-            />
-          </Can>
-          <Can slug={PermissionSlug.ROLES_MANAGE}>
-            <ListItem
-              leading={
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <ShieldCheck className="h-4 w-4" />
-                </div>
-              }
-              title="Rollar"
-              subtitle="Rollar va ruxsatlarni boshqarish"
-              showChevron
-              onClick={() => navigate('/roles')}
-            />
-          </Can>
-          <Can slug={PermissionSlug.CATEGORIES_MANAGE}>
-            <ListItem
-              leading={
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <FolderTree className="h-4 w-4" />
-                </div>
-              }
-              title="Kategoriyalar"
-              subtitle="Chiqim, kirim va mahsulot turlari"
-              showChevron
-              onClick={() => navigate('/categories')}
+              onClick={() => navigate('/transactions')}
             />
           </Can>
           <Can slug={PermissionSlug.CLIENTS_READ}>
@@ -148,27 +130,84 @@ export function DashboardPage(): React.ReactElement {
                   <Package className="h-4 w-4" />
                 </div>
               }
-              title="Mahsulotlar"
-              subtitle="Tovar va xizmatlar katalogi"
+              title="Katalog"
+              subtitle="Mahsulotlar va kategoriyalar"
               showChevron
-              onClick={() => navigate('/products')}
+              onClick={() => navigate('/katalog')}
             />
           </Can>
-          <Can slug={PermissionSlug.TRANSACTIONS_READ}>
+          <Can slug={PermissionSlug.MEMBERS_MANAGE}>
             <ListItem
               leading={
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                  <ArrowLeftRight className="h-4 w-4" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Users className="h-4 w-4" />
                 </div>
               }
-              title="Tranzaksiyalar"
-              subtitle="Tez orada"
-              asStatic
+              title="Sozlamalar"
+              subtitle="A'zolar va rollar"
+              showChevron
+              onClick={() => navigate('/sozlamalar')}
             />
           </Can>
         </Section>
       </div>
     </div>
+  );
+}
+
+/**
+ * Five business actions on the dashboard. Each card opens a creation page
+ * tailored to that action — there is no generic "add transaction" surface.
+ */
+function TransactionTypesGrid(): React.ReactElement {
+  const navigate = useNavigate();
+
+  function open(slug: TransactionUseCase): void {
+    tgHapticImpact('light');
+    navigate(`/transactions/new/${slug}`);
+  }
+
+  return (
+    <section className="px-4">
+      <div className="px-1 pb-1.5 pt-4 text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
+        Yangi tranzaktsiya
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {DASHBOARD_USE_CASES.map((slug) => {
+          const meta = TRANSACTION_USE_CASES[slug];
+          const Icon = meta.icon;
+          return (
+            <button
+              key={slug}
+              type="button"
+              onClick={() => open(slug)}
+              className="press flex items-start gap-3 rounded-2xl bg-card p-3 text-left active:bg-accent"
+            >
+              <div
+                className={cn(
+                  'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl',
+                  meta.sign === 'positive' &&
+                    'bg-[var(--color-help-success-16)] text-[var(--color-help-success)]',
+                  meta.sign === 'negative' &&
+                    'bg-destructive/10 text-destructive',
+                  meta.sign === 'neutral' && 'bg-muted text-muted-foreground',
+                )}
+              >
+                <Icon className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="truncate text-[14px] font-medium leading-tight">
+                  {meta.label}
+                </div>
+                <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                  {meta.description}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -184,8 +223,8 @@ function AccountsOverview(): React.ReactElement {
   const { active, archived } = useMemo(() => {
     const list = accounts.data ?? [];
     return {
-      active: list.filter((a) => a.status === 'ACTIVE'),
-      archived: list.filter((a) => a.status === 'ARCHIVED'),
+      active: list.filter((a) => a.status === 'active'),
+      archived: list.filter((a) => a.status === 'archived'),
     };
   }, [accounts.data]);
 

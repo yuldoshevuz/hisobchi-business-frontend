@@ -87,13 +87,13 @@ export function EditAccountForm({
         <Checkbox
           id="edit-account-default"
           checked={isPrimary}
-          disabled={account.status === 'ARCHIVED'}
+          disabled={account.status === 'archived'}
           onCheckedChange={(v) => setIsPrimary(v === true)}
         />
         <div className="min-w-0 flex-1">
           <div className="text-[15px] font-medium">Asosiy hisob</div>
           <div className="text-[12px] text-muted-foreground">
-            {account.status === 'ARCHIVED'
+            {account.status === 'archived'
               ? 'Arxivlangan hisob asosiy bo‘la olmaydi'
               : 'Yangi tranzaksiyalar uchun avtomatik tanlanadi'}
           </div>

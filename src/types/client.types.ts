@@ -1,12 +1,12 @@
 import type { PaginatedResponse } from './member.types';
 
-export type ClientType = 'CUSTOMER' | 'SUPPLIER' | 'BOTH';
-export type ClientStatus = 'ACTIVE' | 'ARCHIVED';
+export type ClientType = 'customer' | 'supplier' | 'both';
+export type ClientStatus = 'active' | 'archived';
 
 export const CLIENT_TYPE_VALUES: readonly ClientType[] = [
-  'CUSTOMER',
-  'SUPPLIER',
-  'BOTH',
+  'customer',
+  'supplier',
+  'both',
 ] as const;
 
 export const CLIENT_NAME_MIN_LENGTH = 1;
@@ -46,6 +46,8 @@ export interface ListClientsQuery {
   status?: ClientStatus;
   search?: string;
   include?: 'balance';
+  /** Bypass pagination — return every matching client in one page. */
+  all?: boolean;
 }
 
 export interface CreateClientRequest {

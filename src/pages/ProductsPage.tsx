@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   Archive,
   Boxes,
+  Filter,
   Package,
   Plus,
   RotateCcw,
@@ -39,7 +40,14 @@ import { PermissionSlug } from '@/lib/permission-slugs';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import type { Product } from '@/types/product.types';
 
-export function ProductsPage(): React.ReactElement {
+interface ProductsPageProps {
+  /** When true, skips the top PageHeader so the page can be embedded inside Katalog. */
+  embedded?: boolean;
+}
+
+export function ProductsPage({
+  embedded = false,
+}: ProductsPageProps = {}): React.ReactElement {
   const { isReady } = usePermissions();
   const canRead = useCan(PermissionSlug.PRODUCTS_READ);
   const canManage = useCan(PermissionSlug.PRODUCTS_MANAGE);
@@ -50,6 +58,8 @@ export function ProductsPage(): React.ReactElement {
   const [actionProduct, setActionProduct] = useState<Product | null>(null);
   const [editing, setEditing] = useState<Product | null>(null);
   const [adjusting, setAdjusting] = useState<Product | null>(null);
+  const [filterCategoryId, setFilterCategoryId] = useState<number | null>(null);
+  const [filterOpen, setFilterOpen] = useState<boolean>(false);
 
   const trimmedSearch = search.trim();
 
@@ -57,9 +67,10 @@ export function ProductsPage(): React.ReactElement {
 
   const activeProducts = useProductsInfinite(
     {
-      status: 'ACTIVE',
+      status: 'active',
       limit: pageSize,
       ...(trimmedSearch ? { search: trimmedSearch } : {}),
+      ...(filterCategoryId !== null ? { categoryId: filterCategoryId } : {}),
     },
     { enabled: canRead },
   );
@@ -71,11 +82,11 @@ export function ProductsPage(): React.ReactElement {
   });
 
   const archivedProducts = useProducts(
-    { status: 'ARCHIVED', limit: 100 },
+    { status: 'archived', limit: 100 },
     { enabled: canRead && archiveOpen },
   );
 
-  const productCategories = useCategories({ type: 'PRODUCT', all: true });
+  const productCategories = useCategories({ type: 'product', all: true });
   const categoryById = useMemo(() => {
     const map = new Map<
       number,
@@ -88,6 +99,16 @@ export function ProductsPage(): React.ReactElement {
     }
     return map;
   }, [productCategories.data]);
+
+  // Only org-scoped (instantiated) categories can have products attached, so
+  // chips for not-yet-instantiated system rows would always return zero hits.
+  const filterableCategories = useMemo(
+    () =>
+      (productCategories.data?.data ?? []).filter(
+        (c): c is typeof c & { id: number } => c.id !== null,
+      ),
+    [productCategories.data],
+  );
 
   const activeList = useMemo(
     () => (activeProducts.data?.pages ?? []).flatMap((p) => p.data),
@@ -106,15 +127,17 @@ export function ProductsPage(): React.ReactElement {
 
   return (
     <div className="pb-32">
-      <PageHeader
-        title="Mahsulotlar"
-        description="Tovar va xizmatlar katalogi"
-        large
-      />
+      {embedded ? null : (
+        <PageHeader
+          title="Mahsulotlar"
+          description="Tovar va xizmatlar katalogi"
+          large
+        />
+      )}
 
       <div className="space-y-3">
-        <div className="px-4">
-          <div className="relative">
+        <div className="flex items-center gap-2 px-4">
+          <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
@@ -123,6 +146,25 @@ export function ProductsPage(): React.ReactElement {
               className="pl-9"
             />
           </div>
+          {filterableCategories.length > 0 ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="default"
+              className="relative shrink-0"
+              onClick={() => {
+                tgHapticImpact('light');
+                setFilterOpen(true);
+              }}
+            >
+              <Filter className="h-4 w-4" />
+              {filterCategoryId !== null ? (
+                <span className="ml-1 rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+                  1
+                </span>
+              ) : null}
+            </Button>
+          ) : null}
         </div>
 
         {activeProducts.isPending ? (
@@ -288,6 +330,58 @@ export function ProductsPage(): React.ReactElement {
       </Modal>
 
       <Modal
+        open={filterOpen}
+        onOpenChange={setFilterOpen}
+        title="Kategoriya bo‘yicha filter"
+        description="Mahsulotlarni bitta kategoriya bo‘yicha cheklang"
+      >
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => {
+              tgHapticImpact('light');
+              setFilterCategoryId(null);
+              setFilterOpen(false);
+            }}
+            className={`press flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left text-[15px] ${
+              filterCategoryId === null
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border bg-card text-foreground'
+            }`}
+          >
+            <span>Hammasi</span>
+            {filterCategoryId === null ? (
+              <span className="text-[12px] font-medium">tanlangan</span>
+            ) : null}
+          </button>
+          {filterableCategories.map((c) => {
+            const selected = filterCategoryId === c.id;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => {
+                  tgHapticImpact('light');
+                  setFilterCategoryId(selected ? null : c.id);
+                  setFilterOpen(false);
+                }}
+                className={`press flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-left text-[15px] ${
+                  selected
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border bg-card text-foreground'
+                }`}
+              >
+                <span className="truncate">{c.name}</span>
+                {selected ? (
+                  <span className="text-[12px] font-medium">tanlangan</span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      </Modal>
+
+      <Modal
         open={archiveOpen}
         onOpenChange={setArchiveOpen}
         title="Arxiv"
@@ -391,7 +485,7 @@ function ProductActions({
   const update = useUpdateProduct();
   const remove = useDeleteProduct();
 
-  const isArchived = product.status === 'ARCHIVED';
+  const isArchived = product.status === 'archived';
   const trackStock = product.currentStock !== null;
   const pending = update.isPending || remove.isPending;
   const error = update.error ?? remove.error;
@@ -399,7 +493,7 @@ function ProductActions({
   function handleArchive(): void {
     tgHapticImpact('medium');
     update.mutate(
-      { id: product.id, body: { status: 'ARCHIVED' } },
+      { id: product.id, body: { status: 'archived' } },
       {
         onSuccess: () => {
           tgHapticNotify('success');
@@ -413,7 +507,7 @@ function ProductActions({
   function handleRestore(): void {
     tgHapticImpact('medium');
     update.mutate(
-      { id: product.id, body: { status: 'ACTIVE' } },
+      { id: product.id, body: { status: 'active' } },
       {
         onSuccess: () => {
           tgHapticNotify('success');

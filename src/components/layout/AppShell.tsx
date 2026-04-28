@@ -1,14 +1,14 @@
 import { useMemo } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import {
-  FolderTree,
   LayoutDashboard,
-  Users,
-  ShieldCheck,
+  Library,
+  Settings,
   User as UserIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { tgHapticSelection } from '@/lib/telegram';
+import { useDeepLink } from '@/hooks/use-deep-link';
 import { usePermissions } from '@/hooks/use-permissions';
 import { PermissionSlug } from '@/lib/permission-slugs';
 
@@ -23,28 +23,29 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Asosiy', icon: LayoutDashboard },
   {
-    to: '/categories',
-    label: 'Kategoriya',
-    icon: FolderTree,
-    requireAny: [PermissionSlug.CATEGORIES_MANAGE],
+    to: '/katalog',
+    label: 'Katalog',
+    icon: Library,
+    requireAny: [
+      PermissionSlug.PRODUCTS_READ,
+      PermissionSlug.CATEGORIES_MANAGE,
+    ],
   },
   {
-    to: '/members',
-    label: "A'zolar",
-    icon: Users,
-    requireAny: [PermissionSlug.MEMBERS_MANAGE],
-  },
-  {
-    to: '/roles',
-    label: 'Rollar',
-    icon: ShieldCheck,
-    requireAny: [PermissionSlug.ROLES_MANAGE],
+    to: '/sozlamalar',
+    label: 'Sozlamalar',
+    icon: Settings,
+    requireAny: [
+      PermissionSlug.MEMBERS_MANAGE,
+      PermissionSlug.ROLES_MANAGE,
+    ],
   },
   { to: '/profile', label: 'Profil', icon: UserIcon },
 ];
 
 export function AppShell(): React.ReactElement {
   const { isReady, hasAny } = usePermissions();
+  useDeepLink();
 
   const visibleItems = useMemo(() => {
     return NAV_ITEMS.filter((item) => {

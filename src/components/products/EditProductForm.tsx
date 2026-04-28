@@ -31,7 +31,7 @@ export function EditProductForm({
   onClose,
 }: EditProductFormProps): React.ReactElement {
   const update = useUpdateProduct();
-  const categories = useCategories({ type: 'PRODUCT', all: true });
+  const categories = useCategories({ type: 'product', all: true });
 
   // Initial selection — match by instantiated id when set; otherwise leave
   // empty so the user is forced to pick before saving.
@@ -54,7 +54,7 @@ export function EditProductForm({
 
   const options = useMemo<CategoryOption[]>(() => {
     return (categories.data?.data ?? [])
-      .filter((c) => c.type === 'PRODUCT' && !c.isArchived)
+      .filter((c) => c.type === 'product' && !c.isArchived)
       .map((c) => {
         const key =
           c.id !== null ? `id:${c.id}` : `sys:${c.systemCategoryId ?? 'x'}`;

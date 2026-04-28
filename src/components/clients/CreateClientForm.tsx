@@ -24,7 +24,7 @@ export function CreateClientForm({
 }: CreateClientFormProps): React.ReactElement {
   const create = useCreateClient();
   const [name, setName] = useState<string>('');
-  const [type, setType] = useState<ClientType>('CUSTOMER');
+  const [type, setType] = useState<ClientType>('customer');
   const [phone, setPhone] = useState<string>('');
   const [creditLimit, setCreditLimit] = useState<string>('');
   const [notes, setNotes] = useState<string>('');

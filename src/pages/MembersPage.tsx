@@ -27,7 +27,14 @@ import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import type { Member } from '@/types/member.types';
 import type { Role } from '@/types/rbac.types';
 
-export function MembersPage(): React.ReactElement {
+interface MembersPageProps {
+  /** When true, skips the top PageHeader so the page can be embedded inside Sozlamalar. */
+  embedded?: boolean;
+}
+
+export function MembersPage({
+  embedded = false,
+}: MembersPageProps = {}): React.ReactElement {
   const { isReady } = usePermissions();
   const canManage = useCan(PermissionSlug.MEMBERS_MANAGE);
   const members = useMembers({ page: 1, limit: 50 }, { enabled: canManage });
@@ -48,11 +55,13 @@ export function MembersPage(): React.ReactElement {
 
   return (
     <div className="pb-32">
-      <PageHeader
-        title="A'zolar"
-        description="Tashkilot a'zolarini boshqarish"
-        large
-      />
+      {embedded ? null : (
+        <PageHeader
+          title="A'zolar"
+          description="Tashkilot a'zolarini boshqarish"
+          large
+        />
+      )}
 
       <div className="space-y-3">
         {members.isPending ? (

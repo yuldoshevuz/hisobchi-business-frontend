@@ -35,7 +35,7 @@ export function CreateProductForm({
   const create = useCreateProduct();
   // Pickers need the full catalog in one shot. The backend exposes `all=true`
   // to bypass pagination so the picker never misses options.
-  const categories = useCategories({ type: 'PRODUCT', all: true });
+  const categories = useCategories({ type: 'product', all: true });
 
   const [name, setName] = useState<string>('');
   const [categoryKey, setCategoryKey] = useState<string>('');
@@ -52,7 +52,7 @@ export function CreateProductForm({
 
   const options = useMemo<CategoryOption[]>(() => {
     return (categories.data?.data ?? [])
-      .filter((c) => c.type === 'PRODUCT' && !c.isArchived)
+      .filter((c) => c.type === 'product' && !c.isArchived)
       .map((c) => {
         const key =
           c.id !== null ? `id:${c.id}` : `sys:${c.systemCategoryId ?? 'x'}`;

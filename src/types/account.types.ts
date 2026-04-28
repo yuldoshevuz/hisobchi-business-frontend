@@ -1,14 +1,14 @@
-export type AccountType = "CASH" | "BANK" | "E_WALLET" | "CARD";
+export type AccountType = 'cash' | 'bank' | 'e_wallet' | 'card';
 
-export type AccountStatus = "ACTIVE" | "ARCHIVED";
+export type AccountStatus = 'active' | 'archived';
 
-export type AccountCurrency = "UZS" | "USD" | "EUR" | "RUB";
+export type AccountCurrency = 'UZS' | 'USD' | 'EUR' | 'RUB';
 
 export const ACCOUNT_TYPE_VALUES: readonly AccountType[] = [
-  "CASH",
-  "BANK",
-  "E_WALLET",
-  "CARD",
+  'cash',
+  'bank',
+  'e_wallet',
+  'card',
 ] as const;
 
 export const ACCOUNT_CURRENCY_VALUES: readonly AccountCurrency[] = [

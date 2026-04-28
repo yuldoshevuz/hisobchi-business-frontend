@@ -4,12 +4,13 @@ import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { LoginPage } from '@/pages/LoginPage';
 import { OrganizationsPage } from '@/pages/OrganizationsPage';
 import { DashboardPage } from '@/pages/DashboardPage';
-import { MembersPage } from '@/pages/MembersPage';
-import { RolesPage } from '@/pages/RolesPage';
-import { CategoriesPage } from '@/pages/CategoriesPage';
 import { ClientsPage } from '@/pages/ClientsPage';
-import { ProductsPage } from '@/pages/ProductsPage';
 import { ProfilePage } from '@/pages/ProfilePage';
+import { KatalogPage } from '@/pages/KatalogPage';
+import { SozlamalarPage } from '@/pages/SozlamalarPage';
+import { TransactionsListPage } from '@/pages/TransactionsListPage';
+import { TransactionDetailPage } from '@/pages/TransactionDetailPage';
+import { TransactionCreatePage } from '@/pages/TransactionCreatePage';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -24,12 +25,36 @@ export const router = createBrowserRouter([
             element: <AppShell />,
             children: [
               { index: true, element: <DashboardPage /> },
-              { path: 'members', element: <MembersPage /> },
-              { path: 'roles', element: <RolesPage /> },
-              { path: 'categories', element: <CategoriesPage /> },
+              { path: 'katalog', element: <KatalogPage /> },
+              { path: 'sozlamalar', element: <SozlamalarPage /> },
               { path: 'clients', element: <ClientsPage /> },
-              { path: 'products', element: <ProductsPage /> },
+              { path: 'transactions', element: <TransactionsListPage /> },
+              {
+                path: 'transactions/new/:useCase',
+                element: <TransactionCreatePage />,
+              },
+              {
+                path: 'transactions/:id',
+                element: <TransactionDetailPage />,
+              },
               { path: 'profile', element: <ProfilePage /> },
+              // Legacy route redirects so deep links keep working.
+              {
+                path: 'members',
+                element: <Navigate to="/sozlamalar" replace />,
+              },
+              {
+                path: 'roles',
+                element: <Navigate to="/sozlamalar?tab=roles" replace />,
+              },
+              {
+                path: 'categories',
+                element: <Navigate to="/katalog?tab=categories" replace />,
+              },
+              {
+                path: 'products',
+                element: <Navigate to="/katalog" replace />,
+              },
             ],
           },
         ],

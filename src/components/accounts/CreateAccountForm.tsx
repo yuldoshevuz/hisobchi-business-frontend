@@ -26,7 +26,7 @@ export function CreateAccountForm({
 }: CreateAccountFormProps): React.ReactElement {
   const create = useCreateAccount();
   const [name, setName] = useState<string>('');
-  const [type, setType] = useState<AccountType>('CASH');
+  const [type, setType] = useState<AccountType>('cash');
   const [currency, setCurrency] = useState<AccountCurrency>('UZS');
   const [isPrimary, setIsPrimary] = useState<boolean>(false);
 
@@ -44,7 +44,7 @@ export function CreateAccountForm({
           tgHapticNotify('success');
           onClose();
           setName('');
-          setType('CASH');
+          setType('cash');
           setCurrency('UZS');
           setIsPrimary(false);
         },

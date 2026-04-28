@@ -45,7 +45,7 @@ export function ClientsPage(): React.ReactElement {
 
   const activeClients = useClients(
     {
-      status: 'ACTIVE',
+      status: 'active',
       include: 'balance',
       limit: 100,
       ...(trimmedSearch ? { search: trimmedSearch } : {}),
@@ -54,7 +54,7 @@ export function ClientsPage(): React.ReactElement {
   );
 
   const archivedClients = useClients(
-    { status: 'ARCHIVED', limit: 100 },
+    { status: 'archived', limit: 100 },
     { enabled: canRead && archiveOpen },
   );
 
@@ -76,6 +76,7 @@ export function ClientsPage(): React.ReactElement {
         title="Klientlar"
         description="Mijozlar va yetkazib beruvchilar"
         large
+        showBack
       />
 
       <div className="space-y-3">
@@ -329,7 +330,7 @@ function ClientActions({
   const remove = useDeleteClient();
   const balance = useClientBalance(client.id);
 
-  const isArchived = client.status === 'ARCHIVED';
+  const isArchived = client.status === 'archived';
   const pending =
     archive.isPending || update.isPending || remove.isPending;
   const error = archive.error ?? update.error ?? remove.error;
@@ -348,7 +349,7 @@ function ClientActions({
   function handleRestore(): void {
     tgHapticImpact('medium');
     update.mutate(
-      { id: client.id, body: { status: 'ACTIVE' satisfies ClientStatus } },
+      { id: client.id, body: { status: 'active' satisfies ClientStatus } },
       {
         onSuccess: () => {
           tgHapticNotify('success');

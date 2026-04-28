@@ -1,11 +1,11 @@
 import type { PaginatedResponse } from './member.types';
 
-export type CategoryType = 'EXPENSE' | 'INCOME' | 'PRODUCT';
+export type CategoryType = 'expense' | 'income' | 'product';
 
 export const CATEGORY_TYPE_VALUES: readonly CategoryType[] = [
-  'EXPENSE',
-  'INCOME',
-  'PRODUCT',
+  'expense',
+  'income',
+  'product',
 ] as const;
 
 export const CATEGORY_NAME_MIN_LENGTH = 1;

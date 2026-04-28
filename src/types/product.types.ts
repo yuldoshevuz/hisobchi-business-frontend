@@ -1,6 +1,6 @@
 import type { PaginatedResponse } from './member.types';
 
-export type ProductStatus = 'ACTIVE' | 'ARCHIVED';
+export type ProductStatus = 'active' | 'archived';
 
 export const PRODUCT_NAME_MIN_LENGTH = 1;
 export const PRODUCT_NAME_MAX_LENGTH = 255;
@@ -38,6 +38,8 @@ export interface ListProductsQuery {
   status?: ProductStatus;
   search?: string;
   trackStock?: boolean;
+  /** Bypass pagination — return every matching product in one page. */
+  all?: boolean;
 }
 
 export interface CreateProductRequest {

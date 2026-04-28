@@ -38,10 +38,17 @@ import {
   type MergedCategory,
 } from '@/types/category.types';
 
-export function CategoriesPage(): React.ReactElement {
+interface CategoriesPageProps {
+  /** When true, skips the top PageHeader so the page can be embedded inside Katalog. */
+  embedded?: boolean;
+}
+
+export function CategoriesPage({
+  embedded = false,
+}: CategoriesPageProps = {}): React.ReactElement {
   const { isReady } = usePermissions();
   const canManage = useCan(PermissionSlug.CATEGORIES_MANAGE);
-  const [activeType, setActiveType] = useState<CategoryType>('EXPENSE');
+  const [activeType, setActiveType] = useState<CategoryType>('expense');
   const [archiveOpen, setArchiveOpen] = useState<boolean>(false);
   const [editorMode, setEditorMode] = useState<CategoryEditorMode | null>(null);
   const [actionItem, setActionItem] = useState<MergedCategory | null>(null);
@@ -135,11 +142,13 @@ export function CategoriesPage(): React.ReactElement {
 
   return (
     <div className="pb-32">
-      <PageHeader
-        title="Kategoriyalar"
-        description="Chiqim, kirim va mahsulot turlari"
-        large
-      />
+      {embedded ? null : (
+        <PageHeader
+          title="Kategoriyalar"
+          description="Chiqim, kirim va mahsulot turlari"
+          large
+        />
+      )}
 
       <div className="space-y-3">
         <div className="px-4">

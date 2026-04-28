@@ -52,7 +52,7 @@ export function AccountActions({
   function handleRestore(): void {
     tgHapticImpact('medium');
     update.mutate(
-      { id: account.id, body: { status: 'ACTIVE' } },
+      { id: account.id, body: { status: 'active' } },
       {
         onSuccess: () => {
           tgHapticNotify('success');
@@ -77,7 +77,7 @@ export function AccountActions({
   }
 
   const errorMessage = archive.error ?? remove.error ?? update.error ?? null;
-  const isArchived = account.status === 'ARCHIVED';
+  const isArchived = account.status === 'archived';
 
   return (
     <div className="space-y-3">
