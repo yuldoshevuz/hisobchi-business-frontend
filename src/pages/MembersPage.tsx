@@ -1,5 +1,12 @@
 import { useCallback, useState } from 'react';
-import { ChevronRight, UserPlus } from 'lucide-react';
+import {
+  ChevronRight,
+  Pause,
+  Play,
+  ShieldCheck,
+  Trash2,
+  UserPlus,
+} from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import {
@@ -264,6 +271,7 @@ function MemberActions({
         title="Rollarni o'zgartirish"
         subtitle={`${member.roles.length} rol`}
         onClick={onEditRoles}
+        icon={<ShieldCheck className="h-4 w-4 text-muted-foreground" />}
       />
       <ActionRow
         title={
@@ -276,6 +284,13 @@ function MemberActions({
         }
         onClick={toggleStatus}
         loading={updateStatus.isPending}
+        icon={
+          member.status === 'active' ? (
+            <Pause className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <Play className="h-4 w-4 text-muted-foreground" />
+          )
+        }
       />
       <ActionRow
         title="A'zoni o'chirish"
@@ -283,6 +298,7 @@ function MemberActions({
         destructive
         onClick={handleRemove}
         loading={remove.isPending}
+        icon={<Trash2 className="h-4 w-4 text-destructive" />}
       />
     </div>
   );
@@ -294,6 +310,8 @@ interface ActionRowProps {
   onClick: () => void;
   loading?: boolean;
   destructive?: boolean;
+  /** Optional leading icon — same shape as the other Actions sheets. */
+  icon?: React.ReactNode;
 }
 
 function ActionRow({
@@ -302,6 +320,7 @@ function ActionRow({
   onClick,
   loading,
   destructive,
+  icon,
 }: ActionRowProps): React.ReactElement {
   return (
     <button
@@ -312,11 +331,12 @@ function ActionRow({
     >
       <div className="min-w-0 flex-1">
         <div
-          className={`text-[15px] font-medium ${
+          className={`flex items-center gap-2 text-[15px] font-medium ${
             destructive ? 'text-destructive' : 'text-foreground'
           }`}
         >
-          {title}
+          {icon}
+          <span>{title}</span>
         </div>
         {subtitle ? (
           <div className="mt-0.5 text-[13px] text-muted-foreground">

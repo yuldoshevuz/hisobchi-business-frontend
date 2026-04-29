@@ -1,5 +1,9 @@
 import { useCallback, useState } from 'react';
 import { useCreateAccount } from '@/api/hooks/use-accounts';
+import {
+  formatAmount,
+  unformatAmount,
+} from '@/components/transactions/forms/form-utils';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -29,16 +33,31 @@ export function CreateAccountForm({
   const [type, setType] = useState<AccountType>('cash');
   const [currency, setCurrency] = useState<AccountCurrency>('UZS');
   const [isPrimary, setIsPrimary] = useState<boolean>(false);
+  const [openingBalance, setOpeningBalance] = useState<string>('');
 
   const trimmedName = name.trim();
+  const trimmedOpening = openingBalance.trim();
+  // Empty string == "no opening balance" (skip it). Non-empty must be a
+  // finite, non-negative number — backend re-validates anyway, this is just
+  // for the disabled state.
+  const openingBalanceValid =
+    trimmedOpening === '' ||
+    (Number.isFinite(Number(trimmedOpening)) && Number(trimmedOpening) >= 0);
   const isValid =
     trimmedName.length >= ACCOUNT_NAME_MIN_LENGTH &&
-    trimmedName.length <= ACCOUNT_NAME_MAX_LENGTH;
+    trimmedName.length <= ACCOUNT_NAME_MAX_LENGTH &&
+    openingBalanceValid;
 
   const submit = useCallback((): void => {
     if (!isValid) return;
     create.mutate(
-      { name: trimmedName, type, currency, isPrimary },
+      {
+        name: trimmedName,
+        type,
+        currency,
+        isPrimary,
+        ...(trimmedOpening !== '' ? { openingBalance: trimmedOpening } : {}),
+      },
       {
         onSuccess: () => {
           tgHapticNotify('success');
@@ -47,11 +66,21 @@ export function CreateAccountForm({
           setType('cash');
           setCurrency('UZS');
           setIsPrimary(false);
+          setOpeningBalance('');
         },
         onError: () => tgHapticNotify('error'),
       },
     );
-  }, [create, trimmedName, type, currency, isPrimary, isValid, onClose]);
+  }, [
+    create,
+    trimmedName,
+    type,
+    currency,
+    isPrimary,
+    trimmedOpening,
+    isValid,
+    onClose,
+  ]);
 
   return (
     <form
@@ -126,6 +155,21 @@ export function CreateAccountForm({
             );
           })}
         </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="account-opening-balance">Boshlang'ich qoldiq</Label>
+        <Input
+          id="account-opening-balance"
+          inputMode="decimal"
+          value={formatAmount(openingBalance)}
+          onChange={(e) => setOpeningBalance(unformatAmount(e.target.value))}
+          placeholder="0"
+        />
+        <p className="text-[12px] text-muted-foreground">
+          Ixtiyoriy. Hozirda hisobda bor bo'lgan summa. Bo'sh qoldirilsa 0
+          dan boshlanadi.
+        </p>
       </div>
 
       <label

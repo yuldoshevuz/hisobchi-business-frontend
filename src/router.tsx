@@ -4,7 +4,7 @@ import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { LoginPage } from '@/pages/LoginPage';
 import { OrganizationsPage } from '@/pages/OrganizationsPage';
 import { DashboardPage } from '@/pages/DashboardPage';
-import { ClientsPage } from '@/pages/ClientsPage';
+import { ContactsPage } from '@/pages/ContactsPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { KatalogPage } from '@/pages/KatalogPage';
 import { SozlamalarPage } from '@/pages/SozlamalarPage';
@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
               { index: true, element: <DashboardPage /> },
               { path: 'katalog', element: <KatalogPage /> },
               { path: 'sozlamalar', element: <SozlamalarPage /> },
-              { path: 'clients', element: <ClientsPage /> },
+              { path: 'contacts', element: <ContactsPage /> },
               { path: 'transactions', element: <TransactionsListPage /> },
               {
                 path: 'transactions/new/:useCase',

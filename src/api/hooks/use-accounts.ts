@@ -34,11 +34,11 @@ export function useAccount(
 export function useCreateAccount(): ReturnType<
   typeof useMutation<Account, Error, CreateAccountRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Account, Error, CreateAccountRequest>({
     mutationFn: (body) => accountsApi.create(body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.accounts.all });
     },
   });
 }
@@ -51,11 +51,11 @@ interface UpdateAccountVars {
 export function useUpdateAccount(): ReturnType<
   typeof useMutation<Account, Error, UpdateAccountVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Account, Error, UpdateAccountVars>({
     mutationFn: ({ id, body }) => accountsApi.update(id, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.accounts.all });
     },
   });
 }
@@ -63,11 +63,11 @@ export function useUpdateAccount(): ReturnType<
 export function useArchiveAccount(): ReturnType<
   typeof useMutation<Account, Error, number>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Account, Error, number>({
     mutationFn: (id) => accountsApi.archive(id),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.accounts.all });
     },
   });
 }
@@ -75,11 +75,11 @@ export function useArchiveAccount(): ReturnType<
 export function useDeleteAccount(): ReturnType<
   typeof useMutation<void, Error, number>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<void, Error, number>({
     mutationFn: (id) => accountsApi.remove(id),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.accounts.all });
     },
   });
 }

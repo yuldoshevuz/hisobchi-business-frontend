@@ -3,6 +3,9 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { AdjustmentForm } from '@/components/transactions/forms/AdjustmentForm';
 import { BorrowForm } from '@/components/transactions/forms/BorrowForm';
 import { CreditSaleForm } from '@/components/transactions/forms/CreditSaleForm';
+import { ExpenseForm } from '@/components/transactions/forms/ExpenseForm';
+import { IncomeForm } from '@/components/transactions/forms/IncomeForm';
+import { LendForm } from '@/components/transactions/forms/LendForm';
 import { PurchaseForm } from '@/components/transactions/forms/PurchaseForm';
 import { SaleForm } from '@/components/transactions/forms/SaleForm';
 import { TransferForm } from '@/components/transactions/forms/TransferForm';
@@ -75,6 +78,12 @@ function FormForUseCase({
       return <PurchaseForm onCreated={onCreated} />;
     case 'credit-sale':
       return <CreditSaleForm onCreated={onCreated} />;
+    case 'expense':
+      return <ExpenseForm onCreated={onCreated} />;
+    case 'income':
+      return <IncomeForm onCreated={onCreated} />;
+    case 'lend':
+      return <LendForm onCreated={onCreated} />;
     case 'borrow':
       return <BorrowForm onCreated={onCreated} />;
     case 'transfer':

@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { Modal } from '@/components/ui/modal';
+import { SelectField } from '@/components/transactions/forms/form-primitives';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import type { SupportedLocale, User } from '@/types/user.types';
@@ -220,18 +221,20 @@ function ProfileForm({
           inputMode="email"
         />
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="profile-locale">Til</Label>
-        <select
-          id="profile-locale"
-          value={locale}
-          onChange={(e) => setLocale(e.target.value as SupportedLocale)}
-          className="h-11 w-full rounded-xl border border-input bg-card px-3 text-[15px] text-foreground"
-        >
-          <option value="uz">O'zbekcha</option>
-          <option value="ru">Русский</option>
-        </select>
-      </div>
+      <SelectField<SupportedLocale>
+        id="profile-locale"
+        label="Til"
+        value={locale}
+        // SelectField returns null on empty pick — locale is non-nullable so
+        // we ignore the null case (the modal cannot select an empty option).
+        onChange={(next) => {
+          if (next !== null) setLocale(next);
+        }}
+        options={[
+          { value: 'uz', label: "O'zbekcha" },
+          { value: 'ru', label: 'Русский' },
+        ]}
+      />
       {update.isError ? (
         <p className="text-[13px] text-destructive">
           {getApiErrorMessage(update.error)}

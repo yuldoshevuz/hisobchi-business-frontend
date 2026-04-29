@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useAccounts } from '@/api/hooks/use-accounts';
+import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
+import { CategoryIcon } from '@/components/categories/CategoryIcon';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useCreateProduct, useProducts } from '@/api/hooks/use-products';
 import { useCreatePurchase } from '@/api/hooks/use-purchases';
@@ -210,16 +212,13 @@ export function PurchaseForm({
             </p>
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="purchase-new-category">Kategoriya *</Label>
-            <select
-              id="purchase-new-category"
-              value={newProductCategoryRef}
-              onChange={(e) => setNewProductCategoryRef(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-card px-3 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="">Tanlang...</option>
-              {productCategoryList.map((c) => {
+          <SelectField<string>
+            id="purchase-new-category"
+            label="Kategoriya *"
+            value={newProductCategoryRef === '' ? null : newProductCategoryRef}
+            onChange={(next) => setNewProductCategoryRef(next ?? '')}
+            options={productCategoryList
+              .map((c) => {
                 const ref =
                   c.id !== null
                     ? `org:${c.id}`
@@ -227,14 +226,26 @@ export function PurchaseForm({
                       ? `sys:${c.systemCategoryId}`
                       : '';
                 if (!ref) return null;
-                return (
-                  <option key={ref} value={ref}>
-                    {c.name}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+                return {
+                  value: ref,
+                  label: c.name,
+                  iconNode: (
+                    <CategoryIcon
+                      icon={c.icon}
+                      color={c.color}
+                      fallbackText={c.name}
+                    />
+                  ),
+                };
+              })
+              .filter(
+                (o): o is {
+                  value: string;
+                  label: string;
+                  iconNode: React.ReactNode;
+                } => o !== null,
+              )}
+          />
         </div>
       )}
 
@@ -248,6 +259,7 @@ export function PurchaseForm({
           .map((a) => ({
             value: a.id,
             label: `${a.name} · ${a.currency}`,
+            icon: ACCOUNT_TYPE_ICON[a.type],
           }))}
       />
 

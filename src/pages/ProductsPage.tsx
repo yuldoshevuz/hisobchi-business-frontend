@@ -4,10 +4,12 @@ import {
   Boxes,
   Filter,
   Package,
+  Pencil,
   Plus,
   RotateCcw,
   Search,
   Sliders,
+  Trash2,
 } from 'lucide-react';
 import { useCategories } from '@/api/hooks/use-categories';
 import {
@@ -547,6 +549,7 @@ function ProductActions({
             title="Tahrirlash"
             subtitle="Nom, kategoriya, narx, tannarx"
             onClick={onEdit}
+            icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
           />
         ) : null}
         {!isArchived && trackStock ? (
@@ -575,11 +578,12 @@ function ProductActions({
           />
         )}
         <ActionRow
-          title="O‘chirish"
+          title="O'chirish"
           subtitle="Faqat tranzaksiyalarda ishlatilmagan mahsulot uchun"
           destructive
           onClick={handleDelete}
           loading={pending}
+          icon={<Trash2 className="h-4 w-4 text-destructive" />}
         />
       </div>
       {error ? (

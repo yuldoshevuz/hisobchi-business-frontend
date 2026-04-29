@@ -68,11 +68,11 @@ export function useSystemCategories(
 export function useCreateCategory(): ReturnType<
   typeof useMutation<Category, Error, CreateCategoryRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Category, Error, CreateCategoryRequest>({
     mutationFn: (body) => categoriesApi.create(body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.categories.all,
       });
     },
@@ -87,11 +87,11 @@ interface UpdateCategoryVars {
 export function useUpdateCategory(): ReturnType<
   typeof useMutation<Category, Error, UpdateCategoryVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Category, Error, UpdateCategoryVars>({
     mutationFn: ({ id, body }) => categoriesApi.update(id, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.categories.all,
       });
     },
@@ -106,12 +106,12 @@ interface CustomizeBySystemVars {
 export function useCustomizeSystemCategory(): ReturnType<
   typeof useMutation<Category, Error, CustomizeBySystemVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Category, Error, CustomizeBySystemVars>({
     mutationFn: ({ systemCategoryId, body }) =>
       categoriesApi.customizeBySystem(systemCategoryId, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.categories.all,
       });
     },
@@ -122,11 +122,11 @@ export function useCustomizeSystemCategory(): ReturnType<
 export function useDeleteCategory(): ReturnType<
   typeof useMutation<void, Error, number>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<void, Error, number>({
     mutationFn: (id) => categoriesApi.archive(id),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.categories.all,
       });
     },

@@ -13,13 +13,13 @@ import type {
 export function useTelegramWebAppLogin(): ReturnType<
   typeof useMutation<AuthResponse, Error, TelegramWebAppLoginRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<AuthResponse, Error, TelegramWebAppLoginRequest>({
     mutationFn: (body) => authApi.telegramWebAppLogin(body),
     onSuccess: (data) => {
       tokenStore.setTokens(data.accessToken, data.refreshToken);
-      queryClient.setQueryData(queryKeys.user.me, data.user);
-      queryClient.setQueryData(queryKeys.organizations.list, data.organizations);
+      queryContact.setQueryData(queryKeys.user.me, data.user);
+      queryContact.setQueryData(queryKeys.organizations.list, data.organizations);
     },
   });
 }
@@ -31,7 +31,7 @@ export function useSelectOrganization(): ReturnType<
     SelectOrganizationRequest
   >
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<
     SelectOrganizationResponse,
     Error,
@@ -41,13 +41,13 @@ export function useSelectOrganization(): ReturnType<
     onSuccess: (data, variables) => {
       tokenStore.setAccessToken(data.accessToken);
       tokenStore.setActiveOrgId(variables.organizationId);
-      queryClient.invalidateQueries();
+      queryContact.invalidateQueries();
     },
   });
 }
 
 export function useLogout(): ReturnType<typeof useMutation<void, Error, void>> {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<void, Error, void>({
     mutationFn: async () => {
       const refreshToken = tokenStore.getRefreshToken() ?? undefined;
@@ -59,7 +59,7 @@ export function useLogout(): ReturnType<typeof useMutation<void, Error, void>> {
     },
     onSettled: () => {
       tokenStore.clear();
-      queryClient.clear();
+      queryContact.clear();
       // Close the Mini App so Telegram releases the cached WebView and
       // provides a fresh `initData` on the NEXT launch. Otherwise the user
       // would land on /login here with empty initData (one-shot per launch

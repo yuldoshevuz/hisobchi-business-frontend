@@ -3,6 +3,12 @@ import { useAccounts } from '@/api/hooks/use-accounts';
 import { useAddDebtRepayment } from '@/api/hooks/use-debts';
 import { useAddPurchasePayment } from '@/api/hooks/use-purchases';
 import { useAddSalePayment } from '@/api/hooks/use-sales';
+import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
+import {
+  formatAmount,
+  unformatAmount,
+} from '@/components/transactions/forms/form-utils';
+import { SelectField } from '@/components/transactions/forms/form-primitives';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -197,22 +203,17 @@ export function AddCashFlowForm({
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="cf-account">Hisob</Label>
-        <select
-          id="cf-account"
-          value={accountId || ''}
-          onChange={(e) => setAccountId(Number(e.target.value))}
-          className="flex h-10 w-full rounded-md border border-input bg-card px-3 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <option value="">Tanlang...</option>
-          {matchingAccounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name} · {a.currency}
-            </option>
-          ))}
-        </select>
-      </div>
+      <SelectField
+        id="cf-account"
+        label="Hisob"
+        value={accountId === 0 ? null : accountId}
+        onChange={(id) => setAccountId(id ?? 0)}
+        options={matchingAccounts.map((a) => ({
+          value: a.id,
+          label: `${a.name} · ${a.currency}`,
+          icon: ACCOUNT_TYPE_ICON[a.type],
+        }))}
+      />
 
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1.5">
@@ -220,8 +221,8 @@ export function AddCashFlowForm({
           <Input
             id="cf-amount"
             inputMode="decimal"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={formatAmount(amount)}
+            onChange={(e) => setAmount(unformatAmount(e.target.value))}
             placeholder="0"
           />
         </div>

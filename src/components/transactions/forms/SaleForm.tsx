@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useAccounts } from '@/api/hooks/use-accounts';
-import { useClients } from '@/api/hooks/use-clients';
+import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
+import { useContacts } from '@/api/hooks/use-contacts';
 import { useProducts } from '@/api/hooks/use-products';
 import { useCreateSale } from '@/api/hooks/use-sales';
 import { Button } from '@/components/ui/button';
@@ -15,18 +16,28 @@ import {
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import { AmountField, SelectField } from './form-primitives';
 import { formatAmountDisplay } from './form-utils';
-import type { CreateSaleRequest } from '@/types/transaction.types';
+import type {
+  CreateSaleRequest,
+  PaymentLegRequest,
+} from '@/types/transaction.types';
 
 interface SaleFormProps {
   onCreated: (transactionId: number) => void;
 }
 
-/** Sotuv: paid sale. One product, one customer, immediate cash IN. */
+/**
+ * Sotuv: SALE. Defaults to a paid sale (one IN cash flow lands on the chosen
+ * account). When the "Qarzga sotdim" toggle is on, the form switches to a
+ * credit-sale shape: cashFlows is empty, contact becomes required and a
+ * `dueDate` input appears so the user can record when the customer promised
+ * to pay. The selected account is still required in credit mode — the
+ * backend uses its currency to validate the sale's currency.
+ */
 export function SaleForm({
   onCreated,
 }: SaleFormProps): React.ReactElement {
   const accounts = useAccounts({ status: 'active' });
-  const clients = useClients({ all: true, status: 'active' });
+  const contacts = useContacts({ all: true, status: 'active' });
   const products = useProducts({ status: 'active', all: true });
 
   const accountList = useMemo(
@@ -37,16 +48,18 @@ export function SaleForm({
     () => products.data?.data ?? [],
     [products.data],
   );
-  const clientList = useMemo(
-    () => clients.data?.data ?? [],
-    [clients.data],
+  const contactList = useMemo(
+    () => contacts.data?.data ?? [],
+    [contacts.data],
   );
 
   const [productId, setProductId] = useState<number | null>(null);
-  const [clientId, setClientId] = useState<number | null>(null);
+  const [contactId, setContactId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState<string>('1');
   const [unitPrice, setUnitPrice] = useState<string>('');
+  const [isCredit, setIsCredit] = useState<boolean>(false);
+  const [dueDate, setDueDate] = useState<string>('');
 
   const product = productList.find((p) => p.id === productId) ?? null;
   const account = accountList.find((a) => a.id === accountId) ?? null;
@@ -76,7 +89,9 @@ export function SaleForm({
     Boolean(productId) &&
     Boolean(accountId) &&
     isAmountValid &&
-    (!tracksStock || Number(quantity) > 0);
+    (!tracksStock || Number(quantity) > 0) &&
+    // Credit mode requires a contact — there's no other anchor for who owes.
+    (!isCredit || Boolean(contactId));
 
   const create = useCreateSale();
 
@@ -84,16 +99,16 @@ export function SaleForm({
     if (!isFormValid || !product || !account) return;
     tgHapticImpact('light');
 
+    const cashFlows: PaymentLegRequest[] = isCredit
+      ? []
+      : [{ accountId: account.id, amount: totalAmount }];
+
     const body: CreateSaleRequest = {
       currency: account.currency,
       amount: totalAmount,
-      cashFlows: [
-        {
-          accountId: account.id,
-          amount: totalAmount,
-        },
-      ],
-      ...(clientId ? { clientId } : {}),
+      cashFlows,
+      ...(contactId ? { contactId } : {}),
+      ...(isCredit && dueDate ? { dueDate } : {}),
       items: [
         {
           productId: product.id,
@@ -146,7 +161,7 @@ export function SaleForm({
 
       <SelectField
         id="sotuv-account"
-        label="Balans *"
+        label={isCredit ? 'Balans (valyuta uchun) *' : 'Balans *'}
         value={accountId ?? ''}
         onChange={setAccountId}
         options={accountList
@@ -154,21 +169,28 @@ export function SaleForm({
           .map((a) => ({
             value: a.id,
             label: `${a.name} · ${a.currency}`,
+            icon: ACCOUNT_TYPE_ICON[a.type],
           }))}
         helperText={
-          product
-            ? `${product.currency} valyutasidagi hisob tanlang`
-            : undefined
+          isCredit
+            ? "Pul tushmaydi — faqat tranzaktsiya valyutasi uchun ishlatiladi"
+            : product
+              ? `${product.currency} valyutasidagi hisob tanlang`
+              : undefined
         }
       />
 
       <SelectField
-        id="sotuv-client"
-        label="Mijoz"
-        value={clientId ?? ''}
-        onChange={setClientId}
-        options={clientList.map((c) => ({ value: c.id, label: c.name }))}
-        helperText="Ixtiyoriy. Mijozsiz savdo ham qabul qilinadi"
+        id="sotuv-contact"
+        label={isCredit ? 'Mijoz *' : 'Mijoz'}
+        value={contactId ?? ''}
+        onChange={setContactId}
+        options={contactList.map((c) => ({ value: c.id, label: c.name }))}
+        helperText={
+          isCredit
+            ? "Qarzga sotuvda mijoz tanlash majburiy"
+            : 'Ixtiyoriy. Mijozsiz savdo ham qabul qilinadi'
+        }
       />
 
       {tracksStock ? (
@@ -200,11 +222,30 @@ export function SaleForm({
       {tracksStock && Number(quantity) > 1 ? (
         <div className="rounded-xl bg-muted/40 px-3 py-2 text-[13px]">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Jami summa</span>
+            <span className="text-muted-foreground">
+              {isCredit ? 'Jami qarz' : 'Jami summa'}
+            </span>
             <span className="font-semibold tabular-nums text-foreground">
               {formatAmountDisplay(totalAmount)} {currency}
             </span>
           </div>
+        </div>
+      ) : null}
+
+      <CreditToggle value={isCredit} onChange={setIsCredit} />
+
+      {isCredit ? (
+        <div className="space-y-1.5">
+          <Label htmlFor="sotuv-due">Qaytarish sanasi</Label>
+          <Input
+            id="sotuv-due"
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+          <p className="text-[12px] text-muted-foreground">
+            Ixtiyoriy. Eslatmalar uchun ishlatiladi
+          </p>
         </div>
       ) : null}
 
@@ -224,5 +265,34 @@ export function SaleForm({
         Saqlash
       </Button>
     </form>
+  );
+}
+
+interface CreditToggleProps {
+  value: boolean;
+  onChange: (next: boolean) => void;
+}
+
+function CreditToggle({
+  value,
+  onChange,
+}: CreditToggleProps): React.ReactElement {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-input bg-card px-3 py-2.5 active:bg-accent">
+      <input
+        type="checkbox"
+        className="mt-1 h-4 w-4 rounded border-input text-primary focus:ring-primary"
+        checked={value}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      <span className="flex-1">
+        <span className="block text-[14px] font-medium leading-tight">
+          Qarzga sotdim
+        </span>
+        <span className="mt-0.5 block text-[12px] text-muted-foreground">
+          To'lov hozir tushmaydi. Mijoz keyinroq to'lashi mumkin.
+        </span>
+      </span>
+    </label>
   );
 }

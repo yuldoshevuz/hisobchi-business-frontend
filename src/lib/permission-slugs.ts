@@ -16,8 +16,8 @@ export const PermissionSlug = {
 
   CATEGORIES_MANAGE: 'categories.manage',
 
-  CLIENTS_MANAGE: 'clients.manage',
-  CLIENTS_READ: 'clients.read',
+  CONTACTS_MANAGE: 'contacts.manage',
+  CONTACTS_READ: 'contacts.read',
 
   PRODUCTS_MANAGE: 'products.manage',
   PRODUCTS_READ: 'products.read',

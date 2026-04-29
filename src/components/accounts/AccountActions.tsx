@@ -1,3 +1,14 @@
+import { useNavigate } from 'react-router-dom';
+import {
+  ArrowRightLeft,
+  Archive,
+  ArchiveRestore,
+  ListChecks,
+  Pencil,
+  Star,
+  Trash2,
+  type LucideIcon,
+} from 'lucide-react';
 import {
   useArchiveAccount,
   useDeleteAccount,
@@ -6,6 +17,7 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
+import { cn } from '@/lib/utils';
 import type { Account } from '@/types/account.types';
 
 interface AccountActionsProps {
@@ -19,6 +31,7 @@ export function AccountActions({
   onClose,
   onEdit,
 }: AccountActionsProps): React.ReactElement {
+  const navigate = useNavigate();
   const archive = useArchiveAccount();
   const remove = useDeleteAccount();
   const update = useUpdateAccount();
@@ -64,7 +77,7 @@ export function AccountActions({
   }
 
   function handleDelete(): void {
-    if (!confirm(`${account.name} hisobini o‘chirishni tasdiqlaysizmi?`))
+    if (!confirm(`${account.name} hisobini o'chirishni tasdiqlaysizmi?`))
       return;
     tgHapticImpact('heavy');
     remove.mutate(account.id, {
@@ -76,47 +89,92 @@ export function AccountActions({
     });
   }
 
+  function openTransfer(): void {
+    tgHapticImpact('light');
+    onClose();
+    navigate(
+      `/transactions/new/transfer?fromAccountId=${String(account.id)}`,
+    );
+  }
+
+  function openReports(): void {
+    tgHapticImpact('light');
+    onClose();
+    navigate(`/transactions?accountId=${String(account.id)}`);
+  }
+
   const errorMessage = archive.error ?? remove.error ?? update.error ?? null;
   const isArchived = account.status === 'archived';
+  // Hide destructive actions when they cannot succeed:
+  //   • Delete needs balance == 0 AND no cash flows. We check the balance
+  //     here contact-side; the cash-flow check still lives server-side.
+  //   • Archive is forbidden on the primary account — promoting another
+  //     account first is the user's prerequisite.
+  const balanceIsZero = Number(account.currentBalance) === 0;
+  const canDelete = !isArchived && balanceIsZero;
+  const canArchive = !isArchived && !account.isPrimary;
+  const canRestore = isArchived;
 
   return (
     <div className="space-y-3">
       <div className="-mx-4 divide-y divide-border bg-card">
+        {!isArchived ? (
+          <ActionRow
+            icon={ArrowRightLeft}
+            title="Balansdan balansga o'tkazish"
+            subtitle="Boshqa hisobga pul ko'chirish"
+            onClick={openTransfer}
+          />
+        ) : null}
         <ActionRow
-          title="Tahrirlash"
-          subtitle="Nom va asosiy belgisini o‘zgartirish"
-          onClick={onEdit}
+          icon={ListChecks}
+          title="Balans hisobotlarini ko'rish"
+          subtitle="Shu hisob bo'yicha tranzaksiyalar tarixi"
+          onClick={openReports}
         />
         {!isArchived && !account.isPrimary ? (
           <ActionRow
+            icon={Star}
             title="Asosiy qilib tayinlash"
             subtitle="Yangi tranzaksiyalar uchun avtomatik tanlanadi"
             onClick={makeDefault}
             loading={update.isPending}
           />
         ) : null}
-        {!isArchived ? (
+        <ActionRow
+          icon={Pencil}
+          title="Balansni tahrirlash"
+          subtitle="Nom va asosiy belgisini o'zgartirish"
+          onClick={onEdit}
+        />
+        {canArchive ? (
           <ActionRow
+            icon={Archive}
             title="Arxivlash"
             subtitle="Tarix saqlanadi, lekin yangi yozuvlar yopiladi"
             onClick={handleArchive}
             loading={archive.isPending}
           />
-        ) : (
+        ) : null}
+        {canRestore ? (
           <ActionRow
+            icon={ArchiveRestore}
             title="Arxivdan tiklash"
-            subtitle="Hisob yana faol bo‘ladi"
+            subtitle="Hisob yana faol bo'ladi"
             onClick={handleRestore}
             loading={update.isPending}
           />
-        )}
-        <ActionRow
-          title="Hisobni o‘chirish"
-          subtitle="Faqat qoldiq 0 va pul harakati bo‘lmaganda"
-          destructive
-          onClick={handleDelete}
-          loading={remove.isPending}
-        />
+        ) : null}
+        {canDelete ? (
+          <ActionRow
+            icon={Trash2}
+            title="Balansni o'chirish"
+            subtitle="Qaytarib bo'lmaydi"
+            destructive
+            onClick={handleDelete}
+            loading={remove.isPending}
+          />
+        ) : null}
       </div>
       {errorMessage ? (
         <p className="px-4 text-[13px] text-destructive">
@@ -128,6 +186,7 @@ export function AccountActions({
 }
 
 interface ActionRowProps {
+  icon: LucideIcon;
   title: string;
   subtitle?: string;
   onClick: () => void;
@@ -136,6 +195,7 @@ interface ActionRowProps {
 }
 
 function ActionRow({
+  icon: Icon,
   title,
   subtitle,
   onClick,
@@ -149,11 +209,22 @@ function ActionRow({
       disabled={loading}
       className="press flex w-full items-center gap-3 px-4 py-3 text-left active:bg-accent disabled:opacity-50"
     >
+      <div
+        className={cn(
+          'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+          destructive
+            ? 'bg-destructive/10 text-destructive'
+            : 'bg-primary/10 text-primary',
+        )}
+      >
+        <Icon className="h-4 w-4" />
+      </div>
       <div className="min-w-0 flex-1">
         <div
-          className={`text-[15px] font-medium ${
-            destructive ? 'text-destructive' : 'text-foreground'
-          }`}
+          className={cn(
+            'text-[15px] font-medium',
+            destructive ? 'text-destructive' : 'text-foreground',
+          )}
         >
           {title}
         </div>

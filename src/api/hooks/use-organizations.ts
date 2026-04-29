@@ -33,11 +33,11 @@ export function useCurrentOrganization(): ReturnType<
 export function useCreateOrganization(): ReturnType<
   typeof useMutation<Organization, Error, CreateOrganizationRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Organization, Error, CreateOrganizationRequest>({
     mutationFn: (body) => organizationsApi.create(body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.organizations.list,
       });
     },
@@ -47,18 +47,18 @@ export function useCreateOrganization(): ReturnType<
 export function useUpdateCurrentOrganization(): ReturnType<
   typeof useMutation<Organization, Error, UpdateOrganizationRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Organization, Error, UpdateOrganizationRequest>({
     mutationFn: (body) => organizationsApi.updateCurrent(body),
     onSuccess: (data) => {
-      queryClient.setQueryData<CurrentOrganization | undefined>(
+      queryContact.setQueryData<CurrentOrganization | undefined>(
         queryKeys.organizations.current,
         (prev) => (prev ? { ...prev, ...data, viewer: prev.viewer } : undefined),
       );
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.organizations.current,
       });
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.organizations.list,
       });
     },

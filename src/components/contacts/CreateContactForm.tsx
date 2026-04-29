@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useCreateClient } from '@/api/hooks/use-clients';
+import { useCreateContact } from '@/api/hooks/use-contacts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,32 +7,32 @@ import { Spinner } from '@/components/ui/spinner';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import {
-  CLIENT_NAME_MAX_LENGTH,
-  CLIENT_NAME_MIN_LENGTH,
-  CLIENT_NOTES_MAX_LENGTH,
-  CLIENT_TYPE_VALUES,
-  type ClientType,
-} from '@/types/client.types';
-import { CLIENT_TYPE_ICON, CLIENT_TYPE_LABEL } from './client-meta';
+  CONTACT_NAME_MAX_LENGTH,
+  CONTACT_NAME_MIN_LENGTH,
+  CONTACT_NOTES_MAX_LENGTH,
+  CONTACT_TYPE_VALUES,
+  type ContactType,
+} from '@/types/contact.types';
+import { CONTACT_TYPE_ICON, CONTACT_TYPE_LABEL } from './contact-meta';
 
-interface CreateClientFormProps {
+interface CreateContactFormProps {
   onClose: () => void;
 }
 
-export function CreateClientForm({
+export function CreateContactForm({
   onClose,
-}: CreateClientFormProps): React.ReactElement {
-  const create = useCreateClient();
+}: CreateContactFormProps): React.ReactElement {
+  const create = useCreateContact();
   const [name, setName] = useState<string>('');
-  const [type, setType] = useState<ClientType>('customer');
+  const [type, setType] = useState<ContactType>('customer');
   const [phone, setPhone] = useState<string>('');
   const [creditLimit, setCreditLimit] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
 
   const trimmedName = name.trim();
   const isValid =
-    trimmedName.length >= CLIENT_NAME_MIN_LENGTH &&
-    trimmedName.length <= CLIENT_NAME_MAX_LENGTH;
+    trimmedName.length >= CONTACT_NAME_MIN_LENGTH &&
+    trimmedName.length <= CONTACT_NAME_MAX_LENGTH;
 
   const submit = useCallback((): void => {
     if (!isValid) return;
@@ -66,13 +66,13 @@ export function CreateClientForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="client-name">Nom</Label>
+        <Label htmlFor="contact-name">Nom</Label>
         <Input
-          id="client-name"
+          id="contact-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Hisobchi Demo LLC"
-          maxLength={CLIENT_NAME_MAX_LENGTH}
+          maxLength={CONTACT_NAME_MAX_LENGTH}
           required
           autoFocus
         />
@@ -81,8 +81,8 @@ export function CreateClientForm({
       <div className="space-y-1.5">
         <Label>Turi</Label>
         <div className="grid grid-cols-3 gap-2">
-          {CLIENT_TYPE_VALUES.map((t) => {
-            const Icon = CLIENT_TYPE_ICON[t];
+          {CONTACT_TYPE_VALUES.map((t) => {
+            const Icon = CONTACT_TYPE_ICON[t];
             const selected = type === t;
             return (
               <button
@@ -99,7 +99,7 @@ export function CreateClientForm({
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                <span className="truncate">{CLIENT_TYPE_LABEL[t]}</span>
+                <span className="truncate">{CONTACT_TYPE_LABEL[t]}</span>
               </button>
             );
           })}
@@ -107,9 +107,9 @@ export function CreateClientForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="client-phone">Telefon</Label>
+        <Label htmlFor="contact-phone">Telefon</Label>
         <Input
-          id="client-phone"
+          id="contact-phone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+998901234567"
@@ -118,9 +118,9 @@ export function CreateClientForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="client-credit">Kredit limiti</Label>
+        <Label htmlFor="contact-credit">Kredit limiti</Label>
         <Input
-          id="client-credit"
+          id="contact-credit"
           value={creditLimit}
           onChange={(e) => setCreditLimit(e.target.value)}
           placeholder="5000000"
@@ -129,12 +129,12 @@ export function CreateClientForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="client-notes">Eslatma</Label>
+        <Label htmlFor="contact-notes">Eslatma</Label>
         <textarea
-          id="client-notes"
+          id="contact-notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          maxLength={CLIENT_NOTES_MAX_LENGTH}
+          maxLength={CONTACT_NOTES_MAX_LENGTH}
           rows={3}
           placeholder="Qo‘shimcha izoh"
           className="flex min-h-[80px] w-full rounded-xl border border-input bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

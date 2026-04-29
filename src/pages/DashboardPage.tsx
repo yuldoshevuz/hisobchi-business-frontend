@@ -9,6 +9,7 @@ import {
   ListChecks,
   Package,
   Plus,
+  Star,
   Users,
 } from 'lucide-react';
 import { useCurrentOrganization } from '@/api/hooks/use-organizations';
@@ -110,17 +111,17 @@ export function DashboardPage(): React.ReactElement {
               onClick={() => navigate('/transactions')}
             />
           </Can>
-          <Can slug={PermissionSlug.CLIENTS_READ}>
+          <Can slug={PermissionSlug.CONTACTS_READ}>
             <ListItem
               leading={
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Contact className="h-4 w-4" />
                 </div>
               }
-              title="Klientlar"
-              subtitle="Mijozlar va yetkazib beruvchilar"
+              title="Kontaktlar"
+              subtitle="Mijozlar, yetkazib beruvchilar va hamkorlar"
               showChevron
-              onClick={() => navigate('/clients')}
+              onClick={() => navigate('/contacts')}
             />
           </Can>
           <Can slug={PermissionSlug.PRODUCTS_READ}>
@@ -471,7 +472,10 @@ function AccountChip({
     <button
       type="button"
       onClick={onTap}
-      className="press flex h-[88px] w-[160px] shrink-0 flex-col justify-between rounded-2xl bg-muted p-3 text-left"
+      className={cn(
+        'press relative flex h-[88px] w-[160px] shrink-0 flex-col justify-between rounded-2xl bg-muted p-3 text-left',
+        account.isPrimary && 'ring-1 ring-primary/40',
+      )}
     >
       <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
         <Icon className="h-3.5 w-3.5 shrink-0" />
@@ -485,6 +489,12 @@ function AccountChip({
           {account.currency}
         </span>
       </div>
+      {account.isPrimary ? (
+        <div className="absolute right-2 top-2 flex items-center gap-0.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-primary">
+          <Star className="h-2.5 w-2.5 fill-current" />
+          <span>Asosiy</span>
+        </div>
+      ) : null}
     </button>
   );
 }

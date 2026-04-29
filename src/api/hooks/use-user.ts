@@ -19,11 +19,11 @@ export function useMe(): ReturnType<typeof useQuery<User, Error>> {
 export function useUpdateMe(): ReturnType<
   typeof useMutation<User, Error, UpdateProfileRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<User, Error, UpdateProfileRequest>({
     mutationFn: (body) => userApi.updateMe(body),
     onSuccess: (data) => {
-      queryClient.setQueryData(queryKeys.user.me, data);
+      queryContact.setQueryData(queryKeys.user.me, data);
     },
   });
 }
@@ -36,11 +36,11 @@ export function usePrimaryOrganizationId(): number | null {
 export function useSetPrimaryOrganization(): ReturnType<
   typeof useMutation<User, Error, SetPrimaryOrganizationRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<User, Error, SetPrimaryOrganizationRequest>({
     mutationFn: (body) => userApi.setPrimaryOrganization(body),
     onSuccess: (data) => {
-      queryClient.setQueryData(queryKeys.user.me, data);
+      queryContact.setQueryData(queryKeys.user.me, data);
     },
   });
 }

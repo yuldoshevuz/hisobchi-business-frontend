@@ -1,6 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useCreateProduct } from '@/api/hooks/use-products';
+import { CategoryIcon } from '@/components/categories/CategoryIcon';
+import { SelectField } from '@/components/transactions/forms/form-primitives';
+import {
+  formatAmount,
+  unformatAmount,
+} from '@/components/transactions/forms/form-utils';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -20,13 +26,15 @@ interface CreateProductFormProps {
 }
 
 interface CategoryOption {
-  /** Stable key for `<select>` (kind:id). */
+  /** Stable key for the SelectField (kind:id). */
   key: string;
   /** Either an instantiated tenant row id, or null when only system. */
   categoryId: number | null;
   /** System category id when this row links to one (system default or system-linked). */
   systemCategoryId: number | null;
   name: string;
+  icon: string | null;
+  color: string | null;
 }
 
 export function CreateProductForm({
@@ -61,6 +69,8 @@ export function CreateProductForm({
           categoryId: c.id,
           systemCategoryId: c.systemCategoryId,
           name: c.name,
+          icon: c.icon,
+          color: c.color,
         };
       });
   }, [categories.data]);
@@ -131,35 +141,33 @@ export function CreateProductForm({
         />
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="product-category">Kategoriya</Label>
-        {categories.isPending ? (
+      {categories.isPending ? (
+        <div className="space-y-1.5">
+          <Label>Kategoriya</Label>
           <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
             <Spinner /> Yuklanmoqda…
           </div>
-        ) : options.length > 0 ? (
-          <select
-            id="product-category"
-            value={categoryKey}
-            onChange={(e) => setCategoryKey(e.target.value)}
-            className="h-11 w-full rounded-xl border border-input bg-card px-3 text-[15px] text-foreground"
-            required
-          >
-            <option value="" disabled>
-              — Tanlash —
-            </option>
-            {options.map((o) => (
-              <option key={o.key} value={o.key}>
-                {o.name}
-              </option>
-            ))}
-          </select>
-        ) : (
+        </div>
+      ) : options.length > 0 ? (
+        <SelectField<string>
+          id="product-category"
+          label="Kategoriya"
+          value={categoryKey === '' ? null : categoryKey}
+          onChange={(next) => setCategoryKey(next ?? '')}
+          options={options.map((o) => ({
+            value: o.key,
+            label: o.name,
+            iconNode: <CategoryIcon icon={o.icon} color={o.color} fallbackText={o.name} />,
+          }))}
+        />
+      ) : (
+        <div className="space-y-1.5">
+          <Label>Kategoriya</Label>
           <p className="text-[12px] text-muted-foreground">
-            "Mahsulot" turidagi kategoriyalar yo‘q. Avval kategoriya yarating.
+            "Mahsulot" turidagi kategoriyalar yo'q. Avval kategoriya yarating.
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="space-y-1.5">
         <Label>Valyuta</Label>
@@ -192,9 +200,9 @@ export function CreateProductForm({
           <Label htmlFor="product-price">Narx</Label>
           <Input
             id="product-price"
-            value={defaultPrice}
-            onChange={(e) => setDefaultPrice(e.target.value)}
-            placeholder="12000"
+            value={formatAmount(defaultPrice)}
+            onChange={(e) => setDefaultPrice(unformatAmount(e.target.value))}
+            placeholder="12 000"
             inputMode="decimal"
           />
         </div>
@@ -202,9 +210,9 @@ export function CreateProductForm({
           <Label htmlFor="product-cost">Tannarx</Label>
           <Input
             id="product-cost"
-            value={defaultCost}
-            onChange={(e) => setDefaultCost(e.target.value)}
-            placeholder="8000"
+            value={formatAmount(defaultCost)}
+            onChange={(e) => setDefaultCost(unformatAmount(e.target.value))}
+            placeholder="8 000"
             inputMode="decimal"
           />
         </div>
@@ -232,8 +240,8 @@ export function CreateProductForm({
           <Label htmlFor="product-stock">Boshlang‘ich qoldiq</Label>
           <Input
             id="product-stock"
-            value={currentStock}
-            onChange={(e) => setCurrentStock(e.target.value)}
+            value={formatAmount(currentStock)}
+            onChange={(e) => setCurrentStock(unformatAmount(e.target.value))}
             placeholder="0"
             inputMode="decimal"
           />

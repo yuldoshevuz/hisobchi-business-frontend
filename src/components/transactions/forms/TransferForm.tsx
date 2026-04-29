@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAccounts } from '@/api/hooks/use-accounts';
+import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import {
   convertViaUzs,
   useCurrencyRates,
@@ -44,7 +46,19 @@ export function TransferForm({
     [accounts.data],
   );
 
-  const [sourceAccountId, setSourceAccountId] = useState<number | null>(null);
+  // The account chip → "Balansdan balansga o'tkazish" action passes the
+  // account id via the URL so the form lands with the source pre-selected.
+  // Falls back to `null` when opened from the dashboard or a deep link.
+  const [searchParams] = useSearchParams();
+  const initialSourceId = useMemo<number | null>(() => {
+    const raw = searchParams.get('fromAccountId');
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }, [searchParams]);
+  const [sourceAccountId, setSourceAccountId] = useState<number | null>(
+    initialSourceId,
+  );
   const [destAccountId, setDestAccountId] = useState<number | null>(null);
   const [amount, setAmount] = useState<string>('');
   // Lets the user override the auto-converted destination amount when they
@@ -114,7 +128,7 @@ export function TransferForm({
 
     // Auto-fill the description with `source => dest` so the ledger row
      // reads naturally without asking the user for a label.
-    const autoDescription = `${sourceAccount.name} => ${destAccount.name}`;
+    const autoDescription = `${sourceAccount.name} → ${destAccount.name}`;
 
     const body: CreateTransferRequest = {
       fromAccountId: sourceAccount.id,
@@ -157,7 +171,7 @@ export function TransferForm({
     >
       <SelectField
         id="transfer-source"
-        label="Qaerdan *"
+        label="Qayerdan *"
         value={sourceAccountId ?? ''}
         onChange={(id) => {
           setSourceAccountId(id);
@@ -167,12 +181,13 @@ export function TransferForm({
         options={accountList.map((a) => ({
           value: a.id,
           label: `${a.name} · ${a.currency}`,
+          icon: ACCOUNT_TYPE_ICON[a.type],
         }))}
       />
 
       <SelectField
         id="transfer-dest"
-        label="Qaerga *"
+        label="Qayerga *"
         value={destAccountId ?? ''}
         onChange={(id) => {
           setDestAccountId(id);
@@ -183,6 +198,7 @@ export function TransferForm({
           .map((a) => ({
             value: a.id,
             label: `${a.name} · ${a.currency}`,
+            icon: ACCOUNT_TYPE_ICON[a.type],
           }))}
         disabled={!sourceAccountId}
       />

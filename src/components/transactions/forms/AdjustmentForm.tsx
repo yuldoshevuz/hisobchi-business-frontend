@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useAccounts } from '@/api/hooks/use-accounts';
+import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { useCreateAdjustment } from '@/api/hooks/use-adjustments';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -100,6 +101,7 @@ export function AdjustmentForm({
         options={accountList.map((a) => ({
           value: a.id,
           label: `${a.name} · ${a.currency}`,
+          icon: ACCOUNT_TYPE_ICON[a.type],
         }))}
         helperText={
           account

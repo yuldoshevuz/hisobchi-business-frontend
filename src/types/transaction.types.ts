@@ -76,7 +76,7 @@ export interface Transaction {
   currency: string;
   date: string;
   description: string | null;
-  clientId: number | null;
+  contactId: number | null;
   categoryId: number | null;
   paidAmount: string;
   paymentStatus: PaymentStatus;
@@ -97,7 +97,7 @@ export interface ListTransactionsQuery {
   page?: number;
   limit?: number;
   type?: TransactionType[];
-  clientId?: number;
+  contactId?: number;
   /** Backend accepts ONE accountId. */
   accountId?: number;
   dateFrom?: string;
@@ -138,7 +138,7 @@ export interface CreateSaleRequest {
   currency: string;
   amount?: string;
   cashFlows: PaymentLegRequest[];
-  clientId?: number;
+  contactId?: number;
   categoryId?: number;
   systemCategoryId?: number;
   description?: string;
@@ -154,6 +154,48 @@ export interface CreateSaleRequest {
 /** `POST /purchases` body. Same shape as sale. */
 export type CreatePurchaseRequest = CreateSaleRequest;
 
+/**
+ * `POST /expenses` body. Same cash-flow shape as a sale, server forces
+ * direction = "out". `contactId` is optional (e.g. a worker, supplier or
+ * service provider). For salary, set `systemCategoryId` to the "Oyliklar"
+ * id and put `metadata.employeeMemberId`.
+ */
+export interface CreateExpenseRequest {
+  /** Optional. Defaults to the server time when omitted. */
+  date?: string;
+  currency: string;
+  amount: string;
+  cashFlows: PaymentLegRequest[];
+  contactId?: number;
+  categoryId?: number;
+  systemCategoryId?: number;
+  description?: string;
+  attachmentUrl?: string;
+  /** Optional. Defaults to the server time when omitted. */
+  dueDate?: string;
+  metadata?: Record<string, unknown>;
+  allowOverpayment?: boolean;
+  idempotencyKey?: string;
+}
+
+/**
+ * `POST /incomes` body. Used for non-sale income (interest, refunds,
+ * miscellaneous). Same shape as expense but server forces direction = "in".
+ */
+export type CreateIncomeRequest = CreateExpenseRequest;
+
+/**
+ * `POST /accounts/:id/opening-balance` body. Initial balance row that must
+ * precede every other transaction touching the account.
+ */
+export interface OpeningBalanceRequest {
+  amount: string;
+  /** Optional. Defaults to the server time when omitted. */
+  date?: string;
+  description?: string;
+  attachmentUrl?: string;
+}
+
 /** `POST /debts` body. */
 export interface CreateDebtRequest {
   direction: 'lent' | 'borrowed';
@@ -161,7 +203,7 @@ export interface CreateDebtRequest {
   currency: string;
   /** Optional. Defaults to the server time when omitted. */
   date?: string;
-  clientId: number;
+  contactId: number;
   accountId: number;
   /** Optional. Defaults to the server time when omitted. */
   dueDate?: string;
@@ -228,7 +270,7 @@ export interface CreateTransactionRequestBase {
   currency: string;
   date: string;
   description?: string;
-  clientId?: number;
+  contactId?: number;
   categoryId?: number;
   systemCategoryId?: number;
   attachmentUrl?: string;

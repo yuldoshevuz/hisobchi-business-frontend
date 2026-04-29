@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useUpdateClient } from '@/api/hooks/use-clients';
+import { useUpdateContact } from '@/api/hooks/use-contacts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,58 +7,58 @@ import { Spinner } from '@/components/ui/spinner';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import {
-  CLIENT_NAME_MAX_LENGTH,
-  CLIENT_NAME_MIN_LENGTH,
-  CLIENT_NOTES_MAX_LENGTH,
-  CLIENT_TYPE_VALUES,
-  type Client,
-  type ClientType,
-  type UpdateClientRequest,
-} from '@/types/client.types';
-import { CLIENT_TYPE_ICON, CLIENT_TYPE_LABEL } from './client-meta';
+  CONTACT_NAME_MAX_LENGTH,
+  CONTACT_NAME_MIN_LENGTH,
+  CONTACT_NOTES_MAX_LENGTH,
+  CONTACT_TYPE_VALUES,
+  type Contact,
+  type ContactType,
+  type UpdateContactRequest,
+} from '@/types/contact.types';
+import { CONTACT_TYPE_ICON, CONTACT_TYPE_LABEL } from './contact-meta';
 
-interface EditClientFormProps {
-  client: Client;
+interface EditContactFormProps {
+  contact: Contact;
   onClose: () => void;
 }
 
-export function EditClientForm({
-  client,
+export function EditContactForm({
+  contact,
   onClose,
-}: EditClientFormProps): React.ReactElement {
-  const update = useUpdateClient();
-  const [name, setName] = useState<string>(client.name);
-  const [type, setType] = useState<ClientType>(client.type);
-  const [phone, setPhone] = useState<string>(client.phone ?? '');
+}: EditContactFormProps): React.ReactElement {
+  const update = useUpdateContact();
+  const [name, setName] = useState<string>(contact.name);
+  const [type, setType] = useState<ContactType>(contact.type);
+  const [phone, setPhone] = useState<string>(contact.phone ?? '');
   const [creditLimit, setCreditLimit] = useState<string>(
-    client.creditLimit ?? '',
+    contact.creditLimit ?? '',
   );
-  const [notes, setNotes] = useState<string>(client.notes ?? '');
+  const [notes, setNotes] = useState<string>(contact.notes ?? '');
 
   const trimmedName = name.trim();
   const isValid =
-    trimmedName.length >= CLIENT_NAME_MIN_LENGTH &&
-    trimmedName.length <= CLIENT_NAME_MAX_LENGTH;
+    trimmedName.length >= CONTACT_NAME_MIN_LENGTH &&
+    trimmedName.length <= CONTACT_NAME_MAX_LENGTH;
 
   const trimmedPhone = phone.trim();
   const trimmedLimit = creditLimit.trim();
   const trimmedNotes = notes.trim();
-  const initialPhone = client.phone ?? '';
-  const initialLimit = client.creditLimit ?? '';
-  const initialNotes = client.notes ?? '';
+  const initialPhone = contact.phone ?? '';
+  const initialLimit = contact.creditLimit ?? '';
+  const initialNotes = contact.notes ?? '';
 
   const hasChanges =
-    trimmedName !== client.name ||
-    type !== client.type ||
+    trimmedName !== contact.name ||
+    type !== contact.type ||
     trimmedPhone !== initialPhone ||
     trimmedLimit !== initialLimit ||
     trimmedNotes !== initialNotes;
 
   const submit = useCallback((): void => {
     if (!isValid || !hasChanges) return;
-    const body: UpdateClientRequest = {};
-    if (trimmedName !== client.name) body.name = trimmedName;
-    if (type !== client.type) body.type = type;
+    const body: UpdateContactRequest = {};
+    if (trimmedName !== contact.name) body.name = trimmedName;
+    if (type !== contact.type) body.type = type;
     if (trimmedPhone !== initialPhone) {
       body.phone = trimmedPhone === '' ? null : trimmedPhone;
     }
@@ -69,7 +69,7 @@ export function EditClientForm({
       body.notes = trimmedNotes === '' ? null : trimmedNotes;
     }
     update.mutate(
-      { id: client.id, body },
+      { id: contact.id, body },
       {
         onSuccess: () => {
           tgHapticNotify('success');
@@ -80,9 +80,9 @@ export function EditClientForm({
     );
   }, [
     update,
-    client.id,
-    client.name,
-    client.type,
+    contact.id,
+    contact.name,
+    contact.type,
     initialPhone,
     initialLimit,
     initialNotes,
@@ -105,12 +105,12 @@ export function EditClientForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="edit-client-name">Nom</Label>
+        <Label htmlFor="edit-contact-name">Nom</Label>
         <Input
-          id="edit-client-name"
+          id="edit-contact-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          maxLength={CLIENT_NAME_MAX_LENGTH}
+          maxLength={CONTACT_NAME_MAX_LENGTH}
           required
           autoFocus
         />
@@ -119,8 +119,8 @@ export function EditClientForm({
       <div className="space-y-1.5">
         <Label>Turi</Label>
         <div className="grid grid-cols-3 gap-2">
-          {CLIENT_TYPE_VALUES.map((t) => {
-            const Icon = CLIENT_TYPE_ICON[t];
+          {CONTACT_TYPE_VALUES.map((t) => {
+            const Icon = CONTACT_TYPE_ICON[t];
             const selected = type === t;
             return (
               <button
@@ -137,7 +137,7 @@ export function EditClientForm({
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                <span className="truncate">{CLIENT_TYPE_LABEL[t]}</span>
+                <span className="truncate">{CONTACT_TYPE_LABEL[t]}</span>
               </button>
             );
           })}
@@ -145,9 +145,9 @@ export function EditClientForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="edit-client-phone">Telefon</Label>
+        <Label htmlFor="edit-contact-phone">Telefon</Label>
         <Input
-          id="edit-client-phone"
+          id="edit-contact-phone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+998901234567"
@@ -156,9 +156,9 @@ export function EditClientForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="edit-client-credit">Kredit limiti</Label>
+        <Label htmlFor="edit-contact-credit">Kredit limiti</Label>
         <Input
-          id="edit-client-credit"
+          id="edit-contact-credit"
           value={creditLimit}
           onChange={(e) => setCreditLimit(e.target.value)}
           placeholder="5000000"
@@ -167,12 +167,12 @@ export function EditClientForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="edit-client-notes">Eslatma</Label>
+        <Label htmlFor="edit-contact-notes">Eslatma</Label>
         <textarea
-          id="edit-client-notes"
+          id="edit-contact-notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          maxLength={CLIENT_NOTES_MAX_LENGTH}
+          maxLength={CONTACT_NOTES_MAX_LENGTH}
           rows={3}
           className="flex min-h-[80px] w-full rounded-xl border border-input bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />

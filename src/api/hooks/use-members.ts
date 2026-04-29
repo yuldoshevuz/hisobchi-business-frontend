@@ -26,11 +26,11 @@ export function useMembers(
 export function useInviteMember(): ReturnType<
   typeof useMutation<Member, Error, InviteMemberRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Member, Error, InviteMemberRequest>({
     mutationFn: (body) => membersApi.invite(body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.members.all,
       });
     },
@@ -45,11 +45,11 @@ interface UpdateStatusVars {
 export function useUpdateMemberStatus(): ReturnType<
   typeof useMutation<Member, Error, UpdateStatusVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Member, Error, UpdateStatusVars>({
     mutationFn: ({ id, body }) => membersApi.updateStatus(id, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.members.all,
       });
     },
@@ -64,11 +64,11 @@ interface AssignRolesVars {
 export function useAssignMemberRoles(): ReturnType<
   typeof useMutation<Member, Error, AssignRolesVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Member, Error, AssignRolesVars>({
     mutationFn: ({ id, body }) => membersApi.assignRoles(id, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.members.all,
       });
     },
@@ -78,11 +78,11 @@ export function useAssignMemberRoles(): ReturnType<
 export function useRemoveMember(): ReturnType<
   typeof useMutation<void, Error, number>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<void, Error, number>({
     mutationFn: (id) => membersApi.remove(id),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      void queryContact.invalidateQueries({
         queryKey: queryKeys.members.all,
       });
     },

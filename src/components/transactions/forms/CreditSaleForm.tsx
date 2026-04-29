@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useAccounts } from '@/api/hooks/use-accounts';
-import { useClients } from '@/api/hooks/use-clients';
+import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
+import { useContacts } from '@/api/hooks/use-contacts';
 import { useProducts } from '@/api/hooks/use-products';
 import { useCreateSale } from '@/api/hooks/use-sales';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,7 @@ export function CreditSaleForm({
   onCreated,
 }: CreditSaleFormProps): React.ReactElement {
   const accounts = useAccounts({ status: 'active' });
-  const clients = useClients({ all: true, status: 'active' });
+  const contacts = useContacts({ all: true, status: 'active' });
   const products = useProducts({ status: 'active', all: true });
 
   const accountList = useMemo(
@@ -42,14 +43,14 @@ export function CreditSaleForm({
     () => products.data?.data ?? [],
     [products.data],
   );
-  const clientList = useMemo(
-    () => clients.data?.data ?? [],
-    [clients.data],
+  const contactList = useMemo(
+    () => contacts.data?.data ?? [],
+    [contacts.data],
   );
 
   const [productId, setProductId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState<number | null>(null);
-  const [clientId, setClientId] = useState<number | null>(null);
+  const [contactId, setContactId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState<string>('1');
   const [unitPrice, setUnitPrice] = useState<string>('');
   const [dueDate, setDueDate] = useState<string>('');
@@ -77,7 +78,7 @@ export function CreditSaleForm({
   const isFormValid =
     Boolean(productId) &&
     Boolean(accountId) &&
-    Boolean(clientId) &&
+    Boolean(contactId) &&
     Number.isFinite(numericTotal) &&
     numericTotal > 0 &&
     (!tracksStock || Number(quantity) > 0);
@@ -85,14 +86,14 @@ export function CreditSaleForm({
   const create = useCreateSale();
 
   async function submit(): Promise<void> {
-    if (!isFormValid || !account || !product || !clientId) return;
+    if (!isFormValid || !account || !product || !contactId) return;
     tgHapticImpact('light');
 
     const body: CreateSaleRequest = {
       currency: account.currency,
       amount: totalAmount,
       cashFlows: [],
-      clientId,
+      contactId,
       ...(dueDate ? { dueDate } : {}),
       items: [
         {
@@ -153,16 +154,17 @@ export function CreditSaleForm({
           .map((a) => ({
             value: a.id,
             label: `${a.name} · ${a.currency}`,
+            icon: ACCOUNT_TYPE_ICON[a.type],
           }))}
         helperText="Tranzaktsiya valyutasi shu hisobdan olinadi"
       />
 
       <SelectField
-        id="credit-client"
+        id="credit-contact"
         label="Mijoz *"
-        value={clientId ?? ''}
-        onChange={setClientId}
-        options={clientList.map((c) => ({ value: c.id, label: c.name }))}
+        value={contactId ?? ''}
+        onChange={setContactId}
+        options={contactList.map((c) => ({ value: c.id, label: c.name }))}
         helperText="Qarzga sotuv uchun mijoz tanlash majburiy"
       />
 

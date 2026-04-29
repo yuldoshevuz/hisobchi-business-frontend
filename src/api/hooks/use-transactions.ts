@@ -73,21 +73,21 @@ interface VoidTransactionVars {
 export function useVoidTransaction(): ReturnType<
   typeof useMutation<Transaction, Error, VoidTransactionVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Transaction, Error, VoidTransactionVars>({
     mutationFn: ({ transactionId, body }) =>
       transactionsApi.voidTransaction(transactionId, body),
     onSuccess: async (updated) => {
-      queryClient.setQueryData(
+      queryContact.setQueryData(
         queryKeys.transactions.detail(updated.id),
         updated,
       );
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.clients.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.reports.all }),
+        queryContact.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+        queryContact.invalidateQueries({ queryKey: queryKeys.accounts.all }),
+        queryContact.invalidateQueries({ queryKey: queryKeys.products.all }),
+        queryContact.invalidateQueries({ queryKey: queryKeys.clients.all }),
+        queryContact.invalidateQueries({ queryKey: queryKeys.reports.all }),
       ]);
     },
   });
@@ -102,20 +102,20 @@ interface VoidCashFlowVars {
 export function useVoidCashFlow(): ReturnType<
   typeof useMutation<CashFlow, Error, VoidCashFlowVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<CashFlow, Error, VoidCashFlowVars>({
     mutationFn: ({ cashFlowId, body }) =>
       transactionsApi.voidCashFlow(cashFlowId, body),
     onSuccess: async (_, vars) => {
       // Server returns only the cash_flow row; refetch the parent so the UI
       // sees the recomputed paid_amount / payment_status.
-      await queryClient.invalidateQueries({
+      await queryContact.invalidateQueries({
         queryKey: queryKeys.transactions.detail(vars.parentTransactionId),
       });
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.reports.all }),
+        queryContact.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+        queryContact.invalidateQueries({ queryKey: queryKeys.accounts.all }),
+        queryContact.invalidateQueries({ queryKey: queryKeys.reports.all }),
       ]);
     },
   });

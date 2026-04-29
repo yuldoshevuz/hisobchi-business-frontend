@@ -16,25 +16,22 @@ import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import { AmountField, SelectField } from './form-primitives';
 import type { CreateDebtRequest } from '@/types/transaction.types';
 
-interface BorrowFormProps {
+interface LendFormProps {
   onCreated: (transactionId: number) => void;
 }
 
 /**
- * Borrow: DEBT_IN. The user receives money from someone (or some org) and
- * promises to pay it back. One IN cash flow on the chosen account, optional
- * lender (`contactId`), optional `dueDate`.
+ * Lend: DEBT_OUT (qarz berdik). Money leaves the chosen account toward the
+ * contact. The repayment direction (`in`) is forced by the server when the
+ * contact returns the money via the debt's `/repayments` endpoint.
  */
-export function BorrowForm({
+export function LendForm({
   onCreated,
-}: BorrowFormProps): React.ReactElement {
+}: LendFormProps): React.ReactElement {
   const accounts = useAccounts({ status: 'active' });
   const contacts = useContacts({ all: true, status: 'active' });
 
-  const accountList = useMemo(
-    () => accounts.data ?? [],
-    [accounts.data],
-  );
+  const accountList = useMemo(() => accounts.data ?? [], [accounts.data]);
   const contactList = useMemo(
     () => contacts.data?.data ?? [],
     [contacts.data],
@@ -63,7 +60,7 @@ export function BorrowForm({
     tgHapticImpact('light');
 
     const body: CreateDebtRequest = {
-      direction: 'borrowed',
+      direction: 'lent',
       amount: trimmedAmount,
       currency: account.currency,
       contactId,
@@ -95,8 +92,8 @@ export function BorrowForm({
       className="space-y-5 px-4 pb-32 pt-2"
     >
       <SelectField
-        id="borrow-account"
-        label="Balans (qayerga keldi) *"
+        id="lend-account"
+        label="Balans (qayerdan ketdi) *"
         value={accountId ?? ''}
         onChange={setAccountId}
         options={accountList.map((a) => ({
@@ -107,7 +104,7 @@ export function BorrowForm({
       />
 
       <AmountField
-        id="borrow-amount"
+        id="lend-amount"
         value={amount}
         onChange={setAmount}
         currencyDisplay={currency}
@@ -115,22 +112,25 @@ export function BorrowForm({
       />
 
       <SelectField
-        id="borrow-contact"
-        label="Kimdan *"
+        id="lend-contact"
+        label="Kimga *"
         value={contactId ?? ''}
         onChange={setContactId}
         options={contactList.map((c) => ({ value: c.id, label: c.name }))}
-        helperText="Qarz beruvchini tanlash majburiy"
+        helperText="Qarz oluvchini tanlash majburiy"
       />
 
       <div className="space-y-1.5">
-        <Label htmlFor="borrow-due">Qaytarish sanasi</Label>
+        <Label htmlFor="lend-due">Qaytarish sanasi</Label>
         <Input
-          id="borrow-due"
+          id="lend-due"
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
         />
+        <p className="text-[12px] text-muted-foreground">
+          Ixtiyoriy. Eslatmalar uchun ishlatiladi
+        </p>
       </div>
 
       {create.isError ? (

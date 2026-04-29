@@ -13,7 +13,7 @@ import {
   useVoidTransaction,
 } from '@/api/hooks/use-transactions';
 import { useAccounts } from '@/api/hooks/use-accounts';
-import { useClients } from '@/api/hooks/use-clients';
+import { useContacts } from '@/api/hooks/use-contacts';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useMembers } from '@/api/hooks/use-members';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -60,9 +60,9 @@ export function TransactionDetailPage(): React.ReactElement {
   const tx = transactionQuery.data ?? null;
 
   const accounts = useAccounts({ status: 'active' }, { enabled: Boolean(tx) });
-  const clients = useClients(
+  const contacts = useContacts(
     { all: true, status: 'active' },
-    { enabled: Boolean(tx?.clientId) },
+    { enabled: Boolean(tx?.contactId) },
   );
   const categories = useCategories(
     { all: true },
@@ -84,8 +84,8 @@ export function TransactionDetailPage(): React.ReactElement {
     return m;
   }, [accounts.data]);
 
-  const clientName = tx?.clientId
-    ? ((clients.data?.data ?? []).find((c) => c.id === tx.clientId)?.name ??
+  const contactName = tx?.contactId
+    ? ((contacts.data?.data ?? []).find((c) => c.id === tx.contactId)?.name ??
       null)
     : null;
 
@@ -231,7 +231,7 @@ export function TransactionDetailPage(): React.ReactElement {
             label="Izoh"
             value={transactionDescription(tx)}
           />
-          {clientName ? <DetailRow label="Mijoz" value={clientName} /> : null}
+          {contactName ? <DetailRow label="Kontakt" value={contactName} /> : null}
           {categoryName ? (
             <DetailRow label="Kategoriya" value={categoryName} />
           ) : null}

@@ -10,7 +10,7 @@ interface AppProvidersProps {
 }
 
 export function AppProviders({ children }: AppProvidersProps): React.ReactElement {
-  const [queryClient] = useState<QueryClient>(
+  const [queryContact] = useState<QueryClient>(
     () =>
       new QueryClient({
         defaultOptions: {
@@ -28,7 +28,7 @@ export function AppProviders({ children }: AppProvidersProps): React.ReactElemen
 
   useEffect(() => {
     setUnauthorizedHandler(async () => {
-      queryClient.clear();
+      queryContact.clear();
       tokenStore.clear();
 
       // Try to silently re-authenticate via Telegram WebApp initData. If we
@@ -39,18 +39,18 @@ export function AppProviders({ children }: AppProvidersProps): React.ReactElemen
 
       if (tokenStore.getSnapshot().accessToken) {
         // Re-authenticated — invalidate to refetch with the new token.
-        await queryClient.invalidateQueries();
+        await queryContact.invalidateQueries();
         return;
       }
 
       if (window.location.pathname !== '/login') {
-        // Client-side navigation. A hard `window.location.assign` would
+        // Contact-side navigation. A hard `window.location.assign` would
         // wipe Telegram Mini App's initData (it is only provided on the
         // initial page load) and break the login flow on the next render.
         void router.navigate('/login', { replace: true });
       }
     });
-  }, [queryClient]);
+  }, [queryContact]);
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return <QueryClientProvider client={queryContact}>{children}</QueryClientProvider>;
 }

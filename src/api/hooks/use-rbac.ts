@@ -35,11 +35,11 @@ export function useRoles(
 export function useCreateRole(): ReturnType<
   typeof useMutation<Role, Error, CreateRoleRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Role, Error, CreateRoleRequest>({
     mutationFn: (body) => rbacApi.createRole(body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.rbac.roles });
     },
   });
 }
@@ -52,11 +52,11 @@ interface UpdateRoleVars {
 export function useUpdateRole(): ReturnType<
   typeof useMutation<Role, Error, UpdateRoleVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Role, Error, UpdateRoleVars>({
     mutationFn: ({ id, body }) => rbacApi.updateRole(id, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.rbac.roles });
     },
   });
 }
@@ -64,11 +64,11 @@ export function useUpdateRole(): ReturnType<
 export function useDeleteRole(): ReturnType<
   typeof useMutation<void, Error, number>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<void, Error, number>({
     mutationFn: (id) => rbacApi.deleteRole(id),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.rbac.roles });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.rbac.roles });
     },
   });
 }

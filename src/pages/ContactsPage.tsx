@@ -1,12 +1,20 @@
 import { useState } from 'react';
-import { Archive, Plus, RotateCcw, Search, Users } from 'lucide-react';
 import {
-  useArchiveClient,
-  useClientBalance,
-  useClients,
-  useDeleteClient,
-  useUpdateClient,
-} from '@/api/hooks/use-clients';
+  Archive,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Search,
+  Trash2,
+  Users,
+} from 'lucide-react';
+import {
+  useArchiveContact,
+  useContactBalance,
+  useContacts,
+  useDeleteContact,
+  useUpdateContact,
+} from '@/api/hooks/use-contacts';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -16,34 +24,34 @@ import { Input } from '@/components/ui/input';
 import { ListItem, Section } from '@/components/ui/list-item';
 import { Modal } from '@/components/ui/modal';
 import { Spinner } from '@/components/ui/spinner';
-import { CreateClientForm } from '@/components/clients/CreateClientForm';
-import { EditClientForm } from '@/components/clients/EditClientForm';
+import { CreateContactForm } from '@/components/contacts/CreateContactForm';
+import { EditContactForm } from '@/components/contacts/EditContactForm';
 import {
-  CLIENT_TYPE_ICON,
-  CLIENT_TYPE_LABEL,
-} from '@/components/clients/client-meta';
+  CONTACT_TYPE_ICON,
+  CONTACT_TYPE_LABEL,
+} from '@/components/contacts/contact-meta';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
 import { useCan, usePermissions } from '@/hooks/use-permissions';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { formatMoney } from '@/lib/format';
 import { PermissionSlug } from '@/lib/permission-slugs';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
-import type { Client, ClientStatus } from '@/types/client.types';
+import type { Contact, ContactStatus } from '@/types/contact.types';
 
-export function ClientsPage(): React.ReactElement {
+export function ContactsPage(): React.ReactElement {
   const { isReady } = usePermissions();
-  const canRead = useCan(PermissionSlug.CLIENTS_READ);
-  const canManage = useCan(PermissionSlug.CLIENTS_MANAGE);
+  const canRead = useCan(PermissionSlug.CONTACTS_READ);
+  const canManage = useCan(PermissionSlug.CONTACTS_MANAGE);
 
   const [search, setSearch] = useState<string>('');
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [archiveOpen, setArchiveOpen] = useState<boolean>(false);
-  const [actionClient, setActionClient] = useState<Client | null>(null);
-  const [editing, setEditing] = useState<Client | null>(null);
+  const [actionContact, setActionContact] = useState<Contact | null>(null);
+  const [editing, setEditing] = useState<Contact | null>(null);
 
   const trimmedSearch = search.trim();
 
-  const activeClients = useClients(
+  const activeContacts = useContacts(
     {
       status: 'active',
       include: 'balance',
@@ -53,7 +61,7 @@ export function ClientsPage(): React.ReactElement {
     { enabled: canRead },
   );
 
-  const archivedClients = useClients(
+  const archivedContacts = useContacts(
     { status: 'archived', limit: 100 },
     { enabled: canRead && archiveOpen },
   );
@@ -61,20 +69,20 @@ export function ClientsPage(): React.ReactElement {
   if (isReady && !canRead) {
     return (
       <AccessDeniedView
-        title="Klientlar"
+        title="Kontaktlar"
         description="Bu bo‘limga kirish uchun ruxsat yo‘q"
-        hint="Klientlarni ko‘rish uchun 'clients.read' ruxsati kerak."
+        hint="Kontaktlarni ko‘rish uchun 'contacts.read' ruxsati kerak."
       />
     );
   }
 
-  const activeList = activeClients.data?.data ?? [];
+  const activeList = activeContacts.data?.data ?? [];
 
   return (
     <div className="pb-32">
       <PageHeader
-        title="Klientlar"
-        description="Mijozlar va yetkazib beruvchilar"
+        title="Kontaktlar"
+        description="Mijozlar, yetkazib beruvchilar va hamkorlar"
         large
         showBack
       />
@@ -92,30 +100,30 @@ export function ClientsPage(): React.ReactElement {
           </div>
         </div>
 
-        {activeClients.isPending ? (
+        {activeContacts.isPending ? (
           <div className="flex justify-center py-16">
             <Spinner className="h-6 w-6" />
           </div>
-        ) : activeClients.isError ? (
+        ) : activeContacts.isError ? (
           <Section>
             <ListItem
               asStatic
               title={
                 <span className="text-destructive">
-                  {getApiErrorMessage(activeClients.error)}
+                  {getApiErrorMessage(activeContacts.error)}
                 </span>
               }
             />
           </Section>
         ) : activeList.length > 0 ? (
-          <Section title="Faol klientlar">
+          <Section title="Faol kontaktlar">
             {activeList.map((c) => (
-              <ClientRow
+              <ContactRow
                 key={c.id}
-                client={c}
+                contact={c}
                 onTap={() => {
                   tgHapticImpact('light');
-                  setActionClient(c);
+                  setActionContact(c);
                 }}
               />
             ))}
@@ -126,7 +134,7 @@ export function ClientsPage(): React.ReactElement {
             <p className="mt-3 text-[14px] text-muted-foreground">
               {trimmedSearch
                 ? 'Hech narsa topilmadi'
-                : 'Klientlar mavjud emas'}
+                : 'Kontaktlar mavjud emas'}
             </p>
           </div>
         )}
@@ -144,7 +152,7 @@ export function ClientsPage(): React.ReactElement {
               </div>
             }
             title="Arxiv"
-            subtitle="Arxivlangan klientlar"
+            subtitle="Arxivlangan kontaktlar"
           />
         </Section>
       </div>
@@ -159,7 +167,7 @@ export function ClientsPage(): React.ReactElement {
             }}
           >
             <Plus className="h-5 w-5" />
-            Yangi klient qo‘shish
+            Yangi kontakt qo‘shish
           </Button>
         </ScreenAction>
       ) : null}
@@ -167,30 +175,30 @@ export function ClientsPage(): React.ReactElement {
       <Modal
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Yangi klient"
-        description="Mijoz, yetkazib beruvchi yoki aralash"
+        title="Yangi kontakt"
+        description="Mijoz, yetkazib beruvchi yoki hamkor"
       >
-        <CreateClientForm onClose={() => setCreateOpen(false)} />
+        <CreateContactForm onClose={() => setCreateOpen(false)} />
       </Modal>
 
       <Modal
-        open={Boolean(actionClient)}
+        open={Boolean(actionContact)}
         onOpenChange={(o) => {
-          if (!o) setActionClient(null);
+          if (!o) setActionContact(null);
         }}
-        title={actionClient?.name}
+        title={actionContact?.name}
         description={
-          actionClient ? CLIENT_TYPE_LABEL[actionClient.type] : undefined
+          actionContact ? CONTACT_TYPE_LABEL[actionContact.type] : undefined
         }
       >
-        {actionClient ? (
-          <ClientActions
-            client={actionClient}
+        {actionContact ? (
+          <ContactActions
+            contact={actionContact}
             canManage={canManage}
-            onClose={() => setActionClient(null)}
+            onClose={() => setActionContact(null)}
             onEdit={() => {
-              setEditing(actionClient);
-              setActionClient(null);
+              setEditing(actionContact);
+              setActionContact(null);
             }}
           />
         ) : null}
@@ -201,12 +209,12 @@ export function ClientsPage(): React.ReactElement {
         onOpenChange={(o) => {
           if (!o) setEditing(null);
         }}
-        title="Klientni tahrirlash"
-        description={editing ? CLIENT_TYPE_LABEL[editing.type] : undefined}
+        title="Kontaktni tahrirlash"
+        description={editing ? CONTACT_TYPE_LABEL[editing.type] : undefined}
       >
         {editing ? (
-          <EditClientForm
-            client={editing}
+          <EditContactForm
+            contact={editing}
             onClose={() => setEditing(null)}
           />
         ) : null}
@@ -217,19 +225,19 @@ export function ClientsPage(): React.ReactElement {
         onOpenChange={setArchiveOpen}
         title="Arxiv"
         description={
-          archivedClients.data?.meta
-            ? `${archivedClients.data.meta.total} ta arxivlangan klient`
+          archivedContacts.data?.meta
+            ? `${archivedContacts.data.meta.total} ta arxivlangan kontakt`
             : undefined
         }
       >
-        <ArchivedClients
-          isPending={archivedClients.isPending}
-          isError={archivedClients.isError}
-          error={archivedClients.error}
-          clients={archivedClients.data?.data ?? []}
+        <ArchivedContacts
+          isPending={archivedContacts.isPending}
+          isError={archivedContacts.isError}
+          error={archivedContacts.error}
+          contacts={archivedContacts.data?.data ?? []}
           onTap={(c) => {
             setArchiveOpen(false);
-            setActionClient(c);
+            setActionContact(c);
           }}
         />
       </Modal>
@@ -237,20 +245,20 @@ export function ClientsPage(): React.ReactElement {
   );
 }
 
-interface ClientRowProps {
-  client: Client;
+interface ContactRowProps {
+  contact: Contact;
   onTap: () => void;
 }
 
-function ClientRow({ client, onTap }: ClientRowProps): React.ReactElement {
-  const initials = client.name
+function ContactRow({ contact, onTap }: ContactRowProps): React.ReactElement {
+  const initials = contact.name
     .split(' ')
     .map((p) => p[0])
     .filter(Boolean)
     .slice(0, 2)
     .join('')
     .toUpperCase();
-  const Icon = CLIENT_TYPE_ICON[client.type];
+  const Icon = CONTACT_TYPE_ICON[contact.type];
 
   return (
     <ListItem
@@ -263,33 +271,33 @@ function ClientRow({ client, onTap }: ClientRowProps): React.ReactElement {
       }
       title={
         <span className="flex items-center gap-2">
-          <span className="truncate">{client.name}</span>
+          <span className="truncate">{contact.name}</span>
           <Badge variant="secondary" className="text-[10px]">
             <Icon className="mr-0.5 h-3 w-3" />
-            {CLIENT_TYPE_LABEL[client.type]}
+            {CONTACT_TYPE_LABEL[contact.type]}
           </Badge>
         </span>
       }
       subtitle={
         <span className="flex flex-wrap items-center gap-1.5">
-          {client.phone ? (
-            <span className="truncate">{client.phone}</span>
+          {contact.phone ? (
+            <span className="truncate">{contact.phone}</span>
           ) : (
             <span className="text-muted-foreground/70">telefon kiritilmagan</span>
           )}
-          <ClientNetBadges client={client} />
+          <ContactNetBadges contact={contact} />
         </span>
       }
     />
   );
 }
 
-interface ClientNetBadgesProps {
-  client: Client;
+interface ContactNetBadgesProps {
+  contact: Contact;
 }
 
-function ClientNetBadges({ client }: ClientNetBadgesProps): React.ReactElement | null {
-  const balances = client.balances ?? [];
+function ContactNetBadges({ contact }: ContactNetBadgesProps): React.ReactElement | null {
+  const balances = contact.balances ?? [];
   if (balances.length === 0) return null;
   return (
     <>
@@ -312,32 +320,32 @@ function ClientNetBadges({ client }: ClientNetBadgesProps): React.ReactElement |
   );
 }
 
-interface ClientActionsProps {
-  client: Client;
+interface ContactActionsProps {
+  contact: Contact;
   canManage: boolean;
   onClose: () => void;
   onEdit: () => void;
 }
 
-function ClientActions({
-  client,
+function ContactActions({
+  contact,
   canManage,
   onClose,
   onEdit,
-}: ClientActionsProps): React.ReactElement {
-  const archive = useArchiveClient();
-  const update = useUpdateClient();
-  const remove = useDeleteClient();
-  const balance = useClientBalance(client.id);
+}: ContactActionsProps): React.ReactElement {
+  const archive = useArchiveContact();
+  const update = useUpdateContact();
+  const remove = useDeleteContact();
+  const balance = useContactBalance(contact.id);
 
-  const isArchived = client.status === 'archived';
+  const isArchived = contact.status === 'archived';
   const pending =
     archive.isPending || update.isPending || remove.isPending;
   const error = archive.error ?? update.error ?? remove.error;
 
   function handleArchive(): void {
     tgHapticImpact('medium');
-    archive.mutate(client.id, {
+    archive.mutate(contact.id, {
       onSuccess: () => {
         tgHapticNotify('success');
         onClose();
@@ -349,7 +357,7 @@ function ClientActions({
   function handleRestore(): void {
     tgHapticImpact('medium');
     update.mutate(
-      { id: client.id, body: { status: 'active' satisfies ClientStatus } },
+      { id: contact.id, body: { status: 'active' satisfies ContactStatus } },
       {
         onSuccess: () => {
           tgHapticNotify('success');
@@ -361,10 +369,10 @@ function ClientActions({
   }
 
   function handleDelete(): void {
-    if (!confirm(`${client.name} klientini butunlay o‘chirishni tasdiqlaysizmi?`))
+    if (!confirm(`${contact.name} kontaktini butunlay o‘chirishni tasdiqlaysizmi?`))
       return;
     tgHapticImpact('heavy');
-    remove.mutate(client.id, {
+    remove.mutate(contact.id, {
       onSuccess: () => {
         tgHapticNotify('success');
         onClose();
@@ -380,9 +388,9 @@ function ClientActions({
         balances={balance.data?.balances ?? []}
       />
 
-      {client.notes ? (
+      {contact.notes ? (
         <p className="rounded-xl bg-muted/40 px-3 py-2 text-[13px] text-muted-foreground">
-          {client.notes}
+          {contact.notes}
         </p>
       ) : null}
 
@@ -393,6 +401,7 @@ function ClientActions({
               title="Tahrirlash"
               subtitle="Nom, turi, telefon, eslatma"
               onClick={onEdit}
+              icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
             />
           ) : null}
           {!isArchived ? (
@@ -406,18 +415,19 @@ function ClientActions({
           ) : (
             <ActionRow
               title="Arxivdan tiklash"
-              subtitle="Klient yana faol bo‘ladi"
+              subtitle="Kontakt yana faol bo‘ladi"
               onClick={handleRestore}
               loading={pending}
               icon={<RotateCcw className="h-4 w-4 text-muted-foreground" />}
             />
           )}
           <ActionRow
-            title="O‘chirish"
-            subtitle="Faqat tranzaksiyalarda ishlatilmagan klient uchun"
+            title="O'chirish"
+            subtitle="Faqat tranzaksiyalarda ishlatilmagan kontakt uchun"
             destructive
             onClick={handleDelete}
             loading={pending}
+            icon={<Trash2 className="h-4 w-4 text-destructive" />}
           />
         </div>
       ) : null}
@@ -433,7 +443,7 @@ function ClientActions({
 
 interface BalanceSummaryProps {
   isPending: boolean;
-  balances: Client['balances'];
+  balances: Contact['balances'];
 }
 
 function BalanceSummary({
@@ -490,21 +500,21 @@ function BalanceSummary({
   );
 }
 
-interface ArchivedClientsProps {
+interface ArchivedContactsProps {
   isPending: boolean;
   isError: boolean;
   error: Error | null;
-  clients: Client[];
-  onTap: (c: Client) => void;
+  contacts: Contact[];
+  onTap: (c: Contact) => void;
 }
 
-function ArchivedClients({
+function ArchivedContacts({
   isPending,
   isError,
   error,
-  clients,
+  contacts,
   onTap,
-}: ArchivedClientsProps): React.ReactElement {
+}: ArchivedContactsProps): React.ReactElement {
   if (isPending) {
     return (
       <div className="flex justify-center py-8">
@@ -519,16 +529,16 @@ function ArchivedClients({
       </p>
     );
   }
-  if (clients.length === 0) {
+  if (contacts.length === 0) {
     return (
       <div className="py-8 text-center text-[14px] text-muted-foreground">
-        Arxivlangan klientlar yo‘q
+        Arxivlangan kontaktlar yo‘q
       </div>
     );
   }
   return (
     <div className="-mx-4 divide-y divide-border bg-card">
-      {clients.map((c) => {
+      {contacts.map((c) => {
         const initials = c.name
           .split(' ')
           .map((p) => p[0])
@@ -552,7 +562,7 @@ function ArchivedClients({
             <div className="min-w-0 flex-1">
               <div className="truncate text-[15px] font-medium">{c.name}</div>
               <div className="text-[12px] text-muted-foreground">
-                {CLIENT_TYPE_LABEL[c.type]}
+                {CONTACT_TYPE_LABEL[c.type]}
                 {c.phone ? ` · ${c.phone}` : ''}
               </div>
             </div>

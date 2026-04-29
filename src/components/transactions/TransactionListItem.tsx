@@ -15,13 +15,13 @@ import type { Transaction } from '@/types/transaction.types';
 
 interface TransactionListItemProps {
   transaction: Transaction;
-  clientName?: string | null;
+  contactName?: string | null;
   onTap: (transaction: Transaction) => void;
 }
 
 export function TransactionListItem({
   transaction,
-  clientName,
+  contactName,
   onTap,
 }: TransactionListItemProps): React.ReactElement {
   const Icon = TRANSACTION_TYPE_ICON[transaction.type];
@@ -40,7 +40,7 @@ export function TransactionListItem({
     sign === 'positive' ? '+' : sign === 'negative' ? '−' : '';
 
   const subtitleParts: string[] = [];
-  if (clientName) subtitleParts.push(clientName);
+  if (contactName) subtitleParts.push(contactName);
   if (transaction.description?.trim()) {
     subtitleParts.push(transaction.description.trim());
   }

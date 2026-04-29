@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Filter, Receipt, Search } from 'lucide-react';
 import { useTransactionsInfinite } from '@/api/hooks/use-transactions';
-import { useClients } from '@/api/hooks/use-clients';
+import { useContacts } from '@/api/hooks/use-contacts';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,6 +50,12 @@ function parseTypeParam(raw: string | null): TransactionType[] {
     .filter((s): s is TransactionType => allowed.has(s));
 }
 
+function parseAccountIdParam(raw: string | null): number | undefined {
+  if (!raw) return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : undefined;
+}
+
 function groupByDate(items: Transaction[]): Array<{
   key: string;
   label: string;
@@ -76,12 +82,14 @@ export function TransactionsListPage(): React.ReactElement {
   const canRead = useCan(PermissionSlug.TRANSACTIONS_READ);
 
   const urlType = parseTypeParam(searchParams.get('type'));
+  const urlAccountId = parseAccountIdParam(searchParams.get('accountId'));
 
   const [search, setSearch] = useState<string>('');
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [filters, setFilters] = useState<ListTransactionsQuery>({
     status: 'active',
     ...(urlType.length > 0 ? { type: urlType } : {}),
+    ...(urlAccountId !== undefined ? { accountId: urlAccountId } : {}),
   });
   const [filtersOpen, setFiltersOpen] = useState<boolean>(false);
 
@@ -94,6 +102,9 @@ export function TransactionsListPage(): React.ReactElement {
       ...f,
       type: urlType.length > 0 ? urlType : undefined,
     }));
+  }
+  if (filters.accountId !== urlAccountId) {
+    setFilters((f) => ({ ...f, accountId: urlAccountId }));
   }
 
   useEffect(() => {
@@ -112,16 +123,16 @@ export function TransactionsListPage(): React.ReactElement {
     enabled: canRead,
   });
 
-  // Pre-fetch clients to resolve names in list rows (small list, fits one query).
-  const clients = useClients(
+  // Pre-fetch contacts to resolve names in list rows (small list, fits one query).
+  const contacts = useContacts(
     { all: true, status: 'active' },
     { enabled: canRead },
   );
-  const clientNameById = useMemo(() => {
+  const contactNameById = useMemo(() => {
     const map = new Map<number, string>();
-    for (const c of clients.data?.data ?? []) map.set(c.id, c.name);
+    for (const c of contacts.data?.data ?? []) map.set(c.id, c.name);
     return map;
-  }, [clients.data]);
+  }, [contacts.data]);
 
   const sentinelRef = useInfiniteScroll({
     hasNextPage: transactions.hasNextPage ?? false,
@@ -229,8 +240,8 @@ export function TransactionsListPage(): React.ReactElement {
                     <TransactionListItem
                       key={tx.id}
                       transaction={tx}
-                      clientName={
-                        tx.clientId ? clientNameById.get(tx.clientId) : null
+                      contactName={
+                        tx.contactId ? contactNameById.get(tx.contactId) : null
                       }
                       onTap={() => navigate(`/transactions/${tx.id}`)}
                     />

@@ -1,6 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useUpdateProduct } from '@/api/hooks/use-products';
+import { CategoryIcon } from '@/components/categories/CategoryIcon';
+import { SelectField } from '@/components/transactions/forms/form-primitives';
+import {
+  formatAmount,
+  unformatAmount,
+} from '@/components/transactions/forms/form-utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +30,8 @@ interface CategoryOption {
   categoryId: number | null;
   systemCategoryId: number | null;
   name: string;
+  icon: string | null;
+  color: string | null;
 }
 
 export function EditProductForm({
@@ -63,6 +71,8 @@ export function EditProductForm({
           categoryId: c.id,
           systemCategoryId: c.systemCategoryId,
           name: c.name,
+          icon: c.icon,
+          color: c.color,
         };
       });
   }, [categories.data]);
@@ -146,40 +156,35 @@ export function EditProductForm({
         />
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="edit-product-category">Kategoriya</Label>
-        {categories.isPending ? (
+      {categories.isPending ? (
+        <div className="space-y-1.5">
+          <Label>Kategoriya</Label>
           <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
             <Spinner /> Yuklanmoqda…
           </div>
-        ) : (
-          <select
-            id="edit-product-category"
-            value={categoryKey}
-            onChange={(e) => setCategoryKey(e.target.value)}
-            className="h-11 w-full rounded-xl border border-input bg-card px-3 text-[15px] text-foreground"
-            required
-          >
-            <option value="" disabled>
-              — Tanlash —
-            </option>
-            {options.map((o) => (
-              <option key={o.key} value={o.key}>
-                {o.name}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
+        </div>
+      ) : (
+        <SelectField<string>
+          id="edit-product-category"
+          label="Kategoriya"
+          value={categoryKey === '' ? null : categoryKey}
+          onChange={(next) => setCategoryKey(next ?? '')}
+          options={options.map((o) => ({
+            value: o.key,
+            label: o.name,
+            iconNode: <CategoryIcon icon={o.icon} color={o.color} fallbackText={o.name} />,
+          }))}
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="edit-product-price">Narx</Label>
           <Input
             id="edit-product-price"
-            value={defaultPrice}
-            onChange={(e) => setDefaultPrice(e.target.value)}
-            placeholder="12000"
+            value={formatAmount(defaultPrice)}
+            onChange={(e) => setDefaultPrice(unformatAmount(e.target.value))}
+            placeholder="12 000"
             inputMode="decimal"
           />
         </div>
@@ -187,9 +192,9 @@ export function EditProductForm({
           <Label htmlFor="edit-product-cost">Tannarx</Label>
           <Input
             id="edit-product-cost"
-            value={defaultCost}
-            onChange={(e) => setDefaultCost(e.target.value)}
-            placeholder="8000"
+            value={formatAmount(defaultCost)}
+            onChange={(e) => setDefaultCost(unformatAmount(e.target.value))}
+            placeholder="8 000"
             inputMode="decimal"
           />
         </div>

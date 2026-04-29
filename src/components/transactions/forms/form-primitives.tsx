@@ -1,26 +1,69 @@
-import { Label } from '@/components/ui/label';
+import { useMemo, useState } from 'react';
+import { Check, ChevronDown, type LucideIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Modal } from '@/components/ui/modal';
+import { cn } from '@/lib/utils';
+import { tgHapticImpact } from '@/lib/telegram';
 import { formatAmount, unformatAmount } from './form-utils';
 
-interface SelectFieldProps {
+/** Optional leading visual for an option. Either a Lucide icon component or
+ * any drop-in equivalent that accepts a `className`. When provided, it shows
+ * in the modal row AND in the trigger button when the option is selected. */
+type SelectIcon =
+  | LucideIcon
+  | React.ComponentType<{ className?: string }>;
+
+export interface SelectOption<T extends string | number> {
+  value: T;
+  label: string;
+  description?: string;
+  disabled?: boolean;
+  /**
+   * Small inline icon component (Lucide-shaped). When set, the framework
+   * wraps it in a 9×9 muted bg in the modal row and renders it inline in the
+   * trigger pill.
+   */
+  icon?: SelectIcon;
+  /**
+   * Pre-rendered icon node — useful when the option's visual already supplies
+   * its own sizing/background (e.g. CategoryIcon). When set, takes precedence
+   * over `icon` and is rendered as-is in BOTH the trigger and the modal row.
+   */
+  iconNode?: React.ReactNode;
+}
+
+interface SelectFieldProps<T extends string | number> {
   id: string;
   label: React.ReactNode;
   /** `null` (or empty string) means no selection. */
-  value: number | null | '';
-  onChange: (next: number | null) => void;
-  options: Array<{ value: number; label: string; disabled?: boolean }>;
+  value: T | null | '';
+  onChange: (next: T | null) => void;
+  options: SelectOption<T>[];
   placeholder?: string;
   disabled?: boolean;
   helperText?: string;
   errorText?: string;
+  /** Modal title override; defaults to the field's `label`. */
+  modalTitle?: React.ReactNode;
+  /** Show a search input above the list when options.length >= this. */
+  searchThreshold?: number;
+  /**
+   * Render text shown when no options are available. Defaults to a generic
+   * "ro'yxat bo'sh" message.
+   */
+  emptyText?: string;
 }
 
 /**
- * Number-id select. Every dropdown in the create flow chooses an entity by
- * primary key (`number`), so the simpler non-generic API avoids the TS
- * inference pitfalls that come with `T extends string | number`.
+ * Generic ID select. Tapping the field opens a bottom-sheet modal with the
+ * options as a tappable list — replaces the native `<select>` so the picker
+ * matches the rest of the app's mobile-first chrome (large hit targets,
+ * sticky search, multi-line option rows). The generic value type lets the
+ * same component back number-keyed entity pickers (accounts, products, …)
+ * and string-keyed pickers like the merged-category ref.
  */
-export function SelectField({
+export function SelectField<T extends string | number>({
   id,
   label,
   value,
@@ -30,33 +73,151 @@ export function SelectField({
   disabled,
   helperText,
   errorText,
-}: SelectFieldProps): React.ReactElement {
-  const stringValue = value === null || value === '' ? '' : String(value);
+  modalTitle,
+  searchThreshold = 8,
+  emptyText = "Tanlash uchun variant yo'q",
+}: SelectFieldProps<T>): React.ReactElement {
+  const [open, setOpen] = useState<boolean>(false);
+  const [search, setSearch] = useState<string>('');
+
+  const normalizedValue: T | null = value === '' ? null : value;
+  const selected = useMemo(
+    () =>
+      normalizedValue === null
+        ? null
+        : (options.find((o) => o.value === normalizedValue) ?? null),
+    [options, normalizedValue],
+  );
+
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (term === '') return options;
+    return options.filter((o) => o.label.toLowerCase().includes(term));
+  }, [options, search]);
+
+  const showSearch = options.length >= searchThreshold;
+
+  function pick(next: SelectOption<T>): void {
+    if (next.disabled) return;
+    tgHapticImpact('light');
+    onChange(next.value);
+    setOpen(false);
+    setSearch('');
+  }
+
+  function handleOpenChange(nextOpen: boolean): void {
+    setOpen(nextOpen);
+    if (!nextOpen) setSearch('');
+  }
+
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <select
+      <button
         id={id}
-        value={stringValue}
-        onChange={(e) => {
-          const raw = e.target.value;
-          onChange(raw === '' ? null : Number(raw));
-        }}
+        type="button"
         disabled={disabled}
-        className="flex h-10 w-full rounded-md border border-input bg-card px-3 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={() => {
+          tgHapticImpact('light');
+          setOpen(true);
+        }}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        className={cn(
+          'press flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 text-left text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+        )}
       >
-        <option value="">{placeholder}</option>
-        {options.map((o) => (
-          <option key={o.value} value={o.value} disabled={o.disabled}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          {/* The trigger pill renders only the lightweight inline `icon`
+              (Lucide-shaped). `iconNode` is reserved for the modal list rows
+              — it tends to be a pre-styled element (e.g. CategoryIcon's
+              colored bg block) that looks heavy inside a 40px-tall pill. */}
+          {selected?.icon ? (
+            <selected.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+          ) : null}
+          <span
+            className={cn(
+              'min-w-0 flex-1 truncate',
+              selected ? 'text-foreground' : 'text-muted-foreground',
+            )}
+          >
+            {selected ? selected.label : placeholder}
+          </span>
+        </div>
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+      </button>
+
       {errorText ? (
         <p className="text-[12px] text-destructive">{errorText}</p>
       ) : helperText ? (
         <p className="text-[12px] text-muted-foreground">{helperText}</p>
       ) : null}
+
+      <Modal
+        open={open}
+        onOpenChange={handleOpenChange}
+        title={modalTitle ?? label}
+      >
+        {showSearch ? (
+          <div className="pb-3">
+            <Input
+              autoFocus
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Qidiruv"
+            />
+          </div>
+        ) : null}
+
+        {options.length === 0 ? (
+          <div className="py-8 text-center text-[14px] text-muted-foreground">
+            {emptyText}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-8 text-center text-[14px] text-muted-foreground">
+            Mos variant topilmadi
+          </div>
+        ) : (
+          <div className="-mx-4 divide-y divide-border bg-card">
+            {filtered.map((o) => {
+              const isSelected = o.value === normalizedValue;
+              const OptionIcon = o.icon;
+              return (
+                <button
+                  key={String(o.value)}
+                  type="button"
+                  onClick={() => pick(o)}
+                  disabled={o.disabled}
+                  className={cn(
+                    'press flex w-full items-center gap-3 px-4 py-3 text-left active:bg-accent disabled:opacity-50',
+                  )}
+                >
+                  {o.iconNode ? (
+                    <span className="shrink-0">{o.iconNode}</span>
+                  ) : OptionIcon ? (
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                      <OptionIcon className="h-4 w-4" />
+                    </div>
+                  ) : null}
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[15px] font-medium text-foreground">
+                      {o.label}
+                    </div>
+                    {o.description ? (
+                      <div className="mt-0.5 truncate text-[12px] text-muted-foreground">
+                        {o.description}
+                      </div>
+                    ) : null}
+                  </div>
+                  {isSelected ? (
+                    <Check className="h-4 w-4 shrink-0 text-primary" />
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

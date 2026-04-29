@@ -20,8 +20,8 @@ function serializeListQuery(query: ListTransactionsQuery): URLSearchParams {
   const params = new URLSearchParams();
   if (query.page !== undefined) params.set('page', String(query.page));
   if (query.limit !== undefined) params.set('limit', String(query.limit));
-  if (query.clientId !== undefined)
-    params.set('clientId', String(query.clientId));
+  if (query.contactId !== undefined)
+    params.set('contactId', String(query.contactId));
   if (query.accountId !== undefined)
     params.set('accountId', String(query.accountId));
   if (query.dateFrom) params.set('dateFrom', query.dateFrom);

@@ -50,11 +50,11 @@ export function useProductsInfinite(
 export function useCreateProduct(): ReturnType<
   typeof useMutation<Product, Error, CreateProductRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Product, Error, CreateProductRequest>({
     mutationFn: (body) => productsApi.create(body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.products.all });
     },
   });
 }
@@ -67,11 +67,11 @@ interface UpdateProductVars {
 export function useUpdateProduct(): ReturnType<
   typeof useMutation<Product, Error, UpdateProductVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Product, Error, UpdateProductVars>({
     mutationFn: ({ id, body }) => productsApi.update(id, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.products.all });
     },
   });
 }
@@ -84,11 +84,11 @@ interface AdjustStockVars {
 export function useAdjustStock(): ReturnType<
   typeof useMutation<Product, Error, AdjustStockVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Product, Error, AdjustStockVars>({
     mutationFn: ({ id, body }) => productsApi.adjustStock(id, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.products.all });
     },
   });
 }
@@ -96,11 +96,11 @@ export function useAdjustStock(): ReturnType<
 export function useDeleteProduct(): ReturnType<
   typeof useMutation<void, Error, number>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<void, Error, number>({
     mutationFn: (id) => productsApi.remove(id),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+      void queryContact.invalidateQueries({ queryKey: queryKeys.products.all });
     },
   });
 }

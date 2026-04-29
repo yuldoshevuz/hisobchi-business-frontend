@@ -8,29 +8,29 @@ import type {
 } from '@/types/transaction.types';
 
 async function invalidateAfterPurchase(
-  queryClient: ReturnType<typeof useQueryClient>,
+  queryContact: ReturnType<typeof useQueryClient>,
 ): Promise<void> {
   await Promise.all([
-    queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.categories.all }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.reports.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.accounts.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.products.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.categories.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.reports.all }),
   ]);
 }
 
 export function useCreatePurchase(): ReturnType<
   typeof useMutation<Transaction, Error, CreatePurchaseRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Transaction, Error, CreatePurchaseRequest>({
     mutationFn: (body) => purchasesApi.create(body),
     onSuccess: async (created) => {
-      queryClient.setQueryData(
+      queryContact.setQueryData(
         queryKeys.transactions.detail(created.id),
         created,
       );
-      await invalidateAfterPurchase(queryClient);
+      await invalidateAfterPurchase(queryContact);
     },
   });
 }
@@ -43,16 +43,16 @@ interface AddPurchasePaymentVars {
 export function useAddPurchasePayment(): ReturnType<
   typeof useMutation<Transaction, Error, AddPurchasePaymentVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Transaction, Error, AddPurchasePaymentVars>({
     mutationFn: ({ purchaseId, body }) =>
       purchasesApi.addPayment(purchaseId, body),
     onSuccess: async (updated) => {
-      queryClient.setQueryData(
+      queryContact.setQueryData(
         queryKeys.transactions.detail(updated.id),
         updated,
       );
-      await invalidateAfterPurchase(queryClient);
+      await invalidateAfterPurchase(queryContact);
     },
   });
 }

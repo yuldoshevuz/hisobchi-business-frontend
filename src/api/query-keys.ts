@@ -3,7 +3,7 @@ import type {
   ListCategoriesQuery,
   ListSystemCategoriesQuery,
 } from '@/types/category.types';
-import type { ListClientsQuery } from '@/types/client.types';
+import type { ListContactsQuery } from '@/types/contact.types';
 import type { ListMembersQuery } from '@/types/member.types';
 import type { ListProductsQuery } from '@/types/product.types';
 import type { ListTransactionsQuery } from '@/types/transaction.types';
@@ -53,7 +53,7 @@ export const queryKeys = {
   },
   clients: {
     all: ['clients'] as const,
-    list: (query: ListClientsQuery): readonly unknown[] => [
+    list: (query: ListContactsQuery): readonly unknown[] => [
       'clients',
       'list',
       query,

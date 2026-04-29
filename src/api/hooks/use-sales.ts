@@ -8,30 +8,30 @@ import type {
 } from '@/types/transaction.types';
 
 async function invalidateAfterSale(
-  queryClient: ReturnType<typeof useQueryClient>,
+  queryContact: ReturnType<typeof useQueryClient>,
 ): Promise<void> {
   await Promise.all([
-    queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.products.all }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.categories.all }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.clients.all }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.reports.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.accounts.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.products.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.categories.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.clients.all }),
+    queryContact.invalidateQueries({ queryKey: queryKeys.reports.all }),
   ]);
 }
 
 export function useCreateSale(): ReturnType<
   typeof useMutation<Transaction, Error, CreateSaleRequest>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Transaction, Error, CreateSaleRequest>({
     mutationFn: (body) => salesApi.create(body),
     onSuccess: async (created) => {
-      queryClient.setQueryData(
+      queryContact.setQueryData(
         queryKeys.transactions.detail(created.id),
         created,
       );
-      await invalidateAfterSale(queryClient);
+      await invalidateAfterSale(queryContact);
     },
   });
 }
@@ -44,15 +44,15 @@ interface AddSalePaymentVars {
 export function useAddSalePayment(): ReturnType<
   typeof useMutation<Transaction, Error, AddSalePaymentVars>
 > {
-  const queryClient = useQueryClient();
+  const queryContact = useQueryClient();
   return useMutation<Transaction, Error, AddSalePaymentVars>({
     mutationFn: ({ saleId, body }) => salesApi.addPayment(saleId, body),
     onSuccess: async (updated) => {
-      queryClient.setQueryData(
+      queryContact.setQueryData(
         queryKeys.transactions.detail(updated.id),
         updated,
       );
-      await invalidateAfterSale(queryClient);
+      await invalidateAfterSale(queryContact);
     },
   });
 }

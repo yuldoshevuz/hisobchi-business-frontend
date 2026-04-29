@@ -1,5 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Archive, FolderTree, Plus, RotateCcw } from 'lucide-react';
+import {
+  Archive,
+  FolderTree,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Trash2,
+} from 'lucide-react';
 import {
   useCategories,
   useCategoriesInfinite,
@@ -511,8 +518,9 @@ function CategoryActions({
         {!item.isArchived ? (
           <ActionRow
             title={isInstantiated ? 'Tahrirlash' : 'Sozlash'}
-            subtitle="Nom, rang yoki belgini o‘zgartirish"
+            subtitle="Nom, rang yoki belgini o'zgartirish"
             onClick={onEdit}
+            icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
           />
         ) : null}
         {canArchive ? (
@@ -541,11 +549,12 @@ function CategoryActions({
         ) : null}
         {canDelete ? (
           <ActionRow
-            title="O‘chirish"
+            title="O'chirish"
             subtitle="Faqat ishlatilmagan maxsus kategoriyalar uchun"
             onClick={handleDelete}
             loading={pending}
             destructive
+            icon={<Trash2 className="h-4 w-4 text-destructive" />}
           />
         ) : null}
       </div>
