@@ -24,6 +24,9 @@ function readStartParam(): string | null {
  *     → `/transactions/<id>?action=add-cash-flow&suggestedAmount=<amount>`
  *   - `screen=void&transactionId=<id>`
  *     → `/transactions/<id>?action=void`
+ *   - `screen=reminder&reminderId=<id>`
+ *     → `/?reminderId=<id>` — opens the reminder detail modal on the
+ *       dashboard once the carousel data lands.
  */
 export function useDeepLink(): void {
   const navigate = useNavigate();
@@ -43,6 +46,8 @@ export function useDeepLink(): void {
 
     const transactionId =
       fromUrl.get('transactionId') ?? fromTelegram.get('transactionId');
+    const reminderId =
+      fromUrl.get('reminderId') ?? fromTelegram.get('reminderId');
     const amount = fromUrl.get('amount') ?? fromTelegram.get('amount');
 
     consumedRef.current = true;
@@ -50,6 +55,7 @@ export function useDeepLink(): void {
     // Strip the params from the URL so a refresh does not re-trigger.
     fromUrl.delete('screen');
     fromUrl.delete('transactionId');
+    fromUrl.delete('reminderId');
     fromUrl.delete('amount');
     const cleaned = fromUrl.toString();
     window.history.replaceState(
@@ -72,6 +78,14 @@ export function useDeepLink(): void {
       case 'void':
         if (transactionId) {
           navigate(`/transactions/${transactionId}?action=void`);
+        }
+        break;
+      case 'reminder':
+        if (reminderId) {
+          // The dashboard reads `?reminderId=...` on mount and forwards it
+          // into ReminderHighlights — keeps deep-link plumbing in one place
+          // (this hook) and rendering concerns in the page.
+          navigate(`/?reminderId=${encodeURIComponent(reminderId)}`);
         }
         break;
     }
