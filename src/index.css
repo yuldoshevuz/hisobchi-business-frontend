@@ -92,6 +92,18 @@
   * {
     border-color: var(--border);
   }
+  /*
+   * Tint native form controls (checkbox, radio, range, progress) with the
+   * brand green instead of the browser's default blue. Tailwind's
+   * `accent-primary` is per-element; setting this here means every native
+   * control we don't explicitly style still picks up the brand colour.
+   */
+  input[type='checkbox'],
+  input[type='radio'],
+  input[type='range'],
+  progress {
+    accent-color: var(--primary);
+  }
   html,
   body,
   #root {

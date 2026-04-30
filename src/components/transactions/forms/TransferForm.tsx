@@ -275,7 +275,7 @@ export function TransferForm({
                 setDestAmountOverride(unformatAmount(e.target.value))
               }
               placeholder="0"
-              className="flex h-10 w-full rounded-md border border-input bg-card px-3 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-10 w-full rounded-md border border-input bg-card px-3 text-base text-foreground transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           ) : null}
         </div>
