@@ -8,6 +8,7 @@ import type {
   ListMembersQuery,
   Member,
   PaginatedResponse,
+  UpdateEmployeeDefaultsRequest,
   UpdateMemberStatusRequest,
 } from '@/types/member.types';
 
@@ -71,6 +72,23 @@ export function useAssignMemberRoles(): ReturnType<
       void queryContact.invalidateQueries({
         queryKey: queryKeys.members.all,
       });
+    },
+  });
+}
+
+interface UpdateEmployeeDefaultsVars {
+  id: number;
+  body: UpdateEmployeeDefaultsRequest;
+}
+
+export function useUpdateEmployeeDefaults(): ReturnType<
+  typeof useMutation<Member, Error, UpdateEmployeeDefaultsVars>
+> {
+  const qc = useQueryClient();
+  return useMutation<Member, Error, UpdateEmployeeDefaultsVars>({
+    mutationFn: ({ id, body }) => membersApi.updateEmployeeDefaults(id, body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.members.all });
     },
   });
 }

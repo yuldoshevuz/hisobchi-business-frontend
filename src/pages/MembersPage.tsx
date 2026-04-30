@@ -2,8 +2,8 @@ import { useCallback, useState } from 'react';
 import {
   ChevronRight,
   Pause,
+  Pencil,
   Play,
-  ShieldCheck,
   Trash2,
   UserPlus,
 } from 'lucide-react';
@@ -14,9 +14,14 @@ import {
   useInviteMember,
   useMembers,
   useRemoveMember,
+  useUpdateEmployeeDefaults,
   useUpdateMemberStatus,
 } from '@/api/hooks/use-members';
 import { useRoles } from '@/api/hooks/use-rbac';
+import {
+  formatAmount,
+  unformatAmount,
+} from '@/components/transactions/forms/form-utils';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Badge } from '@/components/ui/badge';
@@ -53,9 +58,9 @@ export function MembersPage({
   if (isReady && !canManage) {
     return (
       <AccessDeniedView
-        title="A'zolar"
+        title="Xodimlar"
         description="Bu bo'limga kirish uchun ruxsat yo'q"
-        hint="A'zolarni boshqarish uchun 'members.manage' ruxsati kerak. Tashkilot egasidan so'rang."
+        hint="Xodimlarni boshqarish uchun 'members.manage' ruxsati kerak. Tashkilot egasidan so'rang."
       />
     );
   }
@@ -64,8 +69,8 @@ export function MembersPage({
     <div className="pb-32">
       {embedded ? null : (
         <PageHeader
-          title="A'zolar"
-          description="Tashkilot a'zolarini boshqarish"
+          title="Xodimlar"
+          description="Tashkilot xodimlarini boshqarish"
           large
         />
       )}
@@ -87,7 +92,7 @@ export function MembersPage({
             />
           </Section>
         ) : members.data && members.data.data.length > 0 ? (
-          <Section title="Faol va to'xtatilgan a'zolar">
+          <Section title="Faol va to'xtatilgan xodimlar">
             {members.data.data.map((m) => (
               <MemberRow
                 key={m.id}
@@ -103,7 +108,7 @@ export function MembersPage({
           <div className="px-6 py-12 text-center">
             <UserPlus className="mx-auto h-10 w-10 text-muted-foreground" />
             <p className="mt-3 text-[14px] text-muted-foreground">
-              A'zolar topilmadi
+              Xodim topilmadi
             </p>
           </div>
         )}
@@ -119,7 +124,7 @@ export function MembersPage({
             }}
           >
             <UserPlus className="h-5 w-5" />
-            A'zoni taklif qilish
+            Xodim taklif qilish
           </Button>
         </ScreenAction>
       ) : null}
@@ -127,7 +132,7 @@ export function MembersPage({
       <Modal
         open={inviteOpen}
         onOpenChange={setInviteOpen}
-        title="A'zo taklif qilish"
+        title="Xodim taklif qilish"
         description="Telefon raqami bo'yicha taklif yuboring"
       >
         <InviteMemberForm onClose={() => setInviteOpen(false)} />
@@ -145,9 +150,9 @@ export function MembersPage({
           <MemberActions
             member={actionMember}
             onClose={() => setActionMember(null)}
-            onEditRoles={() => {
-              setActionMember(null);
+            onEdit={() => {
               setEditing(actionMember);
+              setActionMember(null);
             }}
           />
         ) : null}
@@ -158,11 +163,11 @@ export function MembersPage({
         onOpenChange={(o) => {
           if (!o) setEditing(null);
         }}
-        title="Rollar"
+        title="Xodimni tahrirlash"
         description={editing?.user.fullName}
       >
         {editing ? (
-          <EditRolesForm
+          <EditEmployeeForm
             member={editing}
             roles={roles.data ?? []}
             rolesLoading={roles.isPending}
@@ -224,13 +229,13 @@ function MemberRow({ member, onTap }: MemberRowProps): React.ReactElement {
 interface MemberActionsProps {
   member: Member;
   onClose: () => void;
-  onEditRoles: () => void;
+  onEdit: () => void;
 }
 
 function MemberActions({
   member,
   onClose,
-  onEditRoles,
+  onEdit,
 }: MemberActionsProps): React.ReactElement {
   const updateStatus = useUpdateMemberStatus();
   const remove = useRemoveMember();
@@ -265,22 +270,34 @@ function MemberActions({
     });
   }
 
+  const salarySummary =
+    member.defaultSalaryAmount && member.defaultSalaryCurrency
+      ? `${member.defaultSalaryAmount} ${member.defaultSalaryCurrency}`
+      : '—';
+  const commissionSummary = member.defaultCommissionPercentage
+    ? `${member.defaultCommissionPercentage}%`
+    : '—';
+  const rolesSummary =
+    member.roles.length > 0
+      ? member.roles.map((r) => r.name).join(', ')
+      : 'Rol yo‘q';
+
   return (
     <div className="-mx-4 divide-y divide-border bg-card">
       <ActionRow
-        title="Rollarni o'zgartirish"
-        subtitle={`${member.roles.length} rol`}
-        onClick={onEditRoles}
-        icon={<ShieldCheck className="h-4 w-4 text-muted-foreground" />}
+        title="Tahrirlash"
+        subtitle={`Oylik: ${salarySummary} · Foiz: ${commissionSummary} · Rollar: ${rolesSummary}`}
+        onClick={onEdit}
+        icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
       />
       <ActionRow
         title={
-          member.status === 'active' ? "A'zoni to'xtatish" : 'Faollashtirish'
+          member.status === 'active' ? "Xodimni to'xtatish" : 'Faollashtirish'
         }
         subtitle={
           member.status === 'active'
-            ? "A'zo tashkilotga kira olmaydi"
-            : "A'zoga kirish ruxsatini qaytaring"
+            ? 'Xodim tashkilotga kira olmaydi'
+            : 'Xodimga kirish ruxsatini qaytaring'
         }
         onClick={toggleStatus}
         loading={updateStatus.isPending}
@@ -293,7 +310,7 @@ function MemberActions({
         }
       />
       <ActionRow
-        title="A'zoni o'chirish"
+        title="Xodimni o'chirish"
         subtitle="Bu amal qaytarib bo'lmaydi"
         destructive
         onClick={handleRemove}
@@ -382,13 +399,6 @@ function InviteMemberForm({
     );
   }, [invite, phone, name, onClose]);
 
-  // useTelegramMainButton({
-  //   text: 'Taklif qilish',
-  //   onClick: submit,
-  //   enabled: phone.trim().length >= 9 && !invite.isPending,
-  //   showProgress: invite.isPending,
-  // });
-
   return (
     <form
       onSubmit={(e) => {
@@ -436,27 +446,49 @@ function InviteMemberForm({
   );
 }
 
-interface EditRolesFormProps {
+interface EditEmployeeFormProps {
   member: Member;
   roles: Role[];
   rolesLoading: boolean;
   onClose: () => void;
 }
 
-function EditRolesForm({
+const EMP_CURRENCIES = ['UZS', 'USD', 'EUR', 'RUB'] as const;
+
+/**
+ * Single sheet that edits salary, commission percentage AND role assignments
+ * in one submit. Behind the scenes it diffs the current member against the
+ * form state and only fires the mutations whose data actually changed:
+ *   - PATCH /employee-defaults  → salary + commission
+ *   - POST /:id/roles           → role assignments
+ * If the user touches one block but not the other, only one network call is
+ * made. Both succeed → close. Either fails → show its error and stay open.
+ */
+function EditEmployeeForm({
   member,
   roles,
   rolesLoading,
   onClose,
-}: EditRolesFormProps): React.ReactElement {
+}: EditEmployeeFormProps): React.ReactElement {
+  const updateDefaults = useUpdateEmployeeDefaults();
   const assign = useAssignMemberRoles();
-  const [selected, setSelected] = useState<Set<number>>(
+
+  const [salary, setSalary] = useState<string>(
+    member.defaultSalaryAmount ?? '',
+  );
+  const [salaryCurrency, setSalaryCurrency] = useState<string>(
+    member.defaultSalaryCurrency ?? 'UZS',
+  );
+  const [percentage, setPercentage] = useState<string>(
+    member.defaultCommissionPercentage ?? '',
+  );
+  const [selectedRoles, setSelectedRoles] = useState<Set<number>>(
     new Set(member.roles.map((r) => r.id)),
   );
 
-  function toggle(id: number): void {
+  function toggleRole(id: number): void {
     tgHapticImpact('light');
-    setSelected((prev) => {
+    setSelectedRoles((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -464,76 +496,204 @@ function EditRolesForm({
     });
   }
 
-  const submit = useCallback((): void => {
-    assign.mutate(
-      { id: member.id, body: { roleIds: Array.from(selected) } },
-      {
-        onSuccess: () => {
-          tgHapticNotify('success');
-          onClose();
-        },
-        onError: () => tgHapticNotify('error'),
-      },
-    );
-  }, [assign, member.id, selected, onClose]);
+  const trimmedSalary = salary.trim();
+  const trimmedPercentage = percentage.trim();
 
-  // useTelegramMainButton({
-  //   text: 'Saqlash',
-  //   onClick: submit,
-  //   enabled: !assign.isPending,
-  //   showProgress: assign.isPending,
-  // });
+  const salaryValid =
+    trimmedSalary === '' ||
+    (Number.isFinite(Number(trimmedSalary)) && Number(trimmedSalary) > 0);
+  const percentageValid =
+    trimmedPercentage === '' ||
+    (Number.isFinite(Number(trimmedPercentage)) &&
+      Number(trimmedPercentage) >= 0 &&
+      Number(trimmedPercentage) <= 100);
+
+  const isValid = salaryValid && percentageValid;
+
+  // Diff detection — used to decide which mutations to run on submit.
+  const originalSalary = member.defaultSalaryAmount ?? '';
+  const originalCurrency = member.defaultSalaryCurrency ?? 'UZS';
+  const originalPercentage = member.defaultCommissionPercentage ?? '';
+  const defaultsChanged =
+    trimmedSalary !== originalSalary ||
+    salaryCurrency !== originalCurrency ||
+    trimmedPercentage !== originalPercentage;
+
+  const originalRoleIds = new Set(member.roles.map((r) => r.id));
+  const rolesChanged =
+    selectedRoles.size !== originalRoleIds.size ||
+    Array.from(selectedRoles).some((id) => !originalRoleIds.has(id));
+
+  const isPending = updateDefaults.isPending || assign.isPending;
+
+  const submit = useCallback(async (): Promise<void> => {
+    if (!isValid) return;
+    try {
+      if (defaultsChanged) {
+        await updateDefaults.mutateAsync({
+          id: member.id,
+          body: {
+            defaultSalaryAmount:
+              trimmedSalary === '' ? null : trimmedSalary,
+            defaultSalaryCurrency:
+              trimmedSalary === '' ? null : salaryCurrency,
+            defaultCommissionPercentage:
+              trimmedPercentage === '' ? null : Number(trimmedPercentage),
+          },
+        });
+      }
+      if (rolesChanged) {
+        await assign.mutateAsync({
+          id: member.id,
+          body: { roleIds: Array.from(selectedRoles) },
+        });
+      }
+      tgHapticNotify('success');
+      onClose();
+    } catch {
+      tgHapticNotify('error');
+    }
+  }, [
+    isValid,
+    defaultsChanged,
+    rolesChanged,
+    updateDefaults,
+    assign,
+    member.id,
+    trimmedSalary,
+    salaryCurrency,
+    trimmedPercentage,
+    selectedRoles,
+    onClose,
+  ]);
+
+  const errorMessage =
+    updateDefaults.isError && updateDefaults.error
+      ? getApiErrorMessage(updateDefaults.error)
+      : assign.isError && assign.error
+        ? getApiErrorMessage(assign.error)
+        : null;
 
   return (
-    <>
-      {rolesLoading ? (
-        <div className="flex justify-center py-8">
-          <Spinner />
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void submit();
+      }}
+      className="space-y-5"
+    >
+      {/* ── Oylik (salary) + valyuta ──────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="emp-salary">Oylik (ixtiyoriy)</Label>
+          <Input
+            id="emp-salary"
+            inputMode="decimal"
+            value={formatAmount(salary)}
+            onChange={(e) => setSalary(unformatAmount(e.target.value))}
+            placeholder="0"
+          />
         </div>
-      ) : (
-        <div className="-mx-4 divide-y divide-border bg-card">
-          {roles.map((r) => (
-            <label
-              key={r.id}
-              htmlFor={`role-${r.id}`}
-              className="press flex cursor-pointer items-center gap-3 px-4 py-3 active:bg-accent"
-            >
-              <Checkbox
-                id={`role-${r.id}`}
-                checked={selected.has(r.id)}
-                onCheckedChange={() => toggle(r.id)}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="text-[15px] font-medium">{r.name}</div>
-                <div className="text-[12px] text-muted-foreground">
-                  {r.permissionSlugs.length} ruxsat
-                </div>
-              </div>
-              {r.isSystem ? (
-                <Badge variant="outline" className="text-[10px]">
-                  tizim
-                </Badge>
-              ) : null}
-            </label>
-          ))}
+        <div className="space-y-1.5">
+          <Label>Valyuta</Label>
+          <div className="flex flex-wrap gap-2">
+            {EMP_CURRENCIES.map((c) => {
+              const selected = salaryCurrency === c;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    tgHapticImpact('light');
+                    setSalaryCurrency(c);
+                  }}
+                  className={`press min-w-[56px] rounded-xl border px-2 py-2 text-[13px] font-medium ${
+                    selected
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-card text-foreground'
+                  }`}
+                >
+                  {c}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      )}
+      </div>
 
-      {assign.isError ? (
-        <p className="mt-3 text-[13px] text-destructive">
-          {getApiErrorMessage(assign.error)}
+      {/* ── Sotuvdan foiz (commission %) ──────────────────────────────── */}
+      <div className="space-y-1.5">
+        <Label htmlFor="emp-percentage">Sotuvdan foiz (ixtiyoriy)</Label>
+        <Input
+          id="emp-percentage"
+          inputMode="decimal"
+          value={percentage}
+          onChange={(e) => setPercentage(e.target.value)}
+          placeholder="0–100"
+        />
+        <p className="text-[12px] text-muted-foreground">
+          Komissiya yaratishda asosiy qiymat sifatida ishlatiladi.
+        </p>
+      </div>
+
+      {/* ── Rollar ─────────────────────────────────────────────────────── */}
+      <div className="space-y-1.5">
+        <Label>Rollar</Label>
+        {rolesLoading ? (
+          <div className="flex justify-center py-6">
+            <Spinner />
+          </div>
+        ) : roles.length === 0 ? (
+          <p className="text-[13px] text-muted-foreground">
+            Tashkilotda hali rol mavjud emas
+          </p>
+        ) : (
+          <div className="-mx-4 divide-y divide-border bg-card">
+            {roles.map((r) => (
+              <label
+                key={r.id}
+                htmlFor={`role-${r.id}`}
+                className="press flex cursor-pointer items-center gap-3 px-4 py-3 active:bg-accent"
+              >
+                <Checkbox
+                  id={`role-${r.id}`}
+                  checked={selectedRoles.has(r.id)}
+                  onCheckedChange={() => toggleRole(r.id)}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[15px] font-medium">{r.name}</div>
+                  <div className="text-[12px] text-muted-foreground">
+                    {r.permissionSlugs.length} ruxsat
+                  </div>
+                </div>
+                {r.isSystem ? (
+                  <Badge variant="outline" className="text-[10px]">
+                    tizim
+                  </Badge>
+                ) : null}
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {errorMessage ? (
+        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-[13px] text-destructive">
+          {errorMessage}
         </p>
       ) : null}
 
       <Button
-        size="lg"
-        className="mt-4 w-full"
-        onClick={submit}
-        disabled={assign.isPending}
+        type="submit"
+        size="xl"
+        className="w-full"
+        disabled={
+          !isValid || isPending || (!defaultsChanged && !rolesChanged)
+        }
       >
-        {assign.isPending ? <Spinner /> : null}
+        {isPending ? <Spinner className="h-5 w-5" /> : null}
         Saqlash
       </Button>
-    </>
+    </form>
   );
 }

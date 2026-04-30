@@ -16,6 +16,9 @@ export interface MemberRoleSummary {
 export interface Member {
   id: number;
   status: MemberStatus;
+  defaultSalaryAmount: string | null;
+  defaultSalaryCurrency: string | null;
+  defaultCommissionPercentage: string | null;
   user: MemberUserSummary;
   roles: MemberRoleSummary[];
   createdAt: string;
@@ -53,4 +56,10 @@ export interface UpdateMemberStatusRequest {
 
 export interface AssignRolesRequest {
   roleIds: number[];
+}
+
+export interface UpdateEmployeeDefaultsRequest {
+  defaultSalaryAmount?: string | null;
+  defaultSalaryCurrency?: string | null;
+  defaultCommissionPercentage?: number | null;
 }

@@ -8,7 +8,7 @@ import { tgHapticSelection } from '@/lib/telegram';
 type SozlamalarTab = 'members' | 'roles';
 
 const TABS: ReadonlyArray<{ id: SozlamalarTab; label: string }> = [
-  { id: 'members', label: "A'zolar" },
+  { id: 'members', label: 'Xodimlar' },
   { id: 'roles', label: 'Rollar' },
 ];
 
@@ -33,7 +33,7 @@ export function SozlamalarPage(): React.ReactElement {
     <div>
       <PageHeader
         title="Sozlamalar"
-        description="A'zolar va rollar"
+        description="Xodimlar va rollar"
         large
       />
 

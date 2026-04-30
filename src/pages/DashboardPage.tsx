@@ -1,8 +1,11 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Archive,
+  BarChart3,
   Building2,
+  CalendarClock,
+  Coins,
   Contact,
   Eye,
   EyeOff,
@@ -25,6 +28,8 @@ import { Badge } from '@/components/ui/badge';
 import { AccountActions } from '@/components/accounts/AccountActions';
 import { CreateAccountForm } from '@/components/accounts/CreateAccountForm';
 import { EditAccountForm } from '@/components/accounts/EditAccountForm';
+import { ReminderHighlights } from '@/components/scheduled/ReminderHighlights';
+import { DebtRemindersHighlights } from '@/components/transactions/DebtRemindersHighlights';
 import {
   ACCOUNT_TYPE_ICON,
   ACCOUNT_TYPE_LABEL,
@@ -49,6 +54,25 @@ export function DashboardPage(): React.ReactElement {
   const navigate = useNavigate();
   const org = useCurrentOrganization();
   const me = useMe();
+
+  // Deep-link entry point: `useDeepLink` (mounted in AppShell) parses the
+  // bot's start_param and navigates here with `?reminderId=<n>`. We forward
+  // that into <ReminderHighlights/> which auto-opens the modal once the data
+  // lands. After consumption we strip the param so a refresh doesn't keep
+  // re-popping the same modal.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawReminderId = searchParams.get('reminderId');
+  const selectedReminderId = useMemo(() => {
+    if (!rawReminderId) return null;
+    const n = Number(rawReminderId);
+    return Number.isInteger(n) && n > 0 ? n : null;
+  }, [rawReminderId]);
+  const handleReminderConsumed = useCallback(() => {
+    if (!searchParams.has('reminderId')) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('reminderId');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   function handleSwitchOrg(): void {
     tgHapticImpact('light');
@@ -89,6 +113,17 @@ export function DashboardPage(): React.ReactElement {
 
         <Can slug={PermissionSlug.ACCOUNTS_READ}>
           <AccountsOverview />
+        </Can>
+
+        <Can slug={PermissionSlug.SCHEDULED_READ}>
+          <ReminderHighlights
+            selectedReminderId={selectedReminderId}
+            onSelectionConsumed={handleReminderConsumed}
+          />
+        </Can>
+
+        <Can slug={PermissionSlug.TRANSACTIONS_READ}>
+          <DebtRemindersHighlights />
         </Can>
 
         {org.data ? <ViewerRoleBadges roleNames={org.data.viewer.roleNames} /> : null}
@@ -137,6 +172,45 @@ export function DashboardPage(): React.ReactElement {
               onClick={() => navigate('/katalog')}
             />
           </Can>
+          <Can slug={PermissionSlug.SCHEDULED_READ}>
+            <ListItem
+              leading={
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <CalendarClock className="h-4 w-4" />
+                </div>
+              }
+              title="Rejalashtirilgan"
+              subtitle="Takrorlanadigan to'lovlar va eslatmalar"
+              showChevron
+              onClick={() => navigate('/scheduled')}
+            />
+          </Can>
+          <Can slug={PermissionSlug.COMMISSIONS_READ}>
+            <ListItem
+              leading={
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Coins className="h-4 w-4" />
+                </div>
+              }
+              title="Komissiyalar"
+              subtitle="Sotuvdan xodimlarga keladigan ulush"
+              showChevron
+              onClick={() => navigate('/commissions')}
+            />
+          </Can>
+          <Can slug={PermissionSlug.REPORTS_READ}>
+            <ListItem
+              leading={
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <BarChart3 className="h-4 w-4" />
+                </div>
+              }
+              title="Hisobotlar"
+              subtitle="Pul harakati, foyda-zarar, balans"
+              showChevron
+              onClick={() => navigate('/reports')}
+            />
+          </Can>
           <Can slug={PermissionSlug.MEMBERS_MANAGE}>
             <ListItem
               leading={
@@ -145,7 +219,7 @@ export function DashboardPage(): React.ReactElement {
                 </div>
               }
               title="Sozlamalar"
-              subtitle="A'zolar va rollar"
+              subtitle="Xodimlar va rollar"
               showChevron
               onClick={() => navigate('/sozlamalar')}
             />

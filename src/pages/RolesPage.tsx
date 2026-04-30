@@ -96,7 +96,7 @@ export function RolesPage({
                     ) : null}
                   </span>
                 }
-                subtitle={`${role.permissionSlugs.length} ruxsat • ${role.memberCount} a'zo`}
+                subtitle={`${role.permissionSlugs.length} ruxsat • ${role.memberCount} xodim`}
               />
             ))}
           </Section>
@@ -237,13 +237,6 @@ function RoleForm({
   const pending = create.isPending || update.isPending;
   const error = create.error ?? update.error;
   const isSystem = role?.isSystem ?? false;
-
-  // useTelegramMainButton({
-  //   text: 'Saqlash',
-  //   onClick: submit,
-  //   enabled: !pending && !isSystem && name.trim().length >= 2,
-  //   showProgress: pending,
-  // });
 
   return (
     <form
