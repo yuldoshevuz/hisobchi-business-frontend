@@ -10,6 +10,7 @@ import {
 } from '@/components/transactions/forms/form-utils';
 import { SelectField } from '@/components/transactions/forms/form-primitives';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -228,11 +229,9 @@ export function AddCashFlowForm({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="cf-date">Sana</Label>
-          <Input
-            id="cf-date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
+          <DatePicker
+            id="cf-date" value={date}
+            onChange={setDate}
           />
         </div>
       </div>
@@ -246,7 +245,7 @@ export function AddCashFlowForm({
           maxLength={CASH_FLOW_NOTES_MAX_LENGTH}
           rows={2}
           placeholder="Ixtiyoriy"
-          className="flex min-h-[60px] w-full rounded-xl border border-input bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex min-h-[60px] w-full rounded-xl border border-input bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
 

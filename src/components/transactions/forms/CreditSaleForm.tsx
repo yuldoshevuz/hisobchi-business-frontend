@@ -5,6 +5,7 @@ import { useContacts } from '@/api/hooks/use-contacts';
 import { useProducts } from '@/api/hooks/use-products';
 import { useCreateSale } from '@/api/hooks/use-sales';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -15,6 +16,7 @@ import {
 } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import { AmountField, SelectField } from './form-primitives';
+import { ContactPickerField } from './ContactPickerField';
 import { formatAmountDisplay } from './form-utils';
 import type { CreateSaleRequest } from '@/types/transaction.types';
 
@@ -159,12 +161,12 @@ export function CreditSaleForm({
         helperText="Tranzaktsiya valyutasi shu hisobdan olinadi"
       />
 
-      <SelectField
+      <ContactPickerField
         id="credit-contact"
         label="Mijoz *"
         value={contactId ?? ''}
         onChange={setContactId}
-        options={contactList.map((c) => ({ value: c.id, label: c.name }))}
+        contacts={contactList}
         helperText="Qarzga sotuv uchun mijoz tanlash majburiy"
       />
 
@@ -207,11 +209,9 @@ export function CreditSaleForm({
 
       <div className="space-y-1.5">
         <Label htmlFor="credit-due">Qaytarish sanasi</Label>
-        <Input
-          id="credit-due"
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
+        <DatePicker
+          id="credit-due" value={dueDate}
+          onChange={setDueDate}
         />
         <p className="text-[12px] text-muted-foreground">
           Ixtiyoriy. Eslatmalar uchun ishlatiladi

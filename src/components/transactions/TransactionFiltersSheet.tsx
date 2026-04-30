@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAccounts } from '@/api/hooks/use-accounts';
@@ -113,19 +114,11 @@ export function TransactionFiltersSheet({
         <div className="space-y-2">
           <Label>Sana oralig'i</Label>
           <div className="grid grid-cols-2 gap-2">
-            <Input
-              type="date"
-              value={draft.dateFrom ?? ''}
-              onChange={(e) =>
-                setDraft({ ...draft, dateFrom: e.target.value || undefined })
-              }
+            <DatePicker value={draft.dateFrom ?? ''}
+              onChange={(next) => setDraft({ ...draft, dateFrom: next || undefined })}
             />
-            <Input
-              type="date"
-              value={draft.dateTo ?? ''}
-              onChange={(e) =>
-                setDraft({ ...draft, dateTo: e.target.value || undefined })
-              }
+            <DatePicker value={draft.dateTo ?? ''}
+              onChange={(next) => setDraft({ ...draft, dateTo: next || undefined })}
             />
           </div>
         </div>

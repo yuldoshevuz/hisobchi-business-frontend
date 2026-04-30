@@ -5,6 +5,8 @@ import { useContacts } from '@/api/hooks/use-contacts';
 import { useProducts } from '@/api/hooks/use-products';
 import { useCreateSale } from '@/api/hooks/use-sales';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -15,6 +17,7 @@ import {
 } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import { AmountField, SelectField } from './form-primitives';
+import { ContactPickerField } from './ContactPickerField';
 import { formatAmountDisplay } from './form-utils';
 import type {
   CreateSaleRequest,
@@ -180,12 +183,12 @@ export function SaleForm({
         }
       />
 
-      <SelectField
+      <ContactPickerField
         id="sotuv-contact"
         label={isCredit ? 'Mijoz *' : 'Mijoz'}
         value={contactId ?? ''}
         onChange={setContactId}
-        options={contactList.map((c) => ({ value: c.id, label: c.name }))}
+        contacts={contactList}
         helperText={
           isCredit
             ? "Qarzga sotuvda mijoz tanlash majburiy"
@@ -237,11 +240,9 @@ export function SaleForm({
       {isCredit ? (
         <div className="space-y-1.5">
           <Label htmlFor="sotuv-due">Qaytarish sanasi</Label>
-          <Input
-            id="sotuv-due"
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
+          <DatePicker
+            id="sotuv-due" value={dueDate}
+            onChange={setDueDate}
           />
           <p className="text-[12px] text-muted-foreground">
             Ixtiyoriy. Eslatmalar uchun ishlatiladi
@@ -279,11 +280,10 @@ function CreditToggle({
 }: CreditToggleProps): React.ReactElement {
   return (
     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-input bg-card px-3 py-2.5 active:bg-accent">
-      <input
-        type="checkbox"
-        className="mt-1 h-4 w-4 rounded border-input text-primary focus:ring-primary"
+      <Checkbox
+        className="mt-1"
         checked={value}
-        onChange={(e) => onChange(e.target.checked)}
+        onCheckedChange={(next) => onChange(next === true)}
       />
       <span className="flex-1">
         <span className="block text-[14px] font-medium leading-tight">

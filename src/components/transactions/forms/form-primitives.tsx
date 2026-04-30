@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Check, ChevronDown, type LucideIcon } from 'lucide-react';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Modal } from '@/components/ui/modal';
@@ -53,6 +54,13 @@ interface SelectFieldProps<T extends string | number> {
    * "ro'yxat bo'sh" message.
    */
   emptyText?: string;
+  /**
+   * Optional node rendered to the right of the modal's search input — used
+   * for compact filters (e.g. a type-filter button for the contact picker).
+   * Forces the search row to render even below `searchThreshold` so the slot
+   * is always reachable.
+   */
+  searchSlot?: React.ReactNode;
 }
 
 /**
@@ -76,6 +84,7 @@ export function SelectField<T extends string | number>({
   modalTitle,
   searchThreshold = 8,
   emptyText = "Tanlash uchun variant yo'q",
+  searchSlot,
 }: SelectFieldProps<T>): React.ReactElement {
   const [open, setOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
@@ -95,7 +104,10 @@ export function SelectField<T extends string | number>({
     return options.filter((o) => o.label.toLowerCase().includes(term));
   }, [options, search]);
 
-  const showSearch = options.length >= searchThreshold;
+  // Forcing the search row when a `searchSlot` is provided keeps the slot
+  // reachable even for short lists (e.g. when a type filter has narrowed
+  // contacts down to 1-2 results).
+  const showSearch = options.length >= searchThreshold || searchSlot !== undefined;
 
   function pick(next: SelectOption<T>): void {
     if (next.disabled) return;
@@ -124,7 +136,7 @@ export function SelectField<T extends string | number>({
         aria-haspopup="dialog"
         aria-expanded={open}
         className={cn(
-          'press flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 text-left text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+          'press flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 text-left text-base text-foreground transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-input',
         )}
       >
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -159,13 +171,16 @@ export function SelectField<T extends string | number>({
         title={modalTitle ?? label}
       >
         {showSearch ? (
-          <div className="pb-3">
-            <Input
-              autoFocus
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Qidiruv"
-            />
+          <div className="flex items-center gap-2 pb-3">
+            <div className="flex-1 min-w-0">
+              <Input
+                autoFocus
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Qidiruv"
+              />
+            </div>
+            {searchSlot}
           </div>
         ) : null}
 
@@ -282,12 +297,7 @@ export function DateField({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type="date"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      <DatePicker id={id} value={value} onChange={onChange} clearable />
       {helperText ? (
         <p className="text-[12px] text-muted-foreground">{helperText}</p>
       ) : null}
@@ -331,7 +341,7 @@ export function DescriptionField({
         maxLength={maxLength}
         rows={rows}
         placeholder={placeholder}
-        className="flex min-h-[60px] w-full rounded-xl border border-input bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex min-h-[60px] w-full rounded-xl border border-input bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
       {helperText ? (
         <p className="text-[12px] text-muted-foreground">{helperText}</p>

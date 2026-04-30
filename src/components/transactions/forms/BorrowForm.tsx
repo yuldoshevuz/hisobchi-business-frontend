@@ -4,6 +4,7 @@ import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { useContacts } from '@/api/hooks/use-contacts';
 import { useCreateDebt } from '@/api/hooks/use-debts';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -14,6 +15,7 @@ import {
 } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import { AmountField, SelectField } from './form-primitives';
+import { ContactPickerField } from './ContactPickerField';
 import type { CreateDebtRequest } from '@/types/transaction.types';
 
 interface BorrowFormProps {
@@ -114,22 +116,20 @@ export function BorrowForm({
         autoFocus
       />
 
-      <SelectField
+      <ContactPickerField
         id="borrow-contact"
         label="Kimdan *"
         value={contactId ?? ''}
         onChange={setContactId}
-        options={contactList.map((c) => ({ value: c.id, label: c.name }))}
+        contacts={contactList}
         helperText="Qarz beruvchini tanlash majburiy"
       />
 
       <div className="space-y-1.5">
         <Label htmlFor="borrow-due">Qaytarish sanasi</Label>
-        <Input
-          id="borrow-due"
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
+        <DatePicker
+          id="borrow-due" value={dueDate}
+          onChange={setDueDate}
         />
       </div>
 
