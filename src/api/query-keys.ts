@@ -3,9 +3,14 @@ import type {
   ListCategoriesQuery,
   ListSystemCategoriesQuery,
 } from '@/types/category.types';
+import type { ListCommissionsQuery } from '@/types/commission.types';
 import type { ListContactsQuery } from '@/types/contact.types';
 import type { ListMembersQuery } from '@/types/member.types';
 import type { ListProductsQuery } from '@/types/product.types';
+import type {
+  ListScheduledQuery,
+  ListScheduledRemindersQuery,
+} from '@/types/scheduled.types';
 import type { ListTransactionsQuery } from '@/types/transaction.types';
 
 export const queryKeys = {
@@ -81,9 +86,52 @@ export const queryKeys = {
   },
   reports: {
     all: ['reports'] as const,
+    cashFlow: (query: unknown): readonly unknown[] => [
+      'reports',
+      'cash-flow',
+      query,
+    ],
+    cashFlowTimeseries: (query: unknown): readonly unknown[] => [
+      'reports',
+      'cash-flow-timeseries',
+      query,
+    ],
+    pnl: (query: unknown): readonly unknown[] => ['reports', 'pnl', query],
+    financialState: (query: unknown): readonly unknown[] => [
+      'reports',
+      'financial-state',
+      query,
+    ],
+  },
+  scheduled: {
+    all: ['scheduled'] as const,
+    list: (query: ListScheduledQuery): readonly unknown[] => [
+      'scheduled',
+      'list',
+      query,
+    ],
+    detail: (id: number): readonly unknown[] => ['scheduled', 'detail', id],
+    reminders: {
+      all: ['scheduled-reminders'] as const,
+      list: (query: ListScheduledRemindersQuery): readonly unknown[] => [
+        'scheduled-reminders',
+        'list',
+        query,
+      ],
+    },
   },
   currencyRates: {
     all: ['currency-rates'] as const,
     list: ['currency-rates', 'list'] as const,
+  },
+  commissions: {
+    all: ['commissions'] as const,
+    list: (query: ListCommissionsQuery): readonly unknown[] => [
+      'commissions',
+      'list',
+      query,
+    ],
+    detail: (id: number): readonly unknown[] => ['commissions', 'detail', id],
+    summary: ['commissions', 'summary'] as const,
   },
 };

@@ -32,8 +32,10 @@ export const PermissionSlug = {
   REPORTS_READ: 'reports.read',
 
   SCHEDULED_MANAGE: 'scheduled.manage',
+  SCHEDULED_READ: 'scheduled.read',
 
   COMMISSIONS_READ: 'commissions.read',
+  COMMISSIONS_MANAGE: 'commissions.manage',
 
   AI_MANAGE: 'ai.manage',
 

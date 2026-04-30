@@ -7,6 +7,9 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { ContactsPage } from '@/pages/ContactsPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { KatalogPage } from '@/pages/KatalogPage';
+import { ReportsPage } from '@/pages/ReportsPage';
+import { ScheduledPage } from '@/pages/ScheduledPage';
+import { CommissionsPage } from '@/pages/CommissionsPage';
 import { SozlamalarPage } from '@/pages/SozlamalarPage';
 import { TransactionsListPage } from '@/pages/TransactionsListPage';
 import { TransactionDetailPage } from '@/pages/TransactionDetailPage';
@@ -28,6 +31,9 @@ export const router = createBrowserRouter([
               { path: 'katalog', element: <KatalogPage /> },
               { path: 'sozlamalar', element: <SozlamalarPage /> },
               { path: 'contacts', element: <ContactsPage /> },
+              { path: 'scheduled', element: <ScheduledPage /> },
+              { path: 'commissions', element: <CommissionsPage /> },
+              { path: 'reports', element: <ReportsPage /> },
               { path: 'transactions', element: <TransactionsListPage /> },
               {
                 path: 'transactions/new/:useCase',
