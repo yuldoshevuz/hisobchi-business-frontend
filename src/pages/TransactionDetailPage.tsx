@@ -475,7 +475,7 @@ function CashFlowRow({
             )}
             {cashFlow.notes ? ` · ${cashFlow.notes}` : ''}
             {cashFlow.pairedCashFlowId ? ' · juftlangan' : ''}
-            {isVoided ? ' · bekor' : ''}
+            {isVoided ? ' · bekor qilingan' : ''}
           </div>
         </div>
       </div>

@@ -95,7 +95,7 @@ export function TransactionListItem({
           <div className="flex shrink-0 items-center gap-1">
             {isVoided ? (
               <Badge variant="destructive" className="text-[10px]">
-                Bekor
+                Bekor qilingan
               </Badge>
             ) : typeHasPaymentLifecycle(transaction.type) ? (
               <Badge

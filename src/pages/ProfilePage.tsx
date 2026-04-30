@@ -184,13 +184,6 @@ function ProfileForm({
     );
   }, [email, fullName, locale, onClose, update]);
 
-  // useTelegramMainButton({
-  //   text: 'Saqlash',
-  //   onClick: submit,
-  //   enabled: !update.isPending && fullName.trim().length >= 2,
-  //   showProgress: update.isPending,
-  // });
-
   return (
     <form
       onSubmit={(e) => {

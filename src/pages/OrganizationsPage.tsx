@@ -245,17 +245,6 @@ function CreateOrgSheet({
     );
   }, [create, currency, name, onOpenChange]);
 
-  useTelegramMainButton(
-    open
-      ? {
-          text: 'Yaratish',
-          onClick: submit,
-          enabled: name.trim().length >= 2 && !create.isPending,
-          showProgress: create.isPending,
-        }
-      : null,
-  );
-
   return (
     <Modal
       open={open}

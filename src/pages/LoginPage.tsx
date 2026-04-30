@@ -31,17 +31,6 @@ export function LoginPage(): React.ReactElement {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useTelegramMainButton(
-    initData
-      ? {
-          text: login.isPending ? 'Kirilmoqda…' : 'Telegram orqali kirish',
-          onClick: submit,
-          enabled: !login.isPending,
-          showProgress: login.isPending,
-        }
-      : null,
-  );
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
       <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary text-primary-foreground text-3xl font-bold">
