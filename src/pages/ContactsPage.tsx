@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import {
   Archive,
+  Check,
   Pencil,
   Plus,
   RotateCcw,
   Search,
+  SlidersHorizontal,
   Trash2,
   Users,
 } from 'lucide-react';
@@ -35,8 +37,16 @@ import { useCan, usePermissions } from '@/hooks/use-permissions';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { formatMoney } from '@/lib/format';
 import { PermissionSlug } from '@/lib/permission-slugs';
+import { cn } from '@/lib/utils';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
-import type { Contact, ContactStatus } from '@/types/contact.types';
+import {
+  CONTACT_TYPE_VALUES,
+  type Contact,
+  type ContactStatus,
+  type ContactType,
+} from '@/types/contact.types';
+
+type TypeFilter = ContactType | 'all';
 
 export function ContactsPage(): React.ReactElement {
   const { isReady } = usePermissions();
@@ -44,6 +54,7 @@ export function ContactsPage(): React.ReactElement {
   const canManage = useCan(PermissionSlug.CONTACTS_MANAGE);
 
   const [search, setSearch] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [archiveOpen, setArchiveOpen] = useState<boolean>(false);
   const [actionContact, setActionContact] = useState<Contact | null>(null);
@@ -57,6 +68,7 @@ export function ContactsPage(): React.ReactElement {
       include: 'balance',
       limit: 100,
       ...(trimmedSearch ? { search: trimmedSearch } : {}),
+      ...(typeFilter !== 'all' ? { type: typeFilter } : {}),
     },
     { enabled: canRead },
   );
@@ -88,8 +100,8 @@ export function ContactsPage(): React.ReactElement {
       />
 
       <div className="space-y-3">
-        <div className="px-4">
-          <div className="relative">
+        <div className="flex items-center gap-2 px-4">
+          <div className="relative flex-1 min-w-0">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
@@ -98,6 +110,7 @@ export function ContactsPage(): React.ReactElement {
               className="pl-9"
             />
           </div>
+          <TypeFilterButton value={typeFilter} onChange={setTypeFilter} />
         </div>
 
         {activeContacts.isPending ? (
@@ -134,7 +147,9 @@ export function ContactsPage(): React.ReactElement {
             <p className="mt-3 text-[14px] text-muted-foreground">
               {trimmedSearch
                 ? 'Hech narsa topilmadi'
-                : 'Kontaktlar mavjud emas'}
+                : typeFilter !== 'all'
+                  ? `${CONTACT_TYPE_LABEL[typeFilter]} toifasida kontakt yo'q`
+                  : 'Kontaktlar mavjud emas'}
             </p>
           </div>
         )}
@@ -242,6 +257,95 @@ export function ContactsPage(): React.ReactElement {
         />
       </Modal>
     </div>
+  );
+}
+
+interface TypeFilterButtonProps {
+  value: TypeFilter;
+  onChange: (next: TypeFilter) => void;
+}
+
+/**
+ * Compact filter trigger placed beside the search input. When `value` is the
+ * default (`all`) the button shows a generic funnel icon; when a specific
+ * type is active, the type's icon replaces the funnel and the button picks
+ * up the brand-tinted state so the active filter is visible without opening
+ * the picker. Tapping opens a bottom-sheet modal with the full option list.
+ */
+function TypeFilterButton({
+  value,
+  onChange,
+}: TypeFilterButtonProps): React.ReactElement {
+  const [open, setOpen] = useState<boolean>(false);
+  const isFiltered = value !== 'all';
+  const TriggerIcon = isFiltered ? CONTACT_TYPE_ICON[value] : SlidersHorizontal;
+
+  function handleSelect(next: TypeFilter): void {
+    tgHapticImpact('light');
+    onChange(next);
+    setOpen(false);
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label="Turi bo'yicha filter"
+        aria-pressed={isFiltered}
+        onClick={() => {
+          tgHapticImpact('light');
+          setOpen(true);
+        }}
+        className={cn(
+          'press flex h-10 w-10 shrink-0 items-center justify-center rounded-md border transition-colors',
+          isFiltered
+            ? 'border-primary bg-primary/10 text-primary'
+            : 'border-input bg-card text-foreground hover:border-primary',
+        )}
+      >
+        <TriggerIcon className="h-4 w-4" />
+      </button>
+
+      <Modal open={open} onOpenChange={setOpen} title="Turi bo'yicha filter">
+        <div className="-mx-4 divide-y divide-border bg-card">
+          {(['all', ...CONTACT_TYPE_VALUES] as TypeFilter[]).map((key) => {
+            const active = value === key;
+            const Icon = key === 'all' ? Users : CONTACT_TYPE_ICON[key];
+            const label = key === 'all' ? 'Hammasi' : CONTACT_TYPE_LABEL[key];
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => handleSelect(key)}
+                className="press flex w-full items-center gap-3 px-4 py-3 text-left active:bg-accent"
+              >
+                <div
+                  className={cn(
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+                    active
+                      ? 'bg-primary/10 text-primary'
+                      : 'bg-muted text-muted-foreground',
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                </div>
+                <span
+                  className={cn(
+                    'flex-1 text-[15px]',
+                    active ? 'font-semibold text-primary' : 'text-foreground',
+                  )}
+                >
+                  {label}
+                </span>
+                {active ? (
+                  <Check className="h-4 w-4 shrink-0 text-primary" />
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      </Modal>
+    </>
   );
 }
 
