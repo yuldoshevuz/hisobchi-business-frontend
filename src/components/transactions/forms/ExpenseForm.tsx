@@ -17,6 +17,7 @@ import {
   isDuplicateDetected,
 } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
+import { ContactPickerField } from './ContactPickerField';
 import {
   AmountField,
   DescriptionField,
@@ -214,7 +215,7 @@ export function ExpenseForm({
           }))}
           helperText={
             memberList.length === 0 && !members.isPending
-              ? "Faol xodim yo'q. Avval Sozlamalardan a'zo qo'shing."
+              ? "Faol xodim yo'q. Avval Sozlamalardan xodim qo'shing."
               : "Oylik kim uchun berilayotganini tanlang"
           }
         />
@@ -249,12 +250,12 @@ export function ExpenseForm({
             helperText="Ixtiyoriy. Hisobotlarda kategoriyalar bo'yicha bo'lib ko'rsatiladi"
           />
 
-          <SelectField
+          <ContactPickerField
             id="expense-contact"
             label="Kimga"
             value={contactId ?? ''}
             onChange={setContactId}
-            options={contactList.map((c) => ({ value: c.id, label: c.name }))}
+            contacts={contactList}
             helperText="Ixtiyoriy. Yetkazib beruvchi yoki boshqa kontakt"
           />
         </>
@@ -360,7 +361,7 @@ function CategoryPicker({
       value={value === '' ? null : value}
       onChange={(next) => onChange(next ?? '')}
       options={options}
-      placeholder="Tanlash shart emas"
+      placeholder="Tanlang (ixtiyoriy)"
       helperText={helperText}
     />
   );

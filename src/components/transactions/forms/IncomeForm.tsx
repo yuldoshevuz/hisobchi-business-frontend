@@ -13,6 +13,7 @@ import {
   isDuplicateDetected,
 } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
+import { ContactPickerField } from './ContactPickerField';
 import {
   AmountField,
   DescriptionField,
@@ -158,16 +159,16 @@ export function IncomeForm({
               iconNode: React.ReactNode;
             } => o !== null,
           )}
-        placeholder="Tanlash shart emas"
+        placeholder="Tanlang (ixtiyoriy)"
         helperText="Ixtiyoriy. Hisobotlar uchun foydali"
       />
 
-      <SelectField
+      <ContactPickerField
         id="income-contact"
         label="Kimdan"
         value={contactId ?? ''}
         onChange={setContactId}
-        options={contactList.map((c) => ({ value: c.id, label: c.name }))}
+        contacts={contactList}
         helperText="Ixtiyoriy. Tushum manbai"
       />
 
