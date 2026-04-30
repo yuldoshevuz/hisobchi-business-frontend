@@ -1,7 +1,9 @@
 import { useSearchParams } from 'react-router-dom';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
+import { FeatureGate } from '@/components/FeatureGate';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { CashFlowReport } from '@/components/reports/CashFlowReport';
+import { ContactsReport } from '@/components/reports/ContactsReport';
 import { FinancialStateReport } from '@/components/reports/FinancialStateReport';
 import { PnlReport } from '@/components/reports/PnlReport';
 import { useCan, usePermissions } from '@/hooks/use-permissions';
@@ -9,16 +11,23 @@ import { PermissionSlug } from '@/lib/permission-slugs';
 import { cn } from '@/lib/utils';
 import { tgHapticSelection } from '@/lib/telegram';
 
-type ReportTab = 'cash-flow' | 'pnl' | 'financial-state';
+type ReportTab = 'cash-flow' | 'pnl' | 'financial-state' | 'contacts';
 
 const TABS: ReadonlyArray<{ id: ReportTab; label: string }> = [
   { id: 'cash-flow', label: 'Kassa' },
   { id: 'pnl', label: 'P&L' },
   { id: 'financial-state', label: 'Balans' },
+  { id: 'contacts', label: 'Kontaktlar' },
 ];
 
 function readTab(value: string | null): ReportTab {
-  if (value === 'pnl' || value === 'financial-state') return value;
+  if (
+    value === 'pnl' ||
+    value === 'financial-state' ||
+    value === 'contacts'
+  ) {
+    return value;
+  }
   return 'cash-flow';
 }
 
@@ -80,8 +89,21 @@ export function ReportsPage(): React.ReactElement {
       </div>
 
       {tab === 'cash-flow' ? <CashFlowReport /> : null}
-      {tab === 'pnl' ? <PnlReport /> : null}
-      {tab === 'financial-state' ? <FinancialStateReport /> : null}
+      {tab === 'pnl' ? (
+        <FeatureGate feature="ADVANCED_REPORTS" variant="block">
+          <PnlReport />
+        </FeatureGate>
+      ) : null}
+      {tab === 'financial-state' ? (
+        <FeatureGate feature="ADVANCED_REPORTS" variant="block">
+          <FinancialStateReport />
+        </FeatureGate>
+      ) : null}
+      {tab === 'contacts' ? (
+        <FeatureGate feature="DEBT_TRACKING" variant="block">
+          <ContactsReport />
+        </FeatureGate>
+      ) : null}
     </div>
   );
 }

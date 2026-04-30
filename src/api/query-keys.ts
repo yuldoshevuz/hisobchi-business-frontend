@@ -102,6 +102,11 @@ export const queryKeys = {
       'financial-state',
       query,
     ],
+    contacts: (query: unknown): readonly unknown[] => [
+      'reports',
+      'contacts',
+      query,
+    ],
   },
   scheduled: {
     all: ['scheduled'] as const,
@@ -133,5 +138,10 @@ export const queryKeys = {
     ],
     detail: (id: number): readonly unknown[] => ['commissions', 'detail', id],
     summary: ['commissions', 'summary'] as const,
+  },
+  subscription: {
+    all: ['subscription'] as const,
+    plans: ['subscription', 'plans'] as const,
+    current: ['subscription', 'current'] as const,
   },
 };

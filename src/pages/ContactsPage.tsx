@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Archive,
   Check,
@@ -49,6 +50,7 @@ import {
 type TypeFilter = ContactType | 'all';
 
 export function ContactsPage(): React.ReactElement {
+  const navigate = useNavigate();
   const { isReady } = usePermissions();
   const canRead = useCan(PermissionSlug.CONTACTS_READ);
   const canManage = useCan(PermissionSlug.CONTACTS_MANAGE);
@@ -136,7 +138,7 @@ export function ContactsPage(): React.ReactElement {
                 contact={c}
                 onTap={() => {
                   tgHapticImpact('light');
-                  setActionContact(c);
+                  navigate(`/contacts/${c.id}`);
                 }}
               />
             ))}
@@ -252,7 +254,7 @@ export function ContactsPage(): React.ReactElement {
           contacts={archivedContacts.data?.data ?? []}
           onTap={(c) => {
             setArchiveOpen(false);
-            setActionContact(c);
+            navigate(`/contacts/${c.id}`);
           }}
         />
       </Modal>

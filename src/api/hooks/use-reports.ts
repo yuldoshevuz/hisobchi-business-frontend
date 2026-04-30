@@ -7,6 +7,8 @@ import type {
   CashFlowReportQuery,
   CashFlowTimeseriesQuery,
   CashFlowTimeseriesReport,
+  ContactsReport,
+  ContactsReportQuery,
   FinancialStateQuery,
   FinancialStateReport,
   PnlReport,
@@ -57,6 +59,18 @@ export function useFinancialStateReport(
   return useQuery<FinancialStateReport, Error>({
     queryKey: queryKeys.reports.financialState(query),
     queryFn: () => reportsApi.financialState(query),
+    enabled: Boolean(tokenStore.getActiveOrgId()) && callerEnabled,
+  });
+}
+
+export function useContactsReport(
+  query: ContactsReportQuery,
+  options: { enabled?: boolean } = {},
+): ReturnType<typeof useQuery<ContactsReport, Error>> {
+  const callerEnabled = options.enabled ?? true;
+  return useQuery<ContactsReport, Error>({
+    queryKey: queryKeys.reports.contacts(query),
+    queryFn: () => reportsApi.contacts(query),
     enabled: Boolean(tokenStore.getActiveOrgId()) && callerEnabled,
   });
 }

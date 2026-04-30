@@ -10,6 +10,7 @@ import { PurchaseForm } from '@/components/transactions/forms/PurchaseForm';
 import { SaleForm } from '@/components/transactions/forms/SaleForm';
 import { TransferForm } from '@/components/transactions/forms/TransferForm';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
+import { FeatureGate } from '@/components/FeatureGate';
 import { useCan, usePermissions } from '@/hooks/use-permissions';
 import { PermissionSlug } from '@/lib/permission-slugs';
 import {
@@ -50,6 +51,25 @@ export function TransactionCreatePage(): React.ReactElement {
   }
 
   const meta = TRANSACTION_USE_CASES[resolved];
+
+  // Adjustment ("Balansni to'g'irlash") is gated by ADVANCED_TRANSACTIONS;
+  // wrap the form so users on basic plans see a lock screen instead of a
+  // backend 403 after submit.
+  if (resolved === 'correction') {
+    return (
+      <div className="pb-6">
+        <PageHeader title={meta.label} description={meta.description} showBack />
+        <FeatureGate feature="ADVANCED_TRANSACTIONS" variant="block">
+          <FormForUseCase
+            useCase={resolved}
+            onCreated={(id) =>
+              navigate(`/transactions/${id}`, { replace: true })
+            }
+          />
+        </FeatureGate>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-6">

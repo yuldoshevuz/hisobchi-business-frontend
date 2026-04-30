@@ -169,3 +169,50 @@ export interface CashFlowTimeseriesQuery {
   direction?: CashFlowDirectionFilter;
   currency?: string;
 }
+
+// ─── Contacts report ────────────────────────────────────────────────────
+
+export type ContactType = 'customer' | 'supplier' | 'partner';
+
+export interface ContactCurrencyTotals {
+  currency: string;
+  totalSales: string;
+  totalPurchases: string;
+  totalDebtOut: string;
+  totalDebtIn: string;
+  totalIncomes: string;
+  totalExpenses: string;
+  receivable: string;
+  payable: string;
+  txCount: number;
+}
+
+export interface ContactsReportRow {
+  contactId: number;
+  name: string;
+  type: ContactType;
+  phone: string | null;
+  lastActivityAt: string | null;
+  byCurrency: ContactCurrencyTotals[];
+}
+
+export interface ContactsReportTotalsByCurrency {
+  currency: string;
+  totalSales: string;
+  totalPurchases: string;
+  receivable: string;
+  payable: string;
+}
+
+export interface ContactsReport {
+  period: ReportPeriod;
+  totals: ContactsReportTotalsByCurrency[];
+  contacts: ContactsReportRow[];
+}
+
+export interface ContactsReportQuery {
+  dateFrom: string;
+  dateTo: string;
+  contactType?: ContactType;
+  currency?: string;
+}

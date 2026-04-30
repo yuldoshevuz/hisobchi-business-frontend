@@ -20,6 +20,7 @@ import {
   useSkipScheduledReminder,
 } from '@/api/hooks/use-scheduled';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
+import { FeatureGate } from '@/components/FeatureGate';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { CreateScheduledForm } from '@/components/scheduled/CreateScheduledForm';
@@ -103,6 +104,7 @@ export function ScheduledPage(): React.ReactElement {
   const planList = plans.data?.data ?? [];
 
   return (
+    <FeatureGate feature="SCHEDULED_TRANSACTIONS">
     <div className="pb-32">
       <PageHeader
         title="Rejalashtirilgan"
@@ -260,6 +262,7 @@ export function ScheduledPage(): React.ReactElement {
         ) : null}
       </Modal>
     </div>
+    </FeatureGate>
   );
 }
 

@@ -1,15 +1,17 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Plus, Star } from 'lucide-react';
+import { Building2, Lock, Plus, Star } from 'lucide-react';
 import {
   useCreateOrganization,
   useMyOrganizations,
 } from '@/api/hooks/use-organizations';
+import { useLimitGuard } from '@/api/hooks/use-subscription';
 import { useSelectOrganization, useLogout } from '@/api/hooks/use-auth';
 import {
   usePrimaryOrganizationId,
   useSetPrimaryOrganization,
 } from '@/api/hooks/use-user';
+import { useMe } from '@/api/hooks/use-user';
 import { useTelegramMainButton } from '@/hooks/use-tg-main-button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScreenAction } from '@/components/layout/ScreenAction';
@@ -25,12 +27,20 @@ import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 
 export function OrganizationsPage(): React.ReactElement {
   const navigate = useNavigate();
+  const me = useMe();
   const orgs = useMyOrganizations();
   const select = useSelectOrganization();
   const logout = useLogout();
   const primaryOrgId = usePrimaryOrganizationId();
   const setPrimary = useSetPrimaryOrganization();
   const [createOpen, setCreateOpen] = useState<boolean>(false);
+  // ORGANIZATION_LIMIT is per-user, counting orgs they OWN. We approximate
+  // from the local list — only those where `createdBy` matches the calling
+  // user. Member-of orgs don't count.
+  const ownedCount = (orgs.data ?? []).filter(
+    (o) => o.createdBy === me.data?.id,
+  ).length;
+  const orgGuard = useLimitGuard('ORGANIZATION_LIMIT', ownedCount);
 
   const handleSelect = useCallback(
     (orgId: number) => {
@@ -190,17 +200,55 @@ export function OrganizationsPage(): React.ReactElement {
         )}
       </div>
 
+      {!orgGuard.canCreate && orgGuard.isReady ? (
+        <div className="mx-4 my-3 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+            <Lock className="h-4 w-4" />
+          </div>
+          <div className="flex-1 space-y-1">
+            <div className="text-[13px] font-medium text-amber-900">
+              Tashkilot soni chegarasiga yetdingiz
+            </div>
+            <p className="text-[12px] text-amber-800">
+              Joriy tarif: {orgGuard.label}. Yangi tashkilot yaratish uchun
+              tarifni yangilang.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-amber-300 bg-white"
+            onClick={() => navigate('/plans')}
+          >
+            Tariflar
+          </Button>
+        </div>
+      ) : null}
+
       <ScreenAction aboveTabBar={false}>
         <Button
           size="xl"
           variant="outline"
+          disabled={!orgGuard.canCreate}
           onClick={() => {
+            if (!orgGuard.canCreate) {
+              navigate('/plans');
+              return;
+            }
             tgHapticSelectionSafe();
             setCreateOpen(true);
           }}
         >
-          <Plus className="h-5 w-5" />
-          Yangi tashkilot
+          {orgGuard.canCreate ? (
+            <Plus className="h-5 w-5" />
+          ) : (
+            <Lock className="h-5 w-5" />
+          )}
+          {orgGuard.canCreate
+            ? `Yangi tashkilot${
+                typeof orgGuard.limit === 'number' ? ` (${orgGuard.label})` : ''
+              }`
+            : 'Tarif chegarasi tugadi'}
         </Button>
       </ScreenAction>
 

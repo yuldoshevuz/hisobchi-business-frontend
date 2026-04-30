@@ -1,5 +1,9 @@
 import { useCallback, useState } from 'react';
+import { Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCreateAccount } from '@/api/hooks/use-accounts';
+import { useCurrentOrganization } from '@/api/hooks/use-organizations';
+import { useFeature } from '@/api/hooks/use-subscription';
 import {
   formatAmount,
   unformatAmount,
@@ -27,10 +31,17 @@ interface CreateAccountFormProps {
 export function CreateAccountForm({
   onClose,
 }: CreateAccountFormProps): React.ReactElement {
+  const navigate = useNavigate();
   const create = useCreateAccount();
+  const org = useCurrentOrganization();
+  const baseCurrency = (org.data?.baseCurrency ?? 'UZS') as AccountCurrency;
+  // MULTI_CURRENCY_SUPPORT — controls whether non-base-currency accounts
+  // are allowed. When disabled, the picker locks to baseCurrency.
+  const multiCurrency = useFeature('MULTI_CURRENCY_SUPPORT');
+  const canPickAnyCurrency = multiCurrency.isEnabled;
   const [name, setName] = useState<string>('');
   const [type, setType] = useState<AccountType>('cash');
-  const [currency, setCurrency] = useState<AccountCurrency>('UZS');
+  const [currency, setCurrency] = useState<AccountCurrency>(baseCurrency);
   const [openingBalance, setOpeningBalance] = useState<string>('');
 
   const trimmedName = name.trim();
@@ -123,25 +134,52 @@ export function CreateAccountForm({
         <div className="flex flex-wrap gap-2">
           {ACCOUNT_CURRENCY_VALUES.map((c) => {
             const selected = currency === c;
+            const locked = !canPickAnyCurrency && c !== baseCurrency;
             return (
               <button
                 key={c}
                 type="button"
+                disabled={locked}
                 onClick={() => {
+                  if (locked) return;
                   tgHapticImpact('light');
                   setCurrency(c);
                 }}
-                className={`press min-w-[64px] rounded-xl border px-3 py-2 text-[14px] font-medium ${
+                className={`press relative min-w-[64px] rounded-xl border px-3 py-2 text-[14px] font-medium ${
                   selected
                     ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-card text-foreground'
+                    : locked
+                      ? 'border-dashed border-amber-300 bg-amber-50 text-amber-700 opacity-70'
+                      : 'border-border bg-card text-foreground'
                 }`}
               >
-                {c}
+                <span className="flex items-center gap-1">
+                  {locked ? <Lock className="h-3 w-3" /> : null}
+                  {c}
+                </span>
               </button>
             );
           })}
         </div>
+        {!canPickAnyCurrency && multiCurrency.isReady ? (
+          <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px]">
+            <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700" />
+            <div className="flex-1">
+              <span className="text-amber-900">
+                Faqat asosiy valyuta ({baseCurrency}) mavjud. Boshqa valyutada
+                hisob ochish uchun{' '}
+                <button
+                  type="button"
+                  onClick={() => navigate('/plans')}
+                  className="underline"
+                >
+                  tarifni yangilang
+                </button>
+                .
+              </span>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="space-y-1.5">

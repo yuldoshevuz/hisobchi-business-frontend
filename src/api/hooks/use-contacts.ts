@@ -33,6 +33,16 @@ export function useContactBalance(
   });
 }
 
+export function useContact(
+  id: number | null,
+): ReturnType<typeof useQuery<Contact, Error>> {
+  return useQuery<Contact, Error>({
+    queryKey: queryKeys.clients.detail(id ?? 0),
+    queryFn: () => contactsApi.getById(id as number),
+    enabled: Boolean(tokenStore.getActiveOrgId()) && id !== null,
+  });
+}
+
 export function useCreateContact(): ReturnType<
   typeof useMutation<Contact, Error, CreateContactRequest>
 > {

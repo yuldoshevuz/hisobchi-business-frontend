@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useCurrentOrganization } from '@/api/hooks/use-organizations';
 import { useAccounts } from '@/api/hooks/use-accounts';
+import { useLimitGuard } from '@/api/hooks/use-subscription';
 import { useMe } from '@/api/hooks/use-user';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Can } from '@/components/Can';
@@ -287,8 +288,16 @@ function TransactionTypesGrid(): React.ReactElement {
 }
 
 function AccountsOverview(): React.ReactElement {
+  const navigate = useNavigate();
   const canManage = useCan(PermissionSlug.ACCOUNTS_MANAGE);
   const accounts = useAccounts({ includeArchived: true });
+  // Live count for ACCOUNT_LIMIT — only "active" accounts count toward
+  // the cap. Archived accounts don't, matching backend's
+  // `Account.count(orgId, deletedAt = null)` heuristic.
+  const accountGuard = useLimitGuard(
+    'ACCOUNT_LIMIT',
+    (accounts.data ?? []).length,
+  );
   const [hidden, setHidden] = useState<boolean>(false);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [archiveOpen, setArchiveOpen] = useState<boolean>(false);
@@ -315,6 +324,10 @@ function AccountsOverview(): React.ReactElement {
 
   function openCreate(): void {
     if (!canManage) return;
+    if (!accountGuard.canCreate) {
+      navigate('/plans');
+      return;
+    }
     tgHapticImpact('light');
     setCreateOpen(true);
   }
@@ -379,8 +392,22 @@ function AccountsOverview(): React.ReactElement {
             <button
               type="button"
               onClick={openCreate}
-              aria-label="Yangi hisob qo'shish"
-              className="press flex h-[88px] w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground"
+              aria-label={
+                accountGuard.canCreate
+                  ? "Yangi hisob qo'shish"
+                  : "Tarif chegarasi tugadi"
+              }
+              title={
+                accountGuard.canCreate
+                  ? `Yangi hisob (${accountGuard.label})`
+                  : `Tarif chegarasi: ${accountGuard.label}. Tariflarni ko'rish.`
+              }
+              className={cn(
+                'press flex h-[88px] w-14 shrink-0 items-center justify-center rounded-2xl',
+                accountGuard.canCreate
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-amber-100 text-amber-700',
+              )}
             >
               <Plus className="h-6 w-6" />
             </button>

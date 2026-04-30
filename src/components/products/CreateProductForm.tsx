@@ -1,6 +1,9 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useCreateProduct } from '@/api/hooks/use-products';
+import { useFeature } from '@/api/hooks/use-subscription';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
 import { SelectField } from '@/components/transactions/forms/form-primitives';
 import {
@@ -45,13 +48,24 @@ export function CreateProductForm({
   // to bypass pagination so the picker never misses options.
   const categories = useCategories({ type: 'product', all: true });
 
+  const navigate = useNavigate();
+  const inventoryGate = useFeature('INVENTORY_MANAGEMENT');
+  const canTrackStock = inventoryGate.isEnabled;
+
   const [name, setName] = useState<string>('');
   const [categoryKey, setCategoryKey] = useState<string>('');
   const [currency, setCurrency] = useState<AccountCurrency>('UZS');
   const [defaultPrice, setDefaultPrice] = useState<string>('');
   const [defaultCost, setDefaultCost] = useState<string>('');
-  const [trackStock, setTrackStock] = useState<boolean>(true);
+  // Track-stock defaults true ONLY when INVENTORY_MANAGEMENT is granted.
+  // Without that feature the user can still create non-tracked (service)
+  // products — Telegram-bot reception of stock-tracked items will then 403.
+  const [trackStock, setTrackStock] = useState<boolean>(false);
   const [currentStock, setCurrentStock] = useState<string>('0');
+
+  useEffect(() => {
+    if (inventoryGate.isReady) setTrackStock(canTrackStock);
+  }, [inventoryGate.isReady, canTrackStock]);
 
   const trimmedName = name.trim();
   const isNameValid =
@@ -220,20 +234,50 @@ export function CreateProductForm({
 
       <label
         htmlFor="track-stock"
-        className="press flex cursor-pointer items-center gap-3 rounded-xl bg-card px-4 py-3"
+        className={`press flex items-center gap-3 rounded-xl bg-card px-4 py-3 ${
+          canTrackStock ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'
+        }`}
       >
         <Checkbox
           id="track-stock"
-          checked={trackStock}
-          onCheckedChange={(v) => setTrackStock(v === true)}
+          checked={trackStock && canTrackStock}
+          disabled={!canTrackStock}
+          onCheckedChange={(v) => {
+            if (!canTrackStock) return;
+            setTrackStock(v === true);
+          }}
         />
         <div className="min-w-0 flex-1">
-          <div className="text-[15px] font-medium">Ombor hisobi</div>
+          <div className="flex items-center gap-1.5 text-[15px] font-medium">
+            Ombor hisobi
+            {!canTrackStock && inventoryGate.isReady ? (
+              <Lock className="h-3.5 w-3.5 text-amber-600" />
+            ) : null}
+          </div>
           <div className="text-[12px] text-muted-foreground">
-            Xizmat yoki raqamli mahsulot uchun o‘chiring
+            {canTrackStock
+              ? "Xizmat yoki raqamli mahsulot uchun o‘chiring"
+              : "Tarifingizda mavjud emas — bu mahsulot xizmat sifatida yaratiladi"}
           </div>
         </div>
       </label>
+
+      {!canTrackStock && inventoryGate.isReady ? (
+        <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px]">
+          <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700" />
+          <div className="flex-1 text-amber-900">
+            Ombor kuzatuvi (qoldiq, kelib-ketishi) joriy tarifda yo&apos;q.{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/plans')}
+              className="underline"
+            >
+              Tariflarni ko&apos;rish
+            </button>
+            .
+          </div>
+        </div>
+      ) : null}
 
       {trackStock ? (
         <div className="space-y-1.5">

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Lock } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import {
@@ -7,6 +8,7 @@ import {
   useCurrencyRates,
 } from '@/api/hooks/use-currency-rates';
 import { useCreateTransfer } from '@/api/hooks/use-transfers';
+import { useFeature } from '@/api/hooks/use-subscription';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -38,8 +40,13 @@ interface TransferFormProps {
 export function TransferForm({
   onCreated,
 }: TransferFormProps): React.ReactElement {
+  const navigate = useNavigate();
   const accounts = useAccounts({ status: 'active' });
   const rates = useCurrencyRates();
+  // Cross-currency transfers are gated by ADVANCED_TRANSACTIONS. Same-currency
+  // transfers stay free across plans, so we evaluate the lock dynamically
+  // based on the chosen accounts.
+  const advancedTxGate = useFeature('ADVANCED_TRANSACTIONS');
 
   const accountList = useMemo(
     () => accounts.data ?? [],
@@ -112,13 +119,20 @@ export function TransferForm({
 
   const trimmedAmount = amount.trim();
   const numericAmount = Number(trimmedAmount);
+  const crossCurrencyLocked =
+    !sameCurrency &&
+    Boolean(sourceCurrency) &&
+    Boolean(destCurrency) &&
+    advancedTxGate.isReady &&
+    !advancedTxGate.isEnabled;
   const isFormValid =
     Boolean(sourceAccountId) &&
     Boolean(destAccountId) &&
     sourceAccountId !== destAccountId &&
     Number.isFinite(numericAmount) &&
     numericAmount > 0 &&
-    Number(destAmount) > 0;
+    Number(destAmount) > 0 &&
+    !crossCurrencyLocked;
 
   const create = useCreateTransfer();
 
@@ -281,6 +295,24 @@ export function TransferForm({
         </div>
       ) : null}
 
+      {crossCurrencyLocked ? (
+        <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px]">
+          <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700" />
+          <div className="flex-1 text-amber-900">
+            Valyutalararo o&apos;tkazma joriy tarifda mavjud emas. Bir xil
+            valyutali hisoblar tanlang yoki{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/plans')}
+              className="underline"
+            >
+              tarifni yangilang
+            </button>
+            .
+          </div>
+        </div>
+      ) : null}
+
       {create.isError ? (
         <p className="text-[13px] text-destructive">
           {getApiErrorMessage(create.error)}
@@ -294,7 +326,7 @@ export function TransferForm({
         disabled={!isFormValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {crossCurrencyLocked ? 'Tarif kerak' : 'Saqlash'}
       </Button>
     </form>
   );

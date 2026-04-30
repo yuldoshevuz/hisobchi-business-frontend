@@ -19,8 +19,16 @@ import { ListItem, Section } from '@/components/ui/list-item';
 import { Modal } from '@/components/ui/modal';
 import { usePermissions as useViewerPermissions } from '@/hooks/use-permissions';
 import { PermissionSlug } from '@/lib/permission-slugs';
+import {
+  getPermissionLabel,
+  getPermissionModuleLabel,
+} from '@/lib/permission-i18n';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
+import { useFeature } from '@/api/hooks/use-subscription';
+import { useNavigate } from 'react-router-dom';
+import { Lock, Sparkles } from 'lucide-react';
 import { getApiErrorMessage } from '@/lib/api-error';
+import { getFeatureLabel } from '@/lib/feature-i18n';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import type { PermissionGroup, Role } from '@/types/rbac.types';
 
@@ -32,10 +40,14 @@ interface RolesPageProps {
 export function RolesPage({
   embedded = false,
 }: RolesPageProps = {}): React.ReactElement {
+  const navigate = useNavigate();
   const viewerPerms = useViewerPermissions();
   const canManage = viewerPerms.has(PermissionSlug.ROLES_MANAGE);
   const isReady = viewerPerms.isReady;
   const roles = useRoles({ enabled: canManage });
+  const customRolesGate = useFeature('ADVANCED_RBAC');
+  const canCreateCustomRole = canManage && customRolesGate.isEnabled;
+  const customRolesLabel = getFeatureLabel('ADVANCED_RBAC');
   const [editing, setEditing] = useState<Role | null>(null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [deleting, setDeleting] = useState<Role | null>(null);
@@ -103,16 +115,54 @@ export function RolesPage({
         )}
       </div>
 
+      {customRolesGate.isReady && !customRolesGate.isEnabled ? (
+        <div className="mx-4 my-3 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+            <Lock className="h-4 w-4" />
+          </div>
+          <div className="flex-1 space-y-1">
+            <div className="text-[13px] font-medium text-amber-900">
+              {customRolesLabel.name}
+            </div>
+            <p className="text-[12px] text-amber-800">
+              Yangi rol yaratish uchun tarifni yangilashingiz kerak. Tizim
+              rollari (egasi, sotuvchi, va h.k.) joriy tarifda mavjud.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-amber-300 bg-white"
+            onClick={() => {
+              tgHapticImpact('light');
+              navigate('/plans');
+            }}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Tariflar
+          </Button>
+        </div>
+      ) : null}
+
       <ScreenAction>
         <Button
           size="xl"
+          disabled={!canCreateCustomRole}
           onClick={() => {
+            if (!canCreateCustomRole) {
+              navigate('/plans');
+              return;
+            }
             tgHapticImpact('light');
             setCreateOpen(true);
           }}
         >
-          <Plus className="h-5 w-5" />
-          Yangi rol
+          {canCreateCustomRole ? (
+            <Plus className="h-5 w-5" />
+          ) : (
+            <Lock className="h-5 w-5" />
+          )}
+          {canCreateCustomRole ? 'Yangi rol' : 'Yangi rol (tarif kerak)'}
         </Button>
       </ScreenAction>
 
@@ -266,29 +316,35 @@ function RoleForm({
         ) : (
           <div className="space-y-3">
             {groups.map((group) => (
-              <Section key={group.module} title={group.module}>
-                {group.permissions.map((perm) => (
-                  <label
-                    key={perm.slug}
-                    htmlFor={`perm-${perm.slug}`}
-                    className="press flex cursor-pointer items-start gap-3 px-4 py-3 active:bg-accent"
-                  >
-                    <Checkbox
-                      id={`perm-${perm.slug}`}
-                      checked={selected.has(perm.slug)}
-                      onCheckedChange={() => toggle(perm.slug)}
-                      disabled={isSystem}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[14px]">{perm.slug}</div>
-                      {perm.description ? (
-                        <div className="text-[12px] text-muted-foreground">
-                          {perm.description}
-                        </div>
-                      ) : null}
-                    </div>
-                  </label>
-                ))}
+              <Section
+                key={group.module}
+                title={getPermissionModuleLabel(group.module)}
+              >
+                {group.permissions.map((perm) => {
+                  const label = getPermissionLabel(perm.slug);
+                  return (
+                    <label
+                      key={perm.slug}
+                      htmlFor={`perm-${perm.slug}`}
+                      className="press flex cursor-pointer items-start gap-3 px-4 py-3 active:bg-accent"
+                    >
+                      <Checkbox
+                        id={`perm-${perm.slug}`}
+                        checked={selected.has(perm.slug)}
+                        onCheckedChange={() => toggle(perm.slug)}
+                        disabled={isSystem}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[14px]">{label.title}</div>
+                        {label.description ? (
+                          <div className="text-[12px] text-muted-foreground">
+                            {label.description}
+                          </div>
+                        ) : null}
+                      </div>
+                    </label>
+                  );
+                })}
               </Section>
             ))}
           </div>

@@ -79,6 +79,18 @@ const MESSAGE_KEY_TO_UZ: Record<string, string> = {
   TRANSACTION_NOT_FOUND: "Tranzaktsiya topilmadi",
   CASH_FLOW_NOT_FOUND: "To'lov topilmadi",
   CASH_FLOW_VOID_FORBIDDEN: "Bu to'lovni alohida bekor qilib bo'lmaydi",
+  // subscriptions / plans / features
+  FEATURE_DISABLED:
+    "Bu imkoniyat sizning tarifingizda yoqilmagan. Tarifni yangilash uchun administrator bilan bog'laning",
+  FEATURE_LIMIT_REACHED:
+    "Tarif chegarasiga yetdingiz. Yangi qator qo'shish uchun tarifni yangilang",
+  SUBSCRIPTION_REQUIRED:
+    "Bu amalni bajarish uchun aktiv obuna kerak",
+  SUBSCRIPTION_NOT_FOUND: "Obuna topilmadi",
+  PLAN_NOT_FOUND: "Tarif topilmadi",
+  PLAN_INACTIVE: "Tarif faol emas",
+  DEFAULT_PLAN_NOT_CONFIGURED:
+    "Tizimda default tarif sozlanmagan. Iltimos, administrator bilan bog'laning",
 };
 
 export function getApiErrorCode(error: unknown): string | undefined {
@@ -102,6 +114,27 @@ export function isOverpaymentRejected(error: unknown): boolean {
 
 export function isDuplicateDetected(error: unknown): boolean {
   return getApiErrorCode(error) === "DUPLICATE_DETECTED";
+}
+
+export function isFeatureDisabled(error: unknown): boolean {
+  return getApiErrorCode(error) === "FEATURE_DISABLED";
+}
+
+export function isFeatureLimitReached(error: unknown): boolean {
+  return getApiErrorCode(error) === "FEATURE_LIMIT_REACHED";
+}
+
+/**
+ * True for any error indicating the caller should consider upgrading
+ * their plan — UI can wrap such errors with an "Tariflarga o'tish" CTA.
+ */
+export function isSubscriptionGateError(error: unknown): boolean {
+  const code = getApiErrorCode(error);
+  return (
+    code === "FEATURE_DISABLED" ||
+    code === "FEATURE_LIMIT_REACHED" ||
+    code === "SUBSCRIPTION_REQUIRED"
+  );
 }
 
 export function getApiErrorDetails(error: unknown): unknown {

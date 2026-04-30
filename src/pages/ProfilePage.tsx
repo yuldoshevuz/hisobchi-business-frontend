@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Phone, Send, ShieldCheck } from 'lucide-react';
+import { LogOut, Phone, Send, ShieldCheck, Sparkles } from 'lucide-react';
 import { useMe, useUpdateMe } from '@/api/hooks/use-user';
+import { useCurrentSubscription } from '@/api/hooks/use-subscription';
 import { useLogout } from '@/api/hooks/use-auth';
 // import { useTelegramMainButton } from '@/hooks/use-tg-main-button';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -24,6 +25,7 @@ export function ProfilePage(): React.ReactElement {
   const me = useMe();
   const logout = useLogout();
   const viewerPerms = usePermissions();
+  const subscription = useCurrentSubscription();
   const [editOpen, setEditOpen] = useState<boolean>(false);
 
   function handleLogout(): void {
@@ -77,6 +79,29 @@ export function ProfilePage(): React.ReactElement {
               leading={<Send className="h-4 w-4 text-muted-foreground" />}
               title={me.data.telegramConnected ? 'Ulangan' : 'Ulanmagan'}
               subtitle="Telegram"
+            />
+          </Section>
+
+          <Section title="Obuna">
+            <ListItem
+              showChevron
+              onClick={() => {
+                tgHapticImpact('light');
+                navigate('/plans');
+              }}
+              leading={<Sparkles className="h-4 w-4 text-amber-500" />}
+              title="Tariflar"
+              subtitle={
+                subscription.isPending
+                  ? 'Yuklanmoqda...'
+                  : subscription.data?.plan
+                    ? `Joriy: ${subscription.data.plan.name}${
+                        subscription.data.subscription?.status === 'expired'
+                          ? ' (muddati tugagan)'
+                          : ''
+                      }`
+                    : "Tarif tayinlanmagan"
+              }
             />
           </Section>
 

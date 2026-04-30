@@ -6,8 +6,6 @@ export interface Organization {
   baseCurrency: string;
   locale: string;
   status: OrganizationStatus;
-  planId: number | null;
-  subscriptionExpiresAt: string | null;
   createdBy: number;
   createdAt: string;
   updatedAt: string;

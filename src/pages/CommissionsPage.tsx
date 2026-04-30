@@ -15,6 +15,7 @@ import {
   useCommissionsSummary,
 } from '@/api/hooks/use-commissions';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
+import { FeatureGate } from '@/components/FeatureGate';
 import { CreateCommissionForm } from '@/components/commissions/CreateCommissionForm';
 import { VoidCommissionForm } from '@/components/commissions/VoidCommissionForm';
 import {
@@ -119,6 +120,7 @@ export function CommissionsPage(): React.ReactElement {
   const filtersActive = filterCount > 0 || term !== '';
 
   return (
+    <FeatureGate feature="SALES_COMMISSION">
     <div className="pb-32">
       <PageHeader
         title="Komissiyalar"
@@ -255,6 +257,7 @@ export function CommissionsPage(): React.ReactElement {
         ) : null}
       </Modal>
     </div>
+    </FeatureGate>
   );
 }
 

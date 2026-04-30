@@ -34,6 +34,9 @@ import { Modal } from '@/components/ui/modal';
 import { useCan, usePermissions } from '@/hooks/use-permissions';
 import { PermissionSlug } from '@/lib/permission-slugs';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
+import { useLimitGuard } from '@/api/hooks/use-subscription';
+import { useNavigate } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import type { Member } from '@/types/member.types';
@@ -47,10 +50,15 @@ interface MembersPageProps {
 export function MembersPage({
   embedded = false,
 }: MembersPageProps = {}): React.ReactElement {
+  const navigate = useNavigate();
   const { isReady } = usePermissions();
   const canManage = useCan(PermissionSlug.MEMBERS_MANAGE);
   const members = useMembers({ page: 1, limit: 50 }, { enabled: canManage });
   const roles = useRoles({ enabled: canManage });
+  // EMPLOYEES_LIMIT counts the OWNER too — `current` is the live members
+  // count for the org (active + inactive but not soft-deleted).
+  const memberCount = members.data?.data.length ?? 0;
+  const employeeGuard = useLimitGuard('EMPLOYEES_LIMIT', memberCount);
   const [inviteOpen, setInviteOpen] = useState<boolean>(false);
   const [editing, setEditing] = useState<Member | null>(null);
   const [actionMember, setActionMember] = useState<Member | null>(null);
@@ -115,18 +123,62 @@ export function MembersPage({
       </div>
 
       {canManage ? (
-        <ScreenAction>
-          <Button
-            size="xl"
-            onClick={() => {
-              tgHapticImpact('light');
-              setInviteOpen(true);
-            }}
-          >
-            <UserPlus className="h-5 w-5" />
-            Xodim taklif qilish
-          </Button>
-        </ScreenAction>
+        <>
+          {!employeeGuard.canCreate && employeeGuard.isReady ? (
+            <div className="mx-4 my-3 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+                <Lock className="h-4 w-4" />
+              </div>
+              <div className="flex-1 space-y-1">
+                <div className="text-[13px] font-medium text-amber-900">
+                  Xodimlar chegarasiga yetdingiz
+                </div>
+                <p className="text-[12px] text-amber-800">
+                  Joriy tarif: {employeeGuard.label}. Yangi xodim taklif qilish
+                  uchun tarifni yangilang.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-amber-300 bg-white"
+                onClick={() => {
+                  tgHapticImpact('light');
+                  navigate('/plans');
+                }}
+              >
+                Tariflar
+              </Button>
+            </div>
+          ) : null}
+          <ScreenAction>
+            <Button
+              size="xl"
+              disabled={!employeeGuard.canCreate}
+              onClick={() => {
+                if (!employeeGuard.canCreate) {
+                  navigate('/plans');
+                  return;
+                }
+                tgHapticImpact('light');
+                setInviteOpen(true);
+              }}
+            >
+              {employeeGuard.canCreate ? (
+                <UserPlus className="h-5 w-5" />
+              ) : (
+                <Lock className="h-5 w-5" />
+              )}
+              {employeeGuard.canCreate
+                ? `Xodim taklif qilish${
+                    employeeGuard.limit !== null && typeof employeeGuard.limit === 'number'
+                      ? ` (${employeeGuard.label})`
+                      : ''
+                  }`
+                : 'Tarif chegarasi tugadi'}
+            </Button>
+          </ScreenAction>
+        </>
       ) : null}
 
       <Modal

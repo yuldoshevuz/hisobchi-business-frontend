@@ -5,8 +5,10 @@ import { LoginPage } from '@/pages/LoginPage';
 import { OrganizationsPage } from '@/pages/OrganizationsPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ContactsPage } from '@/pages/ContactsPage';
+import { ContactDetailPage } from '@/pages/ContactDetailPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { KatalogPage } from '@/pages/KatalogPage';
+import { PlansPage } from '@/pages/PlansPage';
 import { ReportsPage } from '@/pages/ReportsPage';
 import { ScheduledPage } from '@/pages/ScheduledPage';
 import { CommissionsPage } from '@/pages/CommissionsPage';
@@ -31,9 +33,11 @@ export const router = createBrowserRouter([
               { path: 'katalog', element: <KatalogPage /> },
               { path: 'sozlamalar', element: <SozlamalarPage /> },
               { path: 'contacts', element: <ContactsPage /> },
+              { path: 'contacts/:id', element: <ContactDetailPage /> },
               { path: 'scheduled', element: <ScheduledPage /> },
               { path: 'commissions', element: <CommissionsPage /> },
               { path: 'reports', element: <ReportsPage /> },
+              { path: 'plans', element: <PlansPage /> },
               { path: 'transactions', element: <TransactionsListPage /> },
               {
                 path: 'transactions/new/:useCase',

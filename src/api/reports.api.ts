@@ -4,6 +4,8 @@ import type {
   CashFlowReportQuery,
   CashFlowTimeseriesQuery,
   CashFlowTimeseriesReport,
+  ContactsReport,
+  ContactsReportQuery,
   FinancialStateQuery,
   FinancialStateReport,
   PnlReport,
@@ -39,6 +41,12 @@ export const reportsApi = {
       `${BASE}/financial-state`,
       { params: query },
     );
+    return data;
+  },
+  async contacts(query: ContactsReportQuery): Promise<ContactsReport> {
+    const { data } = await api.get<ContactsReport>(`${BASE}/contacts`, {
+      params: query,
+    });
     return data;
   },
 };
