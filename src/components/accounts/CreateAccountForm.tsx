@@ -5,7 +5,6 @@ import {
   unformatAmount,
 } from '@/components/transactions/forms/form-utils';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -32,7 +31,6 @@ export function CreateAccountForm({
   const [name, setName] = useState<string>('');
   const [type, setType] = useState<AccountType>('cash');
   const [currency, setCurrency] = useState<AccountCurrency>('UZS');
-  const [isPrimary, setIsPrimary] = useState<boolean>(false);
   const [openingBalance, setOpeningBalance] = useState<string>('');
 
   const trimmedName = name.trim();
@@ -55,7 +53,6 @@ export function CreateAccountForm({
         name: trimmedName,
         type,
         currency,
-        isPrimary,
         ...(trimmedOpening !== '' ? { openingBalance: trimmedOpening } : {}),
       },
       {
@@ -65,22 +62,12 @@ export function CreateAccountForm({
           setName('');
           setType('cash');
           setCurrency('UZS');
-          setIsPrimary(false);
           setOpeningBalance('');
         },
         onError: () => tgHapticNotify('error'),
       },
     );
-  }, [
-    create,
-    trimmedName,
-    type,
-    currency,
-    isPrimary,
-    trimmedOpening,
-    isValid,
-    onClose,
-  ]);
+  }, [create, trimmedName, type, currency, trimmedOpening, isValid, onClose]);
 
   return (
     <form
@@ -171,23 +158,6 @@ export function CreateAccountForm({
           dan boshlanadi.
         </p>
       </div>
-
-      <label
-        htmlFor="account-default"
-        className="press flex cursor-pointer items-center gap-3 rounded-xl bg-card px-4 py-3"
-      >
-        <Checkbox
-          id="account-default"
-          checked={isPrimary}
-          onCheckedChange={(v) => setIsPrimary(v === true)}
-        />
-        <div className="min-w-0 flex-1">
-          <div className="text-[15px] font-medium">Asosiy hisob</div>
-          <div className="text-[12px] text-muted-foreground">
-            Yangi tranzaksiyalar uchun avtomatik tanlanadi
-          </div>
-        </div>
-      </label>
 
       {create.isError ? (
         <p className="text-[13px] text-destructive">

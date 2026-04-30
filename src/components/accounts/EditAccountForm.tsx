@@ -6,19 +6,21 @@ import {
   unformatAmount,
 } from '@/components/transactions/forms/form-utils';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { formatMoney } from '@/lib/format';
-import { tgHapticNotify } from '@/lib/telegram';
+import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import { cn } from '@/lib/utils';
 import {
   ACCOUNT_NAME_MAX_LENGTH,
   ACCOUNT_NAME_MIN_LENGTH,
+  ACCOUNT_TYPE_VALUES,
   type Account,
+  type AccountType,
 } from '@/types/account.types';
+import { ACCOUNT_TYPE_ICON, ACCOUNT_TYPE_LABEL } from './account-meta';
 
 interface EditAccountFormProps {
   account: Account;
@@ -26,16 +28,21 @@ interface EditAccountFormProps {
 }
 
 /**
- * Edit account: rename, toggle the default flag, and (optionally) correct the
- * balance. The correction is recorded as an ADJUSTMENT transaction with a
- * single IN or OUT cash flow whose amount equals the diff between the typed
- * "actual balance" and the stored `currentBalance`. The diff is signed by
+ * Edit account: rename, change type, and (optionally) correct the balance.
+ * The correction is recorded as an ADJUSTMENT transaction with a single IN
+ * or OUT cash flow whose amount equals the diff between the typed "actual
+ * balance" and the stored `currentBalance`. The diff is signed by
  * `direction` so the backend writes it inside one ACID `$transaction`.
  *
- * The rename and the correction are two separate API calls — each atomic
- * server-side — issued sequentially. If the rename fails, the correction is
- * skipped; if the correction fails after a successful rename, the user
- * sees the error and can retry without losing the renamed account.
+ * Setting the account as primary is intentionally NOT here — there's a
+ * dedicated action for it (kebab menu / list item). Mixing it with the
+ * edit form caused users to flip primary by mistake when they only meant
+ * to rename. Keep the two flows separate.
+ *
+ * The rename/type-change and the correction are two separate API calls —
+ * each atomic server-side — issued sequentially. If the first fails, the
+ * correction is skipped; if the correction fails after a successful update,
+ * the user sees the error and can retry without losing the rename.
  */
 export function EditAccountForm({
   account,
@@ -44,7 +51,7 @@ export function EditAccountForm({
   const update = useUpdateAccount();
   const adjust = useCreateAdjustment();
   const [name, setName] = useState<string>(account.name);
-  const [isPrimary, setIsPrimary] = useState<boolean>(account.isPrimary);
+  const [type, setType] = useState<AccountType>(account.type);
   // Empty string == "leave balance alone". Non-empty: parsed and diffed
   // against the persisted value to compute the adjustment direction.
   const [actualBalance, setActualBalance] = useState<string>('');
@@ -67,9 +74,9 @@ export function EditAccountForm({
   const correctionAmount = Math.abs(diff).toFixed(4);
 
   const renameChanged = trimmedName !== account.name;
-  const primaryChanged = isPrimary !== account.isPrimary;
+  const typeChanged = type !== account.type;
   const hasChanges =
-    renameChanged || primaryChanged || correctionDirection !== null;
+    renameChanged || typeChanged || correctionDirection !== null;
 
   const isPending = update.isPending || adjust.isPending;
   const errorMessage = update.error ?? adjust.error ?? null;
@@ -77,10 +84,10 @@ export function EditAccountForm({
   const submit = useCallback(async (): Promise<void> => {
     if (!isNameValid || !hasChanges) return;
 
-    if (renameChanged || primaryChanged) {
-      const body: { name?: string; isPrimary?: boolean } = {};
+    if (renameChanged || typeChanged) {
+      const body: { name?: string; type?: AccountType } = {};
       if (renameChanged) body.name = trimmedName;
-      if (primaryChanged) body.isPrimary = isPrimary;
+      if (typeChanged) body.type = type;
       try {
         await update.mutateAsync({ id: account.id, body });
       } catch {
@@ -111,9 +118,9 @@ export function EditAccountForm({
     account.id,
     account.currentBalance,
     trimmedName,
-    isPrimary,
+    type,
     renameChanged,
-    primaryChanged,
+    typeChanged,
     correctionDirection,
     correctionAmount,
     trimmedActual,
@@ -143,6 +150,34 @@ export function EditAccountForm({
       </div>
 
       <div className="space-y-1.5">
+        <Label>Turi</Label>
+        <div className="grid grid-cols-2 gap-2">
+          {ACCOUNT_TYPE_VALUES.map((t) => {
+            const Icon = ACCOUNT_TYPE_ICON[t];
+            const selected = type === t;
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => {
+                  tgHapticImpact('light');
+                  setType(t);
+                }}
+                className={`press flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-[14px] ${
+                  selected
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border bg-card text-foreground'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="truncate">{ACCOUNT_TYPE_LABEL[t]}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
         <Label htmlFor="edit-account-balance">Joriy qoldiq</Label>
         <Input
           id="edit-account-balance"
@@ -166,26 +201,6 @@ export function EditAccountForm({
           />
         ) : null}
       </div>
-
-      <label
-        htmlFor="edit-account-default"
-        className="press flex cursor-pointer items-center gap-3 rounded-xl bg-card px-4 py-3"
-      >
-        <Checkbox
-          id="edit-account-default"
-          checked={isPrimary}
-          disabled={account.status === 'archived'}
-          onCheckedChange={(v) => setIsPrimary(v === true)}
-        />
-        <div className="min-w-0 flex-1">
-          <div className="text-[15px] font-medium">Asosiy hisob</div>
-          <div className="text-[12px] text-muted-foreground">
-            {account.status === 'archived'
-              ? "Arxivlangan hisob asosiy bo'la olmaydi"
-              : 'Yangi tranzaksiyalar uchun avtomatik tanlanadi'}
-          </div>
-        </div>
-      </label>
 
       {errorMessage ? (
         <p className="text-[13px] text-destructive">

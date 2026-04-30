@@ -47,6 +47,7 @@ export interface CreateAccountRequest {
 
 export interface UpdateAccountRequest {
   name?: string;
+  type?: AccountType;
   isPrimary?: boolean;
   status?: AccountStatus;
 }
