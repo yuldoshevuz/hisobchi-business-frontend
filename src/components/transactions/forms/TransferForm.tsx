@@ -106,7 +106,10 @@ export function TransferForm({
     : (destAmountOverride || autoConverted || '');
 
   // Compute the effective rate stored in metadata: how many `destCurrency`
-  // units 1 `sourceCurrency` unit becomes.
+  // units 1 `sourceCurrency` unit becomes. 6 decimals is too lossy for
+  // UZS-denominated pairs (rate = ~0.000083 USD/UZS, rounding loses ~3
+  // significant digits and the backend's 0.01 tolerance trips on million
+  // -size source amounts). 12 decimals keeps round-trip math accurate.
   const effectiveRate = useMemo(() => {
     if (sameCurrency) return null;
     const a = Number(amount);
@@ -114,7 +117,7 @@ export function TransferForm({
     if (!Number.isFinite(a) || !Number.isFinite(d) || a <= 0 || d <= 0) {
       return null;
     }
-    return (d / a).toFixed(6);
+    return (d / a).toFixed(12);
   }, [amount, destAmount, sameCurrency]);
 
   const trimmedAmount = amount.trim();
@@ -260,7 +263,8 @@ export function TransferForm({
 
           {autoConverted && effectiveRate ? (
             <p className="text-[12px] text-muted-foreground">
-              CBU kursi: 1 {sourceCurrency} ≈ {effectiveRate} {destCurrency}
+              CBU kursi: 1 {sourceCurrency} ≈ {trimDecimalZeros(effectiveRate)}{' '}
+              {destCurrency}
             </p>
           ) : null}
 
@@ -330,4 +334,16 @@ export function TransferForm({
       </Button>
     </form>
   );
+}
+
+/**
+ * Strip trailing zeros after the decimal point (and the dot itself when
+ * nothing meaningful is left). The CBU rate column is `Decimal(19,4)` so
+ * "12037.2100" gets rendered as "12037.21"; "12037.0000" becomes "12037".
+ * Pure-string operation — keeps full precision when the trailing digits
+ * are non-zero.
+ */
+function trimDecimalZeros(value: string): string {
+  if (!value.includes('.')) return value;
+  return value.replace(/\.?0+$/, '');
 }

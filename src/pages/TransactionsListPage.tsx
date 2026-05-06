@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Filter, Receipt, Search } from 'lucide-react';
 import { useTransactionsInfinite } from '@/api/hooks/use-transactions';
 import { useContacts } from '@/api/hooks/use-contacts';
+import { useCategories } from '@/api/hooks/use-categories';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -134,6 +135,15 @@ export function TransactionsListPage(): React.ReactElement {
     return map;
   }, [contacts.data]);
 
+  // Same trick for categories so each row can render its tag without an
+  // extra fetch per item.
+  const categories = useCategories({ all: true }, { enabled: canRead });
+  const categoryNameById = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const c of categories.data?.data ?? []) map.set(c.id, c.name);
+    return map;
+  }, [categories.data]);
+
   const sentinelRef = useInfiniteScroll({
     hasNextPage: transactions.hasNextPage ?? false,
     isFetchingNextPage: transactions.isFetchingNextPage,
@@ -242,6 +252,21 @@ export function TransactionsListPage(): React.ReactElement {
                       transaction={tx}
                       contactName={
                         tx.contactId ? contactNameById.get(tx.contactId) : null
+                      }
+                      categoryName={
+                        tx.categoryId
+                          ? categoryNameById.get(tx.categoryId)
+                          : null
+                      }
+                      // Parent categories are operational buckets
+                      // (Ijara / Kommunal / Oyliklar / Tushum…) — they
+                      // apply to every type that has a financial
+                      // direction. Transfer / adjustment / opening_balance
+                      // are type-only flows, so hide the badge for those.
+                      showCategoryBadge={
+                        tx.type !== 'transfer' &&
+                        tx.type !== 'adjustment' &&
+                        tx.type !== 'opening_balance'
                       }
                       onTap={() => navigate(`/transactions/${tx.id}`)}
                     />

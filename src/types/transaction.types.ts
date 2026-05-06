@@ -33,7 +33,54 @@ export const PAYMENT_STATUS_VALUES: readonly PaymentStatus[] = [
   'overpaid',
 ] as const;
 
-export type TransactionStatus = 'active' | 'voided';
+/**
+ * Transaction lifecycle:
+ *   - `initial`: AI proposal awaiting user review in the mini-app edit
+ *     screen. Excluded from EVERY aggregate (balances, paid_amount, stock,
+ *     reports). Side-effects (cash_flows, stock_movements) are deferred
+ *     until the user confirms (initial → active) via PATCH /:id/confirm.
+ *     If the user rejects, DELETE /:id soft-deletes the row.
+ *   - `active`: confirmed event with side-effects applied.
+ *   - `voided`: previously-active row reversed via POST /:id/void.
+ */
+export type TransactionStatus = 'active' | 'voided' | 'initial';
+
+/**
+ * Field-level update payload for `PATCH /:id`. Only metadata-style fields
+ * (amount / description / dueDate / category / contact); cash-flow / sale-item
+ * / stock-movement edits go through their dedicated APIs.
+ */
+export interface UpdateTransactionItem {
+  productId?: number | null;
+  name?: string | null;
+  quantity: string;
+  unitPrice: string;
+  cost?: string | null;
+}
+
+export interface UpdateTransactionCashFlow {
+  accountId: number;
+  amount: string;
+  /** ISO date string. Defaults to the transaction date when omitted. */
+  date?: string;
+  flowKind?: string | null;
+  notes?: string | null;
+}
+
+export interface UpdateTransactionRequest {
+  amount?: string;
+  /** Calendar day the event happened (YYYY-MM-DD). When changed, the row
+   *  is re-bucketed across daily / weekly / monthly aggregates. */
+  date?: string;
+  description?: string | null;
+  dueDate?: string | null;
+  categoryId?: number | null;
+  contactId?: number | null;
+  /** Initial-only: replaces all sale_items, server recomputes parent amount. */
+  items?: UpdateTransactionItem[];
+  /** Initial-only: replaces all deferred cash-flow legs. Direction is server-inferred. */
+  cashFlows?: UpdateTransactionCashFlow[];
+}
 export type CashFlowStatus = 'active' | 'voided';
 export type CashFlowDirection = 'in' | 'out';
 
@@ -100,10 +147,26 @@ export interface ListTransactionsQuery {
   contactId?: number;
   /** Backend accepts ONE accountId. */
   accountId?: number;
+  /** Backend accepts ONE categoryId. */
+  categoryId?: number;
+  /** Filter by system category — used when the user picks an un-instantiated system default. */
+  systemCategoryId?: number;
   dateFrom?: string;
   dateTo?: string;
   status?: TransactionStatus;
   /** Backend accepts ONE paymentStatus value. */
+  paymentStatus?: PaymentStatus;
+  search?: string;
+}
+
+export interface ListSalesQuery {
+  page?: number;
+  limit?: number;
+  contactId?: number;
+  accountId?: number;
+  dateFrom?: string;
+  dateTo?: string;
+  status?: TransactionStatus;
   paymentStatus?: PaymentStatus;
   search?: string;
 }

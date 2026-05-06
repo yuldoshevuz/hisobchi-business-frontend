@@ -4,6 +4,7 @@ import type {
   ListTransactionsQuery,
   PaginatedTransactions,
   Transaction,
+  UpdateTransactionRequest,
   VoidRequest,
 } from '@/types/transaction.types';
 
@@ -68,6 +69,38 @@ export const transactionsApi = {
   ): Promise<CashFlow> {
     const { data } = await api.post<CashFlow>(
       `${CASH_FLOW_BASE}/${cashFlowId}/void`,
+      body,
+    );
+    return data;
+  },
+  /**
+   * Confirm an AI-created `initial` transaction → `active`. Replays the
+   * deferred cash flows and stock movements held in `metadata._deferredCashFlows`.
+   */
+  async confirm(transactionId: number): Promise<Transaction> {
+    const { data } = await api.patch<Transaction>(
+      `${BASE}/${transactionId}/confirm`,
+    );
+    return data;
+  },
+  /**
+   * Cancel an AI-created `initial` transaction (soft-delete). Auto-created
+   * Product / Contact / Category rows persist — only the proposal row is
+   * removed.
+   */
+  async cancel(transactionId: number): Promise<void> {
+    await api.delete(`${BASE}/${transactionId}`);
+  },
+  /**
+   * Field-level update for `active` (or `initial` before confirm) rows.
+   * Cash-flow / sale-item / stock-movement edits are handled separately.
+   */
+  async update(
+    transactionId: number,
+    body: UpdateTransactionRequest,
+  ): Promise<Transaction> {
+    const { data } = await api.patch<Transaction>(
+      `${BASE}/${transactionId}`,
       body,
     );
     return data;

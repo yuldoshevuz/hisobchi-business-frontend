@@ -13,6 +13,7 @@ import type {
   ListTransactionsQuery,
   PaginatedTransactions,
   Transaction,
+  UpdateTransactionRequest,
   VoidRequest,
 } from '@/types/transaction.types';
 
@@ -116,6 +117,75 @@ export function useVoidCashFlow(): ReturnType<
         queryContact.invalidateQueries({ queryKey: queryKeys.transactions.all }),
         queryContact.invalidateQueries({ queryKey: queryKeys.accounts.all }),
         queryContact.invalidateQueries({ queryKey: queryKeys.reports.all }),
+      ]);
+    },
+  });
+}
+
+/**
+ * Confirm an AI-proposed `initial` transaction. Side-effects (cash flows,
+ * stock movements, balance updates, commissions) are written atomically on
+ * the backend; we just invalidate everything that could have moved.
+ */
+export function useConfirmTransaction(): ReturnType<
+  typeof useMutation<Transaction, Error, { transactionId: number }>
+> {
+  const qc = useQueryClient();
+  return useMutation<Transaction, Error, { transactionId: number }>({
+    mutationFn: ({ transactionId }) => transactionsApi.confirm(transactionId),
+    onSuccess: async (updated) => {
+      qc.setQueryData(queryKeys.transactions.detail(updated.id), updated);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+        qc.invalidateQueries({ queryKey: queryKeys.accounts.all }),
+        qc.invalidateQueries({ queryKey: queryKeys.products.all }),
+        qc.invalidateQueries({ queryKey: queryKeys.clients.all }),
+        qc.invalidateQueries({ queryKey: queryKeys.reports.all }),
+      ]);
+    },
+  });
+}
+
+/**
+ * Cancel an AI-proposed `initial` transaction (soft-delete). Use POST /void
+ * for already-active rows.
+ */
+export function useCancelTransaction(): ReturnType<
+  typeof useMutation<void, Error, { transactionId: number }>
+> {
+  const qc = useQueryClient();
+  return useMutation<void, Error, { transactionId: number }>({
+    mutationFn: ({ transactionId }) => transactionsApi.cancel(transactionId),
+    onSuccess: async (_, vars) => {
+      qc.removeQueries({
+        queryKey: queryKeys.transactions.detail(vars.transactionId),
+      });
+      await qc.invalidateQueries({ queryKey: queryKeys.transactions.all });
+    },
+  });
+}
+
+interface UpdateTransactionVars {
+  transactionId: number;
+  body: UpdateTransactionRequest;
+}
+
+/**
+ * Field-level update for an `initial` (pre-confirm) or `active` row. Only
+ * metadata-style fields. Cash flows, items, and stock are NOT touched here.
+ */
+export function useUpdateTransaction(): ReturnType<
+  typeof useMutation<Transaction, Error, UpdateTransactionVars>
+> {
+  const qc = useQueryClient();
+  return useMutation<Transaction, Error, UpdateTransactionVars>({
+    mutationFn: ({ transactionId, body }) =>
+      transactionsApi.update(transactionId, body),
+    onSuccess: async (updated) => {
+      qc.setQueryData(queryKeys.transactions.detail(updated.id), updated);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+        qc.invalidateQueries({ queryKey: queryKeys.reports.all }),
       ]);
     },
   });

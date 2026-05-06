@@ -75,6 +75,11 @@ export const PERMISSION_LABEL: Record<string, PermissionLabel> = {
     title: 'Tranzaksiya yaratish',
     description: "Sotuv, xarajat, o'tkazma va boshqa tranzaksiyalarni yozish",
   },
+  [PermissionSlug.TRANSACTIONS_UPDATE]: {
+    title: 'Tranzaksiyani tahrirlash',
+    description:
+      "Mavjud tranzaksiya maydonlarini o'zgartirish va AI takliflarini tasdiqlash",
+  },
   [PermissionSlug.TRANSACTIONS_VOID]: {
     title: 'Tranzaksiyani bekor qilish',
     description: 'Mavjud tranzaksiyani bekor qilish',

@@ -16,12 +16,22 @@ import type { Transaction } from '@/types/transaction.types';
 interface TransactionListItemProps {
   transaction: Transaction;
   contactName?: string | null;
+  categoryName?: string | null;
+  /**
+   * Whether the txn type can carry a category at all. Sale / purchase
+   * categorise per-item (sale_items.product.category), so the parent
+   * categoryId stays null and we shouldn't shame the row with "(boshqa)".
+   * Only expense / income / debt rows use the parent categoryId.
+   */
+  showCategoryBadge?: boolean;
   onTap: (transaction: Transaction) => void;
 }
 
 export function TransactionListItem({
   transaction,
   contactName,
+  categoryName,
+  showCategoryBadge = true,
   onTap,
 }: TransactionListItemProps): React.ReactElement {
   const Icon = TRANSACTION_TYPE_ICON[transaction.type];
@@ -93,6 +103,20 @@ export function TransactionListItem({
             {subtitle || '—'}
           </span>
           <div className="flex shrink-0 items-center gap-1">
+            {showCategoryBadge ? (
+              categoryName ? (
+                <Badge variant="outline" className="text-[10px]">
+                  {categoryName}
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="text-[10px] text-muted-foreground"
+                >
+                  Boshqa
+                </Badge>
+              )
+            ) : null}
             {isVoided ? (
               <Badge variant="destructive" className="text-[10px]">
                 Bekor qilingan

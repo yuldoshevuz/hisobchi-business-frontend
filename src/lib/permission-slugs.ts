@@ -23,6 +23,7 @@ export const PermissionSlug = {
   PRODUCTS_READ: 'products.read',
 
   TRANSACTIONS_CREATE: 'transactions.create',
+  TRANSACTIONS_UPDATE: 'transactions.update',
   TRANSACTIONS_VOID: 'transactions.void',
   TRANSACTIONS_READ: 'transactions.read',
 

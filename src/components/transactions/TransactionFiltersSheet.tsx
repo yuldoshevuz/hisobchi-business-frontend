@@ -5,6 +5,8 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAccounts } from '@/api/hooks/use-accounts';
+import { useCategories } from '@/api/hooks/use-categories';
+import { CategoryIcon } from '@/components/categories/CategoryIcon';
 import {
   PAYMENT_STATUS_LABEL,
   TRANSACTION_TYPE_ICON,
@@ -36,6 +38,17 @@ export function TransactionFiltersSheet({
   const [draft, setDraft] = useState<ListTransactionsQuery>(value);
   const [lastSeenOpen, setLastSeenOpen] = useState<boolean>(open);
   const accounts = useAccounts({ status: 'active' }, { enabled: open });
+  // Transactions only ever reference income/expense categories — product
+  // categories are inventory metadata, not txn metadata. Fetch the two
+  // typed lists separately so the picker matches what's actually selectable.
+  const incomeCategories = useCategories(
+    { all: true, type: 'income' },
+    { enabled: open },
+  );
+  const expenseCategories = useCategories(
+    { all: true, type: 'expense' },
+    { enabled: open },
+  );
 
   // Sync draft → applied filters whenever the sheet opens. Doing this during
   // render (with the "store the previous value" pattern) keeps the React
@@ -65,6 +78,34 @@ export function TransactionFiltersSheet({
       ...draft,
       accountId: draft.accountId === id ? undefined : id,
     });
+  }
+
+  // Categories come in two flavours from the merged catalog:
+  //   - instantiated (id != null) → filter via `categoryId`
+  //   - system default (id == null) → filter via `systemCategoryId` so we
+  //     don't have to write a row to the DB just to filter the list.
+  function toggleCategory(args: {
+    id: number | null;
+    systemCategoryId: number | null;
+  }): void {
+    const isSelected =
+      (args.id !== null && draft.categoryId === args.id) ||
+      (args.id === null &&
+        args.systemCategoryId !== null &&
+        draft.systemCategoryId === args.systemCategoryId);
+    if (isSelected) {
+      setDraft({ ...draft, categoryId: undefined, systemCategoryId: undefined });
+      return;
+    }
+    if (args.id !== null) {
+      setDraft({ ...draft, categoryId: args.id, systemCategoryId: undefined });
+    } else if (args.systemCategoryId !== null) {
+      setDraft({
+        ...draft,
+        categoryId: undefined,
+        systemCategoryId: args.systemCategoryId,
+      });
+    }
   }
 
   function reset(): void {
@@ -152,6 +193,73 @@ export function TransactionFiltersSheet({
             </div>
           )}
         </div>
+
+        {([
+          { label: 'Kirim kategoriyalari', list: incomeCategories },
+          { label: 'Chiqim kategoriyalari', list: expenseCategories },
+        ] as const).map(({ label, list }) => (
+          <div key={label} className="space-y-2">
+            <Label>{label}</Label>
+            {list.isPending ? (
+              <p className="text-[13px] text-muted-foreground">Yuklanmoqda...</p>
+            ) : (list.data?.data ?? []).length === 0 ? (
+              <p className="text-[13px] text-muted-foreground">
+                Kategoriyalar yo'q
+              </p>
+            ) : (
+              <div className="grid grid-cols-4 gap-2">
+                {(list.data?.data ?? []).map((c) => {
+                  // System defaults that the org hasn't customised yet have
+                  // id=null; we still show + select them via systemCategoryId.
+                  const key =
+                    c.id !== null
+                      ? `cat-${c.id}`
+                      : c.systemCategoryId !== null
+                        ? `sys-${c.systemCategoryId}`
+                        : `name-${c.name}`;
+                  const selected =
+                    (c.id !== null && draft.categoryId === c.id) ||
+                    (c.id === null &&
+                      c.systemCategoryId !== null &&
+                      draft.systemCategoryId === c.systemCategoryId);
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() =>
+                        toggleCategory({
+                          id: c.id,
+                          systemCategoryId: c.systemCategoryId,
+                        })
+                      }
+                      className={cn(
+                        'press flex aspect-square flex-col items-center justify-center gap-1 rounded-2xl border p-1 text-center transition-colors',
+                        selected
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border bg-card',
+                      )}
+                    >
+                      <CategoryIcon
+                        icon={c.icon}
+                        color={c.color}
+                        fallbackText={c.name}
+                        className="h-9 w-9"
+                      />
+                      <span
+                        className={cn(
+                          'line-clamp-2 px-1 text-[10px] leading-tight',
+                          selected ? 'text-primary' : 'text-muted-foreground',
+                        )}
+                      >
+                        {c.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ))}
 
         <div className="space-y-2">
           <Label>To'lov holati</Label>
