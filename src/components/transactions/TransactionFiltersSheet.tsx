@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { useCategories } from '@/api/hooks/use-categories';

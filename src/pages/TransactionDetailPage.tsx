@@ -822,6 +822,7 @@ function InitialEditForm({
           date?: string;
           description?: string | null;
           dueDate?: string | null;
+          contactId?: number | null;
           items?: UpdateTransactionItem[];
           cashFlows?: UpdateTransactionCashFlow[];
         } = {};

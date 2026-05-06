@@ -139,8 +139,13 @@ export function TransactionsListPage(): React.ReactElement {
   // extra fetch per item.
   const categories = useCategories({ all: true }, { enabled: canRead });
   const categoryNameById = useMemo(() => {
+    // Merged catalog rows have `id=null` for system defaults the org
+    // hasn't customised yet — those don't appear on transactions, so
+    // skip them.
     const map = new Map<number, string>();
-    for (const c of categories.data?.data ?? []) map.set(c.id, c.name);
+    for (const c of categories.data?.data ?? []) {
+      if (c.id !== null) map.set(c.id, c.name);
+    }
     return map;
   }, [categories.data]);
 

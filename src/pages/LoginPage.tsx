@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegramWebAppLogin } from '@/api/hooks/use-auth';
 import { getTelegramInitData, tgHapticNotify } from '@/lib/telegram';
-import { useTelegramMainButton } from '@/hooks/use-tg-main-button';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';

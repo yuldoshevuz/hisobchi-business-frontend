@@ -217,16 +217,16 @@ export function PurchaseForm({
             label="Kategoriya *"
             value={newProductCategoryRef === '' ? null : newProductCategoryRef}
             onChange={(next) => setNewProductCategoryRef(next ?? '')}
-            options={productCategoryList
-              .map((c) => {
-                const ref =
-                  c.id !== null
-                    ? `org:${c.id}`
-                    : c.systemCategoryId !== null
-                      ? `sys:${c.systemCategoryId}`
-                      : '';
-                if (!ref) return null;
-                return {
+            options={productCategoryList.flatMap((c) => {
+              const ref =
+                c.id !== null
+                  ? `org:${c.id}`
+                  : c.systemCategoryId !== null
+                    ? `sys:${c.systemCategoryId}`
+                    : '';
+              if (!ref) return [];
+              return [
+                {
                   value: ref,
                   label: c.name,
                   iconNode: (
@@ -236,15 +236,9 @@ export function PurchaseForm({
                       fallbackText={c.name}
                     />
                   ),
-                };
-              })
-              .filter(
-                (o): o is {
-                  value: string;
-                  label: string;
-                  iconNode: React.ReactNode;
-                } => o !== null,
-              )}
+                },
+              ];
+            })}
           />
         </div>
       )}

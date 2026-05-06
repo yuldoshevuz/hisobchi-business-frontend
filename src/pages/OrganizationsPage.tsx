@@ -12,7 +12,6 @@ import {
   useSetPrimaryOrganization,
 } from '@/api/hooks/use-user';
 import { useMe } from '@/api/hooks/use-user';
-import { useTelegramMainButton } from '@/hooks/use-tg-main-button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScreenAction } from '@/components/layout/ScreenAction';
 import { Button } from '@/components/ui/button';

@@ -132,15 +132,15 @@ export function IncomeForm({
         label="Kategoriya"
         value={categoryRef === '' ? null : categoryRef}
         onChange={(next) => setCategoryRef(next ?? '')}
-        options={categoryList
-          .map((c) => {
-            const ref = c.systemCategoryId
-              ? `system:${c.systemCategoryId}`
-              : c.id !== null
-                ? `id:${c.id}`
-                : '';
-            if (!ref) return null;
-            return {
+        options={categoryList.flatMap((c) => {
+          const ref = c.systemCategoryId
+            ? `system:${c.systemCategoryId}`
+            : c.id !== null
+              ? `id:${c.id}`
+              : '';
+          if (!ref) return [];
+          return [
+            {
               value: ref,
               label: c.name,
               iconNode: (
@@ -150,15 +150,9 @@ export function IncomeForm({
                   fallbackText={c.name}
                 />
               ),
-            };
-          })
-          .filter(
-            (o): o is {
-              value: string;
-              label: string;
-              iconNode: React.ReactNode;
-            } => o !== null,
-          )}
+            },
+          ];
+        })}
         placeholder="Tanlang (ixtiyoriy)"
         helperText="Ixtiyoriy. Hisobotlar uchun foydali"
       />
