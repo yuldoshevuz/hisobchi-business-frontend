@@ -20,8 +20,8 @@ import { useTransactions } from '@/api/hooks/use-transactions';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
 import { EditContactForm } from '@/components/contacts/EditContactForm';
 import {
-  CONTACT_TYPE_ICON,
-  CONTACT_TYPE_LABEL,
+  getContactTypeIcon,
+  getContactTypeLabel,
 } from '@/components/contacts/contact-meta';
 import { PageHeader } from '@/components/layout/PageHeader';
 import {
@@ -159,7 +159,7 @@ export function ContactDetailPage(): React.ReactElement {
       <PageHeader
         title={contactData?.name ?? 'Kontakt'}
         description={
-          contactData ? CONTACT_TYPE_LABEL[contactData.type] : undefined
+          contactData ? getContactTypeLabel(contactData.type) : undefined
         }
         large
         showBack
@@ -308,7 +308,7 @@ function aggregateByType(rows: Transaction[]): TypeAggregate[] {
 // ─────────────────────────────────────────── header card ────────────
 
 function ContactHeader({ contact }: { contact: Contact }): React.ReactElement {
-  const TypeIcon = CONTACT_TYPE_ICON[contact.type];
+  const TypeIcon = getContactTypeIcon(contact.type);
   const initials = computeInitials(contact.name);
 
   return (
@@ -326,7 +326,7 @@ function ContactHeader({ contact }: { contact: Contact }): React.ReactElement {
             </span>
             <Badge variant="secondary" className="text-[10px]">
               <TypeIcon className="mr-1 h-3 w-3" />
-              {CONTACT_TYPE_LABEL[contact.type]}
+              {getContactTypeLabel(contact.type)}
             </Badge>
           </div>
           {contact.phone ? (

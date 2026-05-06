@@ -34,6 +34,10 @@ function readStartParam(): string | null {
  *   - `screen=reminder&reminderId=<id>`
  *     → `/?reminderId=<id>` — opens the reminder detail modal on the
  *       dashboard once the carousel data lands.
+ *   - `screen=newContact&name=<name>[&phone=<phone>][&type=<type>][&notes=<text>]`
+ *     → `/contacts?createName=<name>...` — opens the Contacts page with
+ *       the create-contact modal pre-filled. Used by the AI bot when the
+ *       user said "yangi kontakt yarat …" so the user just reviews + saves.
  */
 export function useDeepLink(): void {
   const navigate = useNavigate();
@@ -59,6 +63,10 @@ export function useDeepLink(): void {
     const proposalRawMessageId =
       fromUrl.get('proposalRawMessageId') ??
       fromTelegram.get('proposalRawMessageId');
+    const contactName = fromUrl.get('name') ?? fromTelegram.get('name');
+    const contactPhone = fromUrl.get('phone') ?? fromTelegram.get('phone');
+    const contactType = fromUrl.get('type') ?? fromTelegram.get('type');
+    const contactNotes = fromUrl.get('notes') ?? fromTelegram.get('notes');
 
     consumedRef.current = true;
 
@@ -68,6 +76,10 @@ export function useDeepLink(): void {
     fromUrl.delete('reminderId');
     fromUrl.delete('amount');
     fromUrl.delete('proposalRawMessageId');
+    fromUrl.delete('name');
+    fromUrl.delete('phone');
+    fromUrl.delete('type');
+    fromUrl.delete('notes');
     const cleaned = fromUrl.toString();
     window.history.replaceState(
       null,
@@ -106,6 +118,15 @@ export function useDeepLink(): void {
           // into ReminderHighlights — keeps deep-link plumbing in one place
           // (this hook) and rendering concerns in the page.
           navigate(`/?reminderId=${encodeURIComponent(reminderId)}`);
+        }
+        break;
+      case 'newContact':
+        if (contactName) {
+          const params = new URLSearchParams({ createName: contactName });
+          if (contactPhone) params.set('createPhone', contactPhone);
+          if (contactType) params.set('createType', contactType);
+          if (contactNotes) params.set('createNotes', contactNotes);
+          navigate(`/contacts?${params.toString()}`);
         }
         break;
     }

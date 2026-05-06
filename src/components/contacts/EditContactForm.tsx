@@ -15,7 +15,12 @@ import {
   type ContactType,
   type UpdateContactRequest,
 } from '@/types/contact.types';
-import { CONTACT_TYPE_ICON, CONTACT_TYPE_LABEL } from './contact-meta';
+import {
+  CONTACT_TYPE_ICON,
+  CONTACT_TYPE_LABEL,
+  CONTACT_TYPE_NONE_ICON,
+  CONTACT_TYPE_NONE_LABEL,
+} from './contact-meta';
 
 interface EditContactFormProps {
   contact: Contact;
@@ -28,7 +33,7 @@ export function EditContactForm({
 }: EditContactFormProps): React.ReactElement {
   const update = useUpdateContact();
   const [name, setName] = useState<string>(contact.name);
-  const [type, setType] = useState<ContactType>(contact.type);
+  const [type, setType] = useState<ContactType | null>(contact.type);
   const [phone, setPhone] = useState<string>(contact.phone ?? '');
   const [creditLimit, setCreditLimit] = useState<string>(
     contact.creditLimit ?? '',
@@ -118,7 +123,7 @@ export function EditContactForm({
 
       <div className="space-y-1.5">
         <Label>Turi</Label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {CONTACT_TYPE_VALUES.map((t) => {
             const Icon = CONTACT_TYPE_ICON[t];
             const selected = type === t;
@@ -141,6 +146,22 @@ export function EditContactForm({
               </button>
             );
           })}
+          <button
+            key="none"
+            type="button"
+            onClick={() => {
+              tgHapticImpact('light');
+              setType(null);
+            }}
+            className={`press flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-[12px] ${
+              type === null
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border bg-card text-foreground'
+            }`}
+          >
+            <CONTACT_TYPE_NONE_ICON className="h-4 w-4" />
+            <span className="truncate">{CONTACT_TYPE_NONE_LABEL}</span>
+          </button>
         </div>
       </div>
 

@@ -3,18 +3,23 @@ import { Check, SlidersHorizontal, Users } from 'lucide-react';
 import {
   CONTACT_TYPE_ICON,
   CONTACT_TYPE_LABEL,
+  CONTACT_TYPE_NONE_ICON,
+  CONTACT_TYPE_NONE_LABEL,
+  getContactTypeIcon,
+  getContactTypeLabel,
 } from '@/components/contacts/contact-meta';
 import { Modal } from '@/components/ui/modal';
 import { cn } from '@/lib/utils';
 import { tgHapticImpact } from '@/lib/telegram';
 import {
+  CONTACT_TYPE_NONE,
   CONTACT_TYPE_VALUES,
   type Contact,
-  type ContactType,
+  type ContactTypeFilter,
 } from '@/types/contact.types';
 import { SelectField } from './form-primitives';
 
-type TypeFilter = ContactType | 'all';
+type TypeFilter = ContactTypeFilter | 'all';
 
 interface ContactPickerFieldProps {
   id: string;
@@ -64,13 +69,15 @@ export function ContactPickerField({
   const filtered =
     typeFilter === 'all'
       ? contacts
-      : contacts.filter((c) => c.type === typeFilter);
+      : typeFilter === CONTACT_TYPE_NONE
+        ? contacts.filter((c) => c.type === null)
+        : contacts.filter((c) => c.type === typeFilter);
 
   const computedEmpty =
     emptyText ??
     (typeFilter === 'all'
       ? "Kontakt yo'q"
-      : `${CONTACT_TYPE_LABEL[typeFilter]} toifasida kontakt yo'q`);
+      : `${typeFilter === CONTACT_TYPE_NONE ? CONTACT_TYPE_NONE_LABEL : CONTACT_TYPE_LABEL[typeFilter]} toifasida kontakt yo'q`);
 
   return (
     <SelectField
@@ -92,8 +99,8 @@ export function ContactPickerField({
       options={filtered.map((c) => ({
         value: c.id,
         label: c.name,
-        description: CONTACT_TYPE_LABEL[c.type],
-        icon: CONTACT_TYPE_ICON[c.type],
+        description: getContactTypeLabel(c.type),
+        icon: getContactTypeIcon(c.type),
       }))}
     />
   );
@@ -110,7 +117,12 @@ function TypeFilterButton({
 }: TypeFilterButtonProps): React.ReactElement {
   const [open, setOpen] = useState<boolean>(false);
   const isFiltered = value !== 'all';
-  const TriggerIcon = isFiltered ? CONTACT_TYPE_ICON[value] : SlidersHorizontal;
+  const TriggerIcon =
+    !isFiltered
+      ? SlidersHorizontal
+      : value === CONTACT_TYPE_NONE
+        ? CONTACT_TYPE_NONE_ICON
+        : CONTACT_TYPE_ICON[value];
 
   function handleSelect(next: TypeFilter): void {
     tgHapticImpact('light');
@@ -140,11 +152,22 @@ function TypeFilterButton({
 
       <Modal open={open} onOpenChange={setOpen} title="Turi bo'yicha filter">
         <div className="-mx-4 divide-y divide-border bg-card">
-          {(['all', ...CONTACT_TYPE_VALUES] as TypeFilter[]).map((key) => {
+          {(
+            ['all', ...CONTACT_TYPE_VALUES, CONTACT_TYPE_NONE] as TypeFilter[]
+          ).map((key) => {
             const active = value === key;
-            const Icon = key === 'all' ? Users : CONTACT_TYPE_ICON[key];
+            const Icon =
+              key === 'all'
+                ? Users
+                : key === CONTACT_TYPE_NONE
+                  ? CONTACT_TYPE_NONE_ICON
+                  : CONTACT_TYPE_ICON[key];
             const labelText =
-              key === 'all' ? 'Hammasi' : CONTACT_TYPE_LABEL[key];
+              key === 'all'
+                ? 'Hammasi'
+                : key === CONTACT_TYPE_NONE
+                  ? CONTACT_TYPE_NONE_LABEL
+                  : CONTACT_TYPE_LABEL[key];
             return (
               <button
                 key={key}

@@ -13,21 +13,39 @@ import {
   CONTACT_TYPE_VALUES,
   type ContactType,
 } from '@/types/contact.types';
-import { CONTACT_TYPE_ICON, CONTACT_TYPE_LABEL } from './contact-meta';
+import {
+  CONTACT_TYPE_ICON,
+  CONTACT_TYPE_LABEL,
+  CONTACT_TYPE_NONE_ICON,
+  CONTACT_TYPE_NONE_LABEL,
+} from './contact-meta';
 
 interface CreateContactFormProps {
   onClose: () => void;
+  /**
+   * Pre-fill values from a deeplink (AI "yangi kontakt" intent). When
+   * omitted the form starts blank with `type=customer` selected.
+   */
+  initialValues?: {
+    name?: string;
+    phone?: string;
+    type?: ContactType | null;
+    notes?: string;
+  };
 }
 
 export function CreateContactForm({
   onClose,
+  initialValues,
 }: CreateContactFormProps): React.ReactElement {
   const create = useCreateContact();
-  const [name, setName] = useState<string>('');
-  const [type, setType] = useState<ContactType>('customer');
-  const [phone, setPhone] = useState<string>('');
+  const [name, setName] = useState<string>(initialValues?.name ?? '');
+  const [type, setType] = useState<ContactType | null>(
+    initialValues?.type !== undefined ? initialValues.type : 'customer',
+  );
+  const [phone, setPhone] = useState<string>(initialValues?.phone ?? '');
   const [creditLimit, setCreditLimit] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
+  const [notes, setNotes] = useState<string>(initialValues?.notes ?? '');
 
   const trimmedName = name.trim();
   const isValid =
@@ -42,7 +60,7 @@ export function CreateContactForm({
     create.mutate(
       {
         name: trimmedName,
-        type,
+        type: type ?? null,
         ...(trimmedPhone ? { phone: trimmedPhone } : {}),
         ...(trimmedLimit ? { creditLimit: trimmedLimit } : {}),
         ...(trimmedNotes ? { notes: trimmedNotes } : {}),
@@ -80,7 +98,7 @@ export function CreateContactForm({
 
       <div className="space-y-1.5">
         <Label>Turi</Label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {CONTACT_TYPE_VALUES.map((t) => {
             const Icon = CONTACT_TYPE_ICON[t];
             const selected = type === t;
@@ -103,6 +121,22 @@ export function CreateContactForm({
               </button>
             );
           })}
+          <button
+            key="none"
+            type="button"
+            onClick={() => {
+              tgHapticImpact('light');
+              setType(null);
+            }}
+            className={`press flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-[12px] ${
+              type === null
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border bg-card text-foreground'
+            }`}
+          >
+            <CONTACT_TYPE_NONE_ICON className="h-4 w-4" />
+            <span className="truncate">{CONTACT_TYPE_NONE_LABEL}</span>
+          </button>
         </div>
       </div>
 

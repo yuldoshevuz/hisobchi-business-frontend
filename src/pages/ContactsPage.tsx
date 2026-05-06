@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Archive,
   Check,
@@ -32,6 +32,10 @@ import { EditContactForm } from '@/components/contacts/EditContactForm';
 import {
   CONTACT_TYPE_ICON,
   CONTACT_TYPE_LABEL,
+  CONTACT_TYPE_NONE_ICON,
+  CONTACT_TYPE_NONE_LABEL,
+  getContactTypeIcon,
+  getContactTypeLabel,
 } from '@/components/contacts/contact-meta';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
 import { useCan, usePermissions } from '@/hooks/use-permissions';
@@ -41,16 +45,19 @@ import { PermissionSlug } from '@/lib/permission-slugs';
 import { cn } from '@/lib/utils';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import {
+  CONTACT_TYPE_NONE,
   CONTACT_TYPE_VALUES,
   type Contact,
   type ContactStatus,
   type ContactType,
+  type ContactTypeFilter,
 } from '@/types/contact.types';
 
-type TypeFilter = ContactType | 'all';
+type TypeFilter = ContactTypeFilter | 'all';
 
 export function ContactsPage(): React.ReactElement {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isReady } = usePermissions();
   const canRead = useCan(PermissionSlug.CONTACTS_READ);
   const canManage = useCan(PermissionSlug.CONTACTS_MANAGE);
@@ -61,6 +68,42 @@ export function ContactsPage(): React.ReactElement {
   const [archiveOpen, setArchiveOpen] = useState<boolean>(false);
   const [actionContact, setActionContact] = useState<Contact | null>(null);
   const [editing, setEditing] = useState<Contact | null>(null);
+  const [prefill, setPrefill] = useState<{
+    name: string;
+    phone?: string;
+    type?: ContactType | null;
+    notes?: string;
+  } | null>(null);
+
+  // AI deeplink — `?createName=...&createPhone=...&createType=...&createNotes=...`
+  // opens the Create Contact modal pre-filled with the AI-extracted fields.
+  // Strip the params after consuming so a refresh doesn't re-trigger.
+  useEffect(() => {
+    const createName = searchParams.get('createName');
+    if (!createName) return;
+    const createPhone = searchParams.get('createPhone') ?? undefined;
+    const rawType = searchParams.get('createType');
+    const createType: ContactType | null =
+      rawType === 'customer' || rawType === 'supplier' || rawType === 'partner'
+        ? rawType
+        : rawType === 'none' || rawType === null
+          ? null
+          : null;
+    const createNotes = searchParams.get('createNotes') ?? undefined;
+    setPrefill({
+      name: createName,
+      phone: createPhone,
+      type: createType,
+      notes: createNotes,
+    });
+    setCreateOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('createName');
+    next.delete('createPhone');
+    next.delete('createType');
+    next.delete('createNotes');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const trimmedSearch = search.trim();
 
@@ -150,7 +193,7 @@ export function ContactsPage(): React.ReactElement {
               {trimmedSearch
                 ? 'Hech narsa topilmadi'
                 : typeFilter !== 'all'
-                  ? `${CONTACT_TYPE_LABEL[typeFilter]} toifasida kontakt yo'q`
+                  ? `${typeFilter === CONTACT_TYPE_NONE ? CONTACT_TYPE_NONE_LABEL : CONTACT_TYPE_LABEL[typeFilter]} toifasida kontakt yo'q`
                   : 'Kontaktlar mavjud emas'}
             </p>
           </div>
@@ -191,11 +234,20 @@ export function ContactsPage(): React.ReactElement {
 
       <Modal
         open={createOpen}
-        onOpenChange={setCreateOpen}
+        onOpenChange={(open) => {
+          setCreateOpen(open);
+          if (!open) setPrefill(null);
+        }}
         title="Yangi kontakt"
         description="Mijoz, yetkazib beruvchi yoki hamkor"
       >
-        <CreateContactForm onClose={() => setCreateOpen(false)} />
+        <CreateContactForm
+          onClose={() => {
+            setCreateOpen(false);
+            setPrefill(null);
+          }}
+          initialValues={prefill ?? undefined}
+        />
       </Modal>
 
       <Modal
@@ -205,7 +257,7 @@ export function ContactsPage(): React.ReactElement {
         }}
         title={actionContact?.name}
         description={
-          actionContact ? CONTACT_TYPE_LABEL[actionContact.type] : undefined
+          actionContact ? getContactTypeLabel(actionContact.type) : undefined
         }
       >
         {actionContact ? (
@@ -227,7 +279,7 @@ export function ContactsPage(): React.ReactElement {
           if (!o) setEditing(null);
         }}
         title="Kontaktni tahrirlash"
-        description={editing ? CONTACT_TYPE_LABEL[editing.type] : undefined}
+        description={editing ? getContactTypeLabel(editing.type) : undefined}
       >
         {editing ? (
           <EditContactForm
@@ -280,7 +332,12 @@ function TypeFilterButton({
 }: TypeFilterButtonProps): React.ReactElement {
   const [open, setOpen] = useState<boolean>(false);
   const isFiltered = value !== 'all';
-  const TriggerIcon = isFiltered ? CONTACT_TYPE_ICON[value] : SlidersHorizontal;
+  const TriggerIcon =
+    !isFiltered
+      ? SlidersHorizontal
+      : value === CONTACT_TYPE_NONE
+        ? CONTACT_TYPE_NONE_ICON
+        : CONTACT_TYPE_ICON[value];
 
   function handleSelect(next: TypeFilter): void {
     tgHapticImpact('light');
@@ -310,10 +367,22 @@ function TypeFilterButton({
 
       <Modal open={open} onOpenChange={setOpen} title="Turi bo'yicha filter">
         <div className="-mx-4 divide-y divide-border bg-card">
-          {(['all', ...CONTACT_TYPE_VALUES] as TypeFilter[]).map((key) => {
+          {(
+            ['all', ...CONTACT_TYPE_VALUES, CONTACT_TYPE_NONE] as TypeFilter[]
+          ).map((key) => {
             const active = value === key;
-            const Icon = key === 'all' ? Users : CONTACT_TYPE_ICON[key];
-            const label = key === 'all' ? 'Hammasi' : CONTACT_TYPE_LABEL[key];
+            const Icon =
+              key === 'all'
+                ? Users
+                : key === CONTACT_TYPE_NONE
+                  ? CONTACT_TYPE_NONE_ICON
+                  : CONTACT_TYPE_ICON[key];
+            const label =
+              key === 'all'
+                ? 'Hammasi'
+                : key === CONTACT_TYPE_NONE
+                  ? CONTACT_TYPE_NONE_LABEL
+                  : CONTACT_TYPE_LABEL[key];
             return (
               <button
                 key={key}
@@ -364,7 +433,7 @@ function ContactRow({ contact, onTap }: ContactRowProps): React.ReactElement {
     .slice(0, 2)
     .join('')
     .toUpperCase();
-  const Icon = CONTACT_TYPE_ICON[contact.type];
+  const Icon = getContactTypeIcon(contact.type);
 
   return (
     <ListItem
@@ -380,7 +449,7 @@ function ContactRow({ contact, onTap }: ContactRowProps): React.ReactElement {
           <span className="truncate">{contact.name}</span>
           <Badge variant="secondary" className="text-[10px]">
             <Icon className="mr-0.5 h-3 w-3" />
-            {CONTACT_TYPE_LABEL[contact.type]}
+            {getContactTypeLabel(contact.type)}
           </Badge>
         </span>
       }
@@ -668,7 +737,7 @@ function ArchivedContacts({
             <div className="min-w-0 flex-1">
               <div className="truncate text-[15px] font-medium">{c.name}</div>
               <div className="text-[12px] text-muted-foreground">
-                {CONTACT_TYPE_LABEL[c.type]}
+                {getContactTypeLabel(c.type)}
                 {c.phone ? ` · ${c.phone}` : ''}
               </div>
             </div>
