@@ -11,7 +11,10 @@ import type {
   ListScheduledQuery,
   ListScheduledRemindersQuery,
 } from '@/types/scheduled.types';
-import type { ListTransactionsQuery } from '@/types/transaction.types';
+import type {
+  ListSalesQuery,
+  ListTransactionsQuery,
+} from '@/types/transaction.types';
 
 export const queryKeys = {
   user: {
@@ -83,6 +86,15 @@ export const queryKeys = {
       query,
     ],
     detail: (id: number): readonly unknown[] => ['transactions', 'detail', id],
+  },
+  sales: {
+    all: ['sales'] as const,
+    list: (query: ListSalesQuery): readonly unknown[] => [
+      'sales',
+      'list',
+      query,
+    ],
+    detail: (id: number): readonly unknown[] => ['sales', 'detail', id],
   },
   reports: {
     all: ['reports'] as const,

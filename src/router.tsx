@@ -16,6 +16,7 @@ import { SozlamalarPage } from '@/pages/SozlamalarPage';
 import { TransactionsListPage } from '@/pages/TransactionsListPage';
 import { TransactionDetailPage } from '@/pages/TransactionDetailPage';
 import { TransactionCreatePage } from '@/pages/TransactionCreatePage';
+import { SalesListPage } from '@/pages/SalesListPage';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
               { path: 'reports', element: <ReportsPage /> },
               { path: 'plans', element: <PlansPage /> },
               { path: 'transactions', element: <TransactionsListPage /> },
+              { path: 'sales', element: <SalesListPage /> },
               {
                 path: 'transactions/new/:useCase',
                 element: <TransactionCreatePage />,

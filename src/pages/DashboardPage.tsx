@@ -12,6 +12,7 @@ import {
   ListChecks,
   Package,
   Plus,
+  ShoppingCart,
   Star,
   Users,
 } from 'lucide-react';
@@ -134,6 +135,19 @@ export function DashboardPage(): React.ReactElement {
         </Can>
 
         <Section title="Tezkor amallar">
+          <Can slug={PermissionSlug.TRANSACTIONS_READ}>
+            <ListItem
+              leading={
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-help-success-16)] text-[var(--color-help-success)]">
+                  <ShoppingCart className="h-4 w-4" />
+                </div>
+              }
+              title="Sotuvlar"
+              subtitle="Oxirgi sotuvlar va tovarlari"
+              showChevron
+              onClick={() => navigate('/sales')}
+            />
+          </Can>
           <Can slug={PermissionSlug.TRANSACTIONS_READ}>
             <ListItem
               leading={
