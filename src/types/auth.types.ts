@@ -23,6 +23,10 @@ export interface TelegramWebAppLoginRequest {
   initData: string;
 }
 
+export interface DevImpersonateRequest {
+  telegramId: number;
+}
+
 export interface RefreshRequest {
   refreshToken: string;
 }

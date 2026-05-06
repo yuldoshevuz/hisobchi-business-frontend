@@ -1,6 +1,7 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-dom';
 import { AppShell } from '@/components/layout/AppShell';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
+import { DevImpersonatePage } from '@/pages/DevImpersonatePage';
 import { LoginPage } from '@/pages/LoginPage';
 import { OrganizationsPage } from '@/pages/OrganizationsPage';
 import { DashboardPage } from '@/pages/DashboardPage';
@@ -18,8 +19,18 @@ import { TransactionDetailPage } from '@/pages/TransactionDetailPage';
 import { TransactionCreatePage } from '@/pages/TransactionCreatePage';
 import { SalesListPage } from '@/pages/SalesListPage';
 
+// Dev-only route stripped from production bundles by the `import.meta.env.DEV`
+// gate — Vite tree-shakes the false branch + `DevImpersonatePage` import
+// during the prod build, so the page never ships to end users.
+// const devRoutes: RouteObject[] = import.meta.env.DEV
+//   ? [{ path: '/dev/impersonate', element: <DevImpersonatePage /> }]
+//   : [];
+
+const devRoutes: RouteObject[] = [{ path: '/dev/impersonate', element: <DevImpersonatePage /> }]
+
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
+  ...devRoutes,
   {
     element: <ProtectedRoute />,
     children: [
