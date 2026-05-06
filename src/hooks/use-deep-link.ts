@@ -24,6 +24,13 @@ function readStartParam(): string | null {
  *     → `/transactions/<id>?action=add-cash-flow&suggestedAmount=<amount>`
  *   - `screen=void&transactionId=<id>`
  *     → `/transactions/<id>?action=void`
+ *   - `screen=newTransfer[&proposalRawMessageId=<id>]`
+ *     → `/transactions/new/transfer` — used by the AI bot when the user
+ *       wrote a transfer message ("1 mln o'tkazdim") without naming the
+ *       source / destination accounts; the form is opened blank so the
+ *       user picks accounts there. `proposalRawMessageId` is forwarded
+ *       so the page can fetch the raw_message and pre-fill amount /
+ *       description if it wants to.
  *   - `screen=reminder&reminderId=<id>`
  *     → `/?reminderId=<id>` — opens the reminder detail modal on the
  *       dashboard once the carousel data lands.
@@ -49,6 +56,9 @@ export function useDeepLink(): void {
     const reminderId =
       fromUrl.get('reminderId') ?? fromTelegram.get('reminderId');
     const amount = fromUrl.get('amount') ?? fromTelegram.get('amount');
+    const proposalRawMessageId =
+      fromUrl.get('proposalRawMessageId') ??
+      fromTelegram.get('proposalRawMessageId');
 
     consumedRef.current = true;
 
@@ -57,6 +67,7 @@ export function useDeepLink(): void {
     fromUrl.delete('transactionId');
     fromUrl.delete('reminderId');
     fromUrl.delete('amount');
+    fromUrl.delete('proposalRawMessageId');
     const cleaned = fromUrl.toString();
     window.history.replaceState(
       null,
@@ -80,6 +91,15 @@ export function useDeepLink(): void {
           navigate(`/transactions/${transactionId}?action=void`);
         }
         break;
+      case 'newTransfer': {
+        const params = new URLSearchParams();
+        if (proposalRawMessageId) {
+          params.set('proposalRawMessageId', proposalRawMessageId);
+        }
+        const qs = params.toString();
+        navigate(`/transactions/new/transfer${qs ? `?${qs}` : ''}`);
+        break;
+      }
       case 'reminder':
         if (reminderId) {
           // The dashboard reads `?reminderId=...` on mount and forwards it
