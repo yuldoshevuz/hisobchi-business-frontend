@@ -122,6 +122,32 @@ export function useVoidCashFlow(): ReturnType<
   });
 }
 
+interface SwapAccountVars {
+  cashFlowId: number;
+  parentTransactionId: number;
+  accountId: number;
+}
+
+export function useSwapCashFlowAccount(): ReturnType<
+  typeof useMutation<CashFlow, Error, SwapAccountVars>
+> {
+  const queryContact = useQueryClient();
+  return useMutation<CashFlow, Error, SwapAccountVars>({
+    mutationFn: ({ cashFlowId, accountId }) =>
+      transactionsApi.swapCashFlowAccount(cashFlowId, accountId),
+    onSuccess: async (_, vars) => {
+      await queryContact.invalidateQueries({
+        queryKey: queryKeys.transactions.detail(vars.parentTransactionId),
+      });
+      await Promise.all([
+        queryContact.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+        queryContact.invalidateQueries({ queryKey: queryKeys.accounts.all }),
+        queryContact.invalidateQueries({ queryKey: queryKeys.reports.all }),
+      ]);
+    },
+  });
+}
+
 /**
  * Confirm an AI-proposed `initial` transaction. Side-effects (cash flows,
  * stock movements, balance updates, commissions) are written atomically on

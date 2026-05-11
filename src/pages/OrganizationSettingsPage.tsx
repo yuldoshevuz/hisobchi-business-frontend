@@ -1,0 +1,189 @@
+import { useEffect, useState } from 'react';
+import {
+  useCurrentOrganization,
+  useUpdateCurrentOrganization,
+} from '@/api/hooks/use-organizations';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { useCan } from '@/hooks/use-permissions';
+import { getApiErrorMessage } from '@/lib/api-error';
+import { PermissionSlug } from '@/lib/permission-slugs';
+import { tgHapticNotify } from '@/lib/telegram';
+
+const LOCALE_OPTIONS = [
+  { value: 'uz', label: "O'zbekcha" },
+  { value: 'ru', label: 'Русский' },
+  { value: 'en', label: 'English' },
+] as const;
+
+const CURRENCY_OPTIONS = ['UZS', 'USD', 'EUR', 'RUB'] as const;
+
+/**
+ * Organization-level settings. Lives inside Sozlamalar as a third tab so
+ * it sits alongside Xodimlar and Rollar — admins land in the same place
+ * for every org-wide tweak.
+ *
+ * Edits go through the existing `PATCH /web/organizations/current`
+ * endpoint guarded by the `organizations.manage` permission. Currency
+ * changes only take effect for FUTURE transactions; existing rows keep
+ * the currency they were posted in (call-out shown in the form).
+ */
+export function OrganizationSettingsPage(): React.ReactElement {
+  const currentOrgQuery = useCurrentOrganization();
+  const updateMutation = useUpdateCurrentOrganization();
+  const canManage = useCan(PermissionSlug.ORGANIZATIONS_MANAGE);
+
+  const [name, setName] = useState<string>('');
+  const [baseCurrency, setBaseCurrency] = useState<string>('UZS');
+  const [locale, setLocale] = useState<string>('uz');
+
+  // Sync form when the query result first lands (or refreshes after save).
+  useEffect(() => {
+    const data = currentOrgQuery.data;
+    if (!data) return;
+    setName(data.name);
+    setBaseCurrency(data.baseCurrency);
+    setLocale(data.locale);
+  }, [currentOrgQuery.data]);
+
+  if (currentOrgQuery.isPending) {
+    return (
+      <div className="flex justify-center py-10">
+        <Spinner />
+      </div>
+    );
+  }
+  if (currentOrgQuery.isError || !currentOrgQuery.data) {
+    return (
+      <p className="px-4 py-6 text-[13px] text-destructive">
+        {getApiErrorMessage(
+          currentOrgQuery.error,
+          "Tashkilot ma'lumotlari yuklanmadi",
+        )}
+      </p>
+    );
+  }
+
+  const org = currentOrgQuery.data;
+  const trimmedName = name.trim();
+  const isValid = trimmedName.length >= 1 && trimmedName.length <= 255;
+  const hasChanges =
+    trimmedName !== org.name ||
+    baseCurrency !== org.baseCurrency ||
+    locale !== org.locale;
+
+  function handleSubmit(e: React.FormEvent): void {
+    e.preventDefault();
+    if (!canManage || !isValid || !hasChanges) return;
+    const body: {
+      name?: string;
+      baseCurrency?: string;
+      locale?: string;
+    } = {};
+    if (trimmedName !== org.name) body.name = trimmedName;
+    if (baseCurrency !== org.baseCurrency) body.baseCurrency = baseCurrency;
+    if (locale !== org.locale) body.locale = locale;
+    updateMutation.mutate(body, {
+      onSuccess: () => tgHapticNotify('success'),
+      onError: () => tgHapticNotify('error'),
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 px-4 pb-8 pt-2">
+      <div className="space-y-1.5">
+        <Label htmlFor="org-name">Tashkilot nomi</Label>
+        <Input
+          id="org-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={255}
+          disabled={!canManage}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Asosiy valyuta</Label>
+        <div className="grid grid-cols-4 gap-2">
+          {CURRENCY_OPTIONS.map((code) => {
+            const active = baseCurrency === code;
+            return (
+              <button
+                key={code}
+                type="button"
+                onClick={() => canManage && setBaseCurrency(code)}
+                disabled={!canManage}
+                className={`press rounded-xl border px-2 py-3 text-[13px] font-medium disabled:opacity-50 ${
+                  active
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border bg-card text-foreground'
+                }`}
+              >
+                {code}
+              </button>
+            );
+          })}
+        </div>
+        {baseCurrency !== org.baseCurrency ? (
+          <p className="text-[11px] text-muted-foreground">
+            ⚠️ Yangi valyuta faqat keyingi tranzaksiyalarga ta'sir qiladi.
+            Mavjud yozuvlar o'z valyutalarida qoladi.
+          </p>
+        ) : null}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Til</Label>
+        <div className="grid grid-cols-3 gap-2">
+          {LOCALE_OPTIONS.map((opt) => {
+            const active = locale === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => canManage && setLocale(opt.value)}
+                disabled={!canManage}
+                className={`press rounded-xl border px-2 py-3 text-[12px] font-medium disabled:opacity-50 ${
+                  active
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border bg-card text-foreground'
+                }`}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {!canManage ? (
+        <p className="text-[12px] text-muted-foreground">
+          Tahrirlash uchun "tashkilot boshqarish" ruxsati kerak.
+        </p>
+      ) : null}
+
+      {updateMutation.isError ? (
+        <p className="text-[13px] text-destructive">
+          {getApiErrorMessage(updateMutation.error, "Saqlab bo'lmadi")}
+        </p>
+      ) : null}
+
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={
+          !canManage ||
+          !isValid ||
+          !hasChanges ||
+          updateMutation.isPending
+        }
+      >
+        {updateMutation.isPending ? <Spinner /> : null}
+        Saqlash
+      </Button>
+    </form>
+  );
+}

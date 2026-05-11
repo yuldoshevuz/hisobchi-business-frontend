@@ -17,6 +17,8 @@ import { SozlamalarPage } from '@/pages/SozlamalarPage';
 import { TransactionsListPage } from '@/pages/TransactionsListPage';
 import { TransactionDetailPage } from '@/pages/TransactionDetailPage';
 import { TransactionCreatePage } from '@/pages/TransactionCreatePage';
+import { EditTransactionAccountPage } from '@/pages/EditTransactionAccountPage';
+import { EditTransactionCategoryPage } from '@/pages/EditTransactionCategoryPage';
 import { SalesListPage } from '@/pages/SalesListPage';
 
 // Dev-only route stripped from production bundles by the `import.meta.env.DEV`
@@ -59,6 +61,14 @@ export const router = createBrowserRouter([
               {
                 path: 'transactions/:id',
                 element: <TransactionDetailPage />,
+              },
+              {
+                path: 'transactions/:id/edit-category',
+                element: <EditTransactionCategoryPage />,
+              },
+              {
+                path: 'transactions/:id/edit-account',
+                element: <EditTransactionAccountPage />,
               },
               { path: 'profile', element: <ProfilePage /> },
               // Legacy route redirects so deep links keep working.

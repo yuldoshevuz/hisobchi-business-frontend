@@ -67,6 +67,7 @@ export function useDeepLink(): void {
     const contactPhone = fromUrl.get('phone') ?? fromTelegram.get('phone');
     const contactType = fromUrl.get('type') ?? fromTelegram.get('type');
     const contactNotes = fromUrl.get('notes') ?? fromTelegram.get('notes');
+    const action = fromUrl.get('action') ?? fromTelegram.get('action');
 
     consumedRef.current = true;
 
@@ -80,6 +81,7 @@ export function useDeepLink(): void {
     fromUrl.delete('phone');
     fromUrl.delete('type');
     fromUrl.delete('notes');
+    fromUrl.delete('action');
     const cleaned = fromUrl.toString();
     window.history.replaceState(
       null,
@@ -89,7 +91,26 @@ export function useDeepLink(): void {
 
     switch (screen) {
       case 'transaction':
-        if (transactionId) navigate(`/transactions/${transactionId}`);
+        if (transactionId) {
+          // The bot's rich-notification "Kassa ✏️" button uses
+          // `screen=transaction&action=edit-account&transactionId=<id>` —
+          // route directly to the dedicated edit page in that case.
+          if (action === 'edit-account') {
+            navigate(`/transactions/${transactionId}/edit-account`);
+          } else {
+            navigate(`/transactions/${transactionId}`);
+          }
+        }
+        break;
+      case 'editTransactionCategory':
+        if (transactionId) {
+          navigate(`/transactions/${transactionId}/edit-category`);
+        }
+        break;
+      case 'editTransactionAccount':
+        if (transactionId) {
+          navigate(`/transactions/${transactionId}/edit-account`);
+        }
         break;
       case 'overpayment':
         if (transactionId) {

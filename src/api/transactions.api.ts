@@ -74,6 +74,21 @@ export const transactionsApi = {
     return data;
   },
   /**
+   * Re-point a cash flow at a different account without changing
+   * amount / direction. Backs the bot's "Kassa ✏️" rich-notification
+   * button.
+   */
+  async swapCashFlowAccount(
+    cashFlowId: number,
+    accountId: number,
+  ): Promise<CashFlow> {
+    const { data } = await api.post<CashFlow>(
+      `${CASH_FLOW_BASE}/${cashFlowId}/swap-account`,
+      { accountId },
+    );
+    return data;
+  },
+  /**
    * Confirm an AI-created `initial` transaction → `active`. Replays the
    * deferred cash flows and stock movements held in `metadata._deferredCashFlows`.
    */

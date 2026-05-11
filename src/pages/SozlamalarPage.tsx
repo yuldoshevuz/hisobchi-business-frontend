@@ -1,19 +1,23 @@
 import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { MembersPage } from './MembersPage';
+import { OrganizationSettingsPage } from './OrganizationSettingsPage';
 import { RolesPage } from './RolesPage';
 import { cn } from '@/lib/utils';
 import { tgHapticSelection } from '@/lib/telegram';
 
-type SozlamalarTab = 'members' | 'roles';
+type SozlamalarTab = 'members' | 'roles' | 'organization';
 
 const TABS: ReadonlyArray<{ id: SozlamalarTab; label: string }> = [
   { id: 'members', label: 'Xodimlar' },
   { id: 'roles', label: 'Rollar' },
+  { id: 'organization', label: 'Tashkilot' },
 ];
 
 function readTab(value: string | null): SozlamalarTab {
-  return value === 'roles' ? 'roles' : 'members';
+  if (value === 'roles') return 'roles';
+  if (value === 'organization') return 'organization';
+  return 'members';
 }
 
 export function SozlamalarPage(): React.ReactElement {
@@ -60,7 +64,13 @@ export function SozlamalarPage(): React.ReactElement {
         </div>
       </div>
 
-      {tab === 'members' ? <MembersPage embedded /> : <RolesPage embedded />}
+      {tab === 'members' ? (
+        <MembersPage embedded />
+      ) : tab === 'roles' ? (
+        <RolesPage embedded />
+      ) : (
+        <OrganizationSettingsPage />
+      )}
     </div>
   );
 }
