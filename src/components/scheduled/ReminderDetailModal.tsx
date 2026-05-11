@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import {
   AlertCircle,
   Check,
@@ -64,6 +66,7 @@ export function ReminderDetailModal({
   reminder,
   plan: planProp,
 }: ReminderDetailModalProps): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   // Fetch the plan if the caller didn't pass it. Lazy-enabled so we don't
   // make a request when the modal isn't open.
@@ -160,44 +163,43 @@ export function ReminderDetailModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title={plan?.description ?? `Reja #${reminder.scheduledId}`}
-      description={plan ? TRANSACTION_TYPE_LABEL[plan.type] : 'Eslatma'}
+      title={plan?.description ?? t('reminder_detail.plan_placeholder', { id: reminder.scheduledId })}
+      description={plan ? TRANSACTION_TYPE_LABEL[plan.type] : t('reminder_detail.fallback_description')}
     >
       <div className="space-y-3">
         <div className="space-y-2 rounded-xl bg-muted/40 px-3 py-3 text-[13px]">
-          <Row label="Sana" value={formatDateUz(reminder.dueDate)} />
+          <Row label={t('reminder_detail.date')} value={formatDateUz(reminder.dueDate, t)} />
           {plan ? (
             <>
               <Row
-                label="Summa"
+                label={t('reminder_detail.amount')}
                 value={
                   plan.amount !== null
                     ? `${formatMoney(plan.amount, plan.currency)} ${plan.currency}`
-                    : "Tasdiqlashda kiritiladi"
+                    : t('reminder_detail.amount_on_confirm')
                 }
               />
               <Row
-                label="Takrorlanish"
+                label={t('reminder_detail.recurrence')}
                 value={RECURRENCE_LABEL[plan.recurrenceType]}
               />
             </>
           ) : null}
-          <Row label="Holati" value={REMINDER_STATUS_LABEL[reminder.status]} />
+          <Row label={t('reminder_detail.status')} value={REMINDER_STATUS_LABEL[reminder.status]} />
         </div>
 
         {overdue ? (
           <div className="flex items-start gap-2 rounded-xl border border-destructive bg-destructive/10 px-3 py-2 text-[13px] text-destructive">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
-              Sana o'tgan. Tasdiqlash yoki o'tkazib yuborish kerak.
+              {t('reminder_detail.overdue_message')}
             </span>
           </div>
         ) : (
           <div className="flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2 text-[13px]">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
             <span className="text-foreground">
-              Tasdiqlasangiz, tegishli tranzaksiya yaratiladi va keyingi sana
-              avtomatik hisoblanadi.
+              {t('reminder_detail.confirm_message')}
             </span>
           </div>
         )}
@@ -207,7 +209,7 @@ export function ReminderDetailModal({
             {requiresAmount || plan!.amount !== null ? (
               <div className="space-y-1.5">
                 <Label htmlFor="reminder-amount">
-                  Summa{' '}
+                  {t('reminder_detail.amount')}{' '}
                   <span className="text-muted-foreground">
                     ({plan!.currency})
                   </span>
@@ -225,7 +227,7 @@ export function ReminderDetailModal({
                 />
                 {!requiresAmount ? (
                   <p className="text-[12px] text-muted-foreground">
-                    Bo'sh qoldirilsa, rejadagi summa ishlatiladi
+                    {t('reminder_detail.amount_blank_hint')}
                   </p>
                 ) : null}
               </div>
@@ -233,11 +235,11 @@ export function ReminderDetailModal({
 
             <SelectField
               id="reminder-account"
-              label="Hisob"
+              label={t('reminder_detail.account')}
               value={accountId ?? plan!.defaultAccountId ?? ''}
               onChange={setAccountId}
               options={accountOptions}
-              helperText="Pul qaysi hisobga / hisobdan harakat qilishi"
+              helperText={t('reminder_detail.account_helper')}
             />
           </div>
         ) : null}
@@ -259,7 +261,7 @@ export function ReminderDetailModal({
                 disabled={!amountValid || confirm.isPending}
               >
                 {confirm.isPending ? <Spinner /> : <Check className="h-4 w-4" />}
-                Tasdiqlash
+                {t('reminder_detail.confirm')}
               </Button>
             ) : (
               <Button
@@ -277,7 +279,7 @@ export function ReminderDetailModal({
                 disabled={confirm.isPending}
               >
                 {confirm.isPending ? <Spinner /> : <Check className="h-4 w-4" />}
-                {requiresAmount ? 'Summa kiritib tasdiqlash' : 'Tasdiqlash'}
+                {requiresAmount ? t('reminder_detail.confirm_with_amount') : t('reminder_detail.confirm')}
               </Button>
             )
           ) : null}
@@ -294,7 +296,7 @@ export function ReminderDetailModal({
                   setEditing(true);
                 }}
               >
-                Tahrirlash
+                {t('reminder_detail.edit')}
               </Button>
             ) : null}
             {canConfirm && editing ? (
@@ -310,7 +312,7 @@ export function ReminderDetailModal({
                   setAccountId(null);
                 }}
               >
-                Bekor qilish
+                {t('common.cancel')}
               </Button>
             ) : null}
             {canSkip ? (
@@ -323,7 +325,7 @@ export function ReminderDetailModal({
                 disabled={skip.isPending}
               >
                 {skip.isPending ? <Spinner /> : <SkipForward className="h-4 w-4" />}
-                O'tkazish
+                {t('reminder_detail.skip')}
               </Button>
             ) : null}
           </div>
@@ -335,7 +337,7 @@ export function ReminderDetailModal({
             className="w-full text-[13px] text-muted-foreground"
             onClick={handleOpenInList}
           >
-            Ro'yxatda ochish →
+            {t('reminder_detail.open_in_list')}
           </Button>
         </div>
       </div>
@@ -357,16 +359,16 @@ function Row({ label, value }: RowProps): React.ReactElement {
   );
 }
 
-const MONTHS_UZ_SHORT = [
-  'Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn',
-  'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek',
+const MONTH_KEYS = [
+  'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+  'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
 ] as const;
 
-function formatDateUz(iso: string): string {
+function formatDateUz(iso: string, tFn: TFunction): string {
   const [datePart] = iso.split('T');
   const [y, m, d] = (datePart ?? '').split('-').map((p) => Number(p));
   if (!y || !m || !d) return iso;
-  return `${d.toString().padStart(2, '0')} ${MONTHS_UZ_SHORT[m - 1]} ${y}`;
+  return `${d.toString().padStart(2, '0')} ${tFn(`reminder_detail.month.${MONTH_KEYS[m - 1]}`)} ${y}`;
 }
 
 function isoToday(): string {

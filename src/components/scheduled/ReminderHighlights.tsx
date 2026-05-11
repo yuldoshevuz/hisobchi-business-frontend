@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import {
   AlertCircle,
   ArrowRight,
@@ -22,9 +24,9 @@ import {
 import { ReminderDetailModal } from './ReminderDetailModal';
 import type { Scheduled, ScheduledReminder } from '@/types/scheduled.types';
 
-const MONTHS_UZ_SHORT = [
-  'Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn',
-  'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek',
+const MONTH_KEYS = [
+  'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+  'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
 ] as const;
 
 interface ReminderHighlightsProps {
@@ -56,6 +58,7 @@ export function ReminderHighlights({
   selectedReminderId,
   onSelectionConsumed,
 }: ReminderHighlightsProps = {}): React.ReactElement | null {
+  const { t } = useTranslation();
   const pending = useScheduledReminders({ status: 'pending', limit: 20 });
   const notified = useScheduledReminders({ status: 'notified', limit: 20 });
   const plans = useScheduled({ status: 'active', limit: 100 });
@@ -101,7 +104,7 @@ export function ReminderHighlights({
     <div className="space-y-2 px-4">
       <div className="flex items-center gap-2">
         <h2 className="flex-1 text-[14px] font-semibold uppercase tracking-wide text-destructive">
-          Eslatmalar
+          {t('reminder_highlights.title')}
         </h2>
         <Badge variant="destructive" className="text-[11px]">
           {reminders.length}
@@ -119,6 +122,7 @@ export function ReminderHighlights({
                 <ReminderCard
                   reminder={r}
                   plan={planById.get(r.scheduledId)}
+                  tFn={t}
                   onTap={() => setActiveReminderId(r.id)}
                 />
               </div>
@@ -129,6 +133,7 @@ export function ReminderHighlights({
         <ReminderCard
           reminder={reminders[0]!}
           plan={planById.get(reminders[0]!.scheduledId)}
+          tFn={t}
           onTap={() => setActiveReminderId(reminders[0]!.id)}
         />
       )}
@@ -150,12 +155,14 @@ export function ReminderHighlights({
 interface ReminderCardProps {
   reminder: ScheduledReminder;
   plan: Scheduled | undefined;
+  tFn: TFunction;
   onTap: () => void;
 }
 
 function ReminderCard({
   reminder,
   plan,
+  tFn,
   onTap,
 }: ReminderCardProps): React.ReactElement {
   const overdue = reminder.dueDate < isoToday();
@@ -189,7 +196,7 @@ function ReminderCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="truncate text-[15px] font-semibold text-foreground">
-              {plan?.description ?? `Reja #${reminder.scheduledId}`}
+              {plan?.description ?? tFn('reminder_highlights.plan_placeholder', { id: reminder.scheduledId })}
             </span>
             <Badge
               variant={REMINDER_STATUS_VARIANT[reminder.status]}
@@ -205,7 +212,7 @@ function ReminderCard({
                 overdue ? 'font-semibold text-destructive' : 'text-destructive/80',
               )}
             >
-              {formatDateUz(reminder.dueDate)}
+              {formatDateUz(reminder.dueDate, tFn)}
             </span>
             {plan ? (
               <>
@@ -232,7 +239,7 @@ function ReminderCard({
       ) : (
         <div className="flex items-end justify-between pt-1">
           <Badge variant="secondary" className="text-[11px]">
-            Summa tasdiqlashda kiritiladi
+            {tFn('reminder_highlights.amount_on_confirm')}
           </Badge>
           <ArrowRight className="h-4 w-4 text-muted-foreground" />
         </div>
@@ -241,11 +248,11 @@ function ReminderCard({
   );
 }
 
-function formatDateUz(iso: string): string {
+function formatDateUz(iso: string, tFn: TFunction): string {
   const [datePart] = iso.split('T');
   const [y, m, d] = (datePart ?? '').split('-').map((p) => Number(p));
   if (!y || !m || !d) return iso;
-  return `${d.toString().padStart(2, '0')} ${MONTHS_UZ_SHORT[m - 1]} ${y}`;
+  return `${d.toString().padStart(2, '0')} ${tFn(`reminder_highlights.month.${MONTH_KEYS[m - 1]}`)} ${y}`;
 }
 
 function isoToday(): string {

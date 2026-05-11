@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import {
   Boxes,
   Briefcase,
@@ -42,6 +44,7 @@ function isoToday(): string {
  * collapsible per-contact lists.
  */
 export function FinancialStateReport(): React.ReactElement {
+  const { t } = useTranslation();
   const [asOfDate, setAsOfDate] = useState<string>(isoToday());
   const [byContact, setByContact] = useState<boolean>(false);
   const report = useFinancialStateReport({ asOfDate, byContact });
@@ -49,10 +52,10 @@ export function FinancialStateReport(): React.ReactElement {
   return (
     <div className="space-y-4 px-4">
       <div className="space-y-2">
-        <Label htmlFor="financial-as-of">Sana</Label>
+        <Label htmlFor="financial-as-of">{t('report.financial_state.date')}</Label>
         <DatePicker id="financial-as-of" value={asOfDate} onChange={setAsOfDate} />
         <p className="text-[12px] text-muted-foreground">
-          Hisoblar shu sanagacha bo'lgan harakatlardan qaytadan hisoblanadi.
+          {t('report.financial_state.date_hint')}
         </p>
       </div>
 
@@ -71,10 +74,10 @@ export function FinancialStateReport(): React.ReactElement {
         />
         <span className="flex-1">
           <span className="block text-[14px] font-medium leading-tight">
-            Mijoz/ta'minotchi bo'yicha bo'lib ko'rsatish
+            {t('report.financial_state.by_contact')}
           </span>
           <span className="mt-0.5 block text-[12px] text-muted-foreground">
-            Qabul qilinadigan / to'lanishi kerak summalarni har bir kontakt bo'yicha
+            {t('report.financial_state.by_contact_hint')}
           </span>
         </span>
       </label>
@@ -95,11 +98,11 @@ export function FinancialStateReport(): React.ReactElement {
           />
         </Section>
       ) : (report.data?.byCurrency ?? []).length === 0 ? (
-        <EmptyReport />
+        <EmptyReport tFn={t} />
       ) : (
         <div className="space-y-3">
           {report.data!.byCurrency.map((row) => (
-            <CurrencyCard key={row.currency} row={row} />
+            <CurrencyCard key={row.currency} row={row} tFn={t} />
           ))}
         </div>
       )}
@@ -109,9 +112,10 @@ export function FinancialStateReport(): React.ReactElement {
 
 interface CurrencyCardProps {
   row: FinancialStateCurrencyRow;
+  tFn: TFunction;
 }
 
-function CurrencyCard({ row }: CurrencyCardProps): React.ReactElement {
+function CurrencyCard({ row, tFn }: CurrencyCardProps): React.ReactElement {
   return (
     <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
       <div className="flex items-center justify-between">
@@ -120,7 +124,7 @@ function CurrencyCard({ row }: CurrencyCardProps): React.ReactElement {
         </span>
         <div className="text-right">
           <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-            Kapital
+            {tFn('report.financial_state.equity')}
           </div>
           <div
             className={cn(
@@ -135,18 +139,20 @@ function CurrencyCard({ row }: CurrencyCardProps): React.ReactElement {
         </div>
       </div>
 
-      <Section title="Aktivlar">
+      <Section title={tFn('report.financial_state.assets')}>
         <CashRow
           currency={row.currency}
           total={row.assets.cash.total}
           accounts={row.assets.cash.byAccount}
+          tFn={tFn}
         />
         <OpenItemRow
-          label="Qarzdorlik (oldim olishim kerak)"
+          label={tFn('report.financial_state.receivables')}
           icon={<Briefcase className="h-4 w-4" />}
           currency={row.currency}
           bucket={row.assets.receivables}
           tone="success"
+          tFn={tFn}
         />
         <ListItem
           leading={
@@ -154,8 +160,8 @@ function CurrencyCard({ row }: CurrencyCardProps): React.ReactElement {
               <Boxes className="h-4 w-4" />
             </div>
           }
-          title="Tovar zaxirasi"
-          subtitle="Mahsulotlar tannarxi"
+          title={tFn('report.financial_state.inventory')}
+          subtitle={tFn('report.financial_state.inventory_subtitle')}
           trailing={
             <span className="text-[15px] font-semibold tabular-nums text-foreground">
               {formatMoney(row.assets.inventory.total, row.currency)}
@@ -167,7 +173,7 @@ function CurrencyCard({ row }: CurrencyCardProps): React.ReactElement {
           asStatic
           title={
             <span className="text-[14px] font-bold text-foreground">
-              Jami aktivlar
+              {tFn('report.financial_state.total_assets')}
             </span>
           }
           trailing={
@@ -178,19 +184,20 @@ function CurrencyCard({ row }: CurrencyCardProps): React.ReactElement {
         />
       </Section>
 
-      <Section title="Passivlar">
+      <Section title={tFn('report.financial_state.liabilities')}>
         <OpenItemRow
-          label="Qarz (to'lashim kerak)"
+          label={tFn('report.financial_state.payables')}
           icon={<Briefcase className="h-4 w-4" />}
           currency={row.currency}
           bucket={row.liabilities.payables}
           tone="destructive"
+          tFn={tFn}
         />
         <ListItem
           asStatic
           title={
             <span className="text-[14px] font-bold text-foreground">
-              Jami passivlar
+              {tFn('report.financial_state.total_liabilities')}
             </span>
           }
           trailing={
@@ -208,12 +215,14 @@ interface CashRowProps {
   currency: string;
   total: string;
   accounts: AccountBalanceRow[];
+  tFn: TFunction;
 }
 
 function CashRow({
   currency,
   total,
   accounts,
+  tFn,
 }: CashRowProps): React.ReactElement {
   const [expanded, setExpanded] = useState<boolean>(false);
   const hasBreakdown = accounts.length > 0;
@@ -227,9 +236,11 @@ function CashRow({
             <Wallet className="h-4 w-4" />
           </div>
         }
-        title="Naqd va hisoblar"
+        title={tFn('report.financial_state.cash_and_accounts')}
         subtitle={
-          hasBreakdown ? `${accounts.length} ta hisob` : undefined
+          hasBreakdown
+            ? tFn('report.financial_state.accounts_count', { count: accounts.length })
+            : undefined
         }
         trailing={
           <div className="flex items-center gap-2">
@@ -271,6 +282,7 @@ interface OpenItemRowProps {
   currency: string;
   bucket: ReceivableAsset | PayableLiability;
   tone: 'success' | 'destructive';
+  tFn: TFunction;
 }
 
 function OpenItemRow({
@@ -279,6 +291,7 @@ function OpenItemRow({
   currency,
   bucket,
   tone,
+  tFn,
 }: OpenItemRowProps): React.ReactElement {
   const [expanded, setExpanded] = useState<boolean>(false);
   const breakdown = bucket.byContact ?? [];
@@ -303,7 +316,7 @@ function OpenItemRow({
         title={label}
         subtitle={
           hasBreakdown
-            ? `${breakdown.length} ta kontakt`
+            ? tFn('report.financial_state.contacts_count', { count: breakdown.length })
             : undefined
         }
         trailing={
@@ -343,7 +356,7 @@ function OpenItemRow({
           ))}
           {bucket.truncated ? (
             <p className="text-[11px] italic text-muted-foreground">
-              + boshqalar (50 dan ortiq kontakt)
+              {tFn('report.financial_state.plus_other_contacts')}
             </p>
           ) : null}
         </div>
@@ -352,14 +365,17 @@ function OpenItemRow({
   );
 }
 
-function EmptyReport(): React.ReactElement {
+interface EmptyReportProps {
+  tFn: TFunction;
+}
+
+function EmptyReport({ tFn }: EmptyReportProps): React.ReactElement {
   return (
     <div className="px-6 py-12 text-center">
       <FileSearch className="mx-auto h-10 w-10 text-muted-foreground" />
       <p className="mt-3 text-[14px] text-muted-foreground">
-        Tanlangan sana uchun ma'lumot yo'q
+        {tFn('report.financial_state.no_data_for_date')}
       </p>
     </div>
   );
 }
-

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { useContacts } from '@/api/hooks/use-contacts';
@@ -33,6 +34,7 @@ interface CreditSaleFormProps {
 export function CreditSaleForm({
   onCreated,
 }: CreditSaleFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const accounts = useAccounts({ status: 'active' });
   const contacts = useContacts({ all: true, status: 'active' });
   const products = useProducts({ status: 'active', all: true });
@@ -132,12 +134,12 @@ export function CreditSaleForm({
       className="space-y-5 px-4 pb-32 pt-2"
     >
       <div className="rounded-xl bg-muted/40 px-3 py-2 text-[13px] text-muted-foreground">
-        To'liq qarz savdo. Mijoz to'laganida "To'lov qo'shish" orqali yozasiz.
+        {t('credit_sale_form.intro')}
       </div>
 
       <SelectField
         id="credit-product"
-        label="Mahsulot *"
+        label={`${t('form.product')} *`}
         value={productId ?? ''}
         onChange={setProductId}
         options={productList.map((p) => ({
@@ -148,7 +150,7 @@ export function CreditSaleForm({
 
       <SelectField
         id="credit-account"
-        label="Balans *"
+        label={`${t('form.account')} *`}
         value={accountId ?? ''}
         onChange={setAccountId}
         options={accountList
@@ -158,21 +160,21 @@ export function CreditSaleForm({
             label: `${a.name} · ${a.currency}`,
             icon: ACCOUNT_TYPE_ICON[a.type],
           }))}
-        helperText="Tranzaktsiya valyutasi shu hisobdan olinadi"
+        helperText={t('credit_sale_form.account_helper')}
       />
 
       <ContactPickerField
         id="credit-contact"
-        label="Mijoz *"
+        label={`${t('credit_sale_form.customer')} *`}
         value={contactId ?? ''}
         onChange={setContactId}
         contacts={contactList}
-        helperText="Qarzga sotuv uchun mijoz tanlash majburiy"
+        helperText={t('credit_sale_form.customer_helper')}
       />
 
       {tracksStock ? (
         <div className="space-y-1.5">
-          <Label htmlFor="credit-qty">Soni *</Label>
+          <Label htmlFor="credit-qty">{`${t('credit_sale_form.quantity')} *`}</Label>
           <Input
             id="credit-qty"
             inputMode="decimal"
@@ -182,7 +184,7 @@ export function CreditSaleForm({
           />
           {product && product.currentStock !== null ? (
             <p className="text-[12px] text-muted-foreground">
-              Ombordagi qoldiq: {product.currentStock}
+              {t('credit_sale_form.stock_left')}: {product.currentStock}
             </p>
           ) : null}
         </div>
@@ -190,7 +192,7 @@ export function CreditSaleForm({
 
       <AmountField
         id="credit-price"
-        label="Narxi (1 dona uchun) *"
+        label={`${t('credit_sale_form.unit_price')} *`}
         value={unitPrice}
         onChange={setUnitPrice}
         currencyDisplay={currency}
@@ -199,7 +201,7 @@ export function CreditSaleForm({
       {tracksStock && Number(quantity) > 1 ? (
         <div className="rounded-xl bg-muted/40 px-3 py-2 text-[13px]">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Jami qarz</span>
+            <span className="text-muted-foreground">{t('credit_sale_form.total_debt')}</span>
             <span className="font-semibold tabular-nums text-foreground">
               {formatAmountDisplay(totalAmount)} {currency}
             </span>
@@ -208,13 +210,13 @@ export function CreditSaleForm({
       ) : null}
 
       <div className="space-y-1.5">
-        <Label htmlFor="credit-due">Qaytarish sanasi</Label>
+        <Label htmlFor="credit-due">{t('credit_sale_form.due_date')}</Label>
         <DatePicker
           id="credit-due" value={dueDate}
           onChange={setDueDate}
         />
         <p className="text-[12px] text-muted-foreground">
-          Ixtiyoriy. Eslatmalar uchun ishlatiladi
+          {t('credit_sale_form.due_date_helper')}
         </p>
       </div>
 
@@ -231,7 +233,7 @@ export function CreditSaleForm({
         disabled={!isFormValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

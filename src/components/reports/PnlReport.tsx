@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { FileSearch, TrendingDown, TrendingUp } from 'lucide-react';
 import { usePnlReport } from '@/api/hooks/use-reports';
 import { Spinner } from '@/components/ui/spinner';
@@ -18,6 +20,7 @@ import type { PnlBucket, PnlCurrencyRow } from '@/types/report.types';
  * revenues / expenses for drill-down.
  */
 export function PnlReport(): React.ReactElement {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState(DEFAULT_PERIOD);
   const report = usePnlReport(period);
 
@@ -45,11 +48,11 @@ export function PnlReport(): React.ReactElement {
           />
         </Section>
       ) : (report.data?.byCurrency ?? []).length === 0 ? (
-        <EmptyReport />
+        <EmptyReport tFn={t} />
       ) : (
         <div className="space-y-3">
           {report.data!.byCurrency.map((row) => (
-            <PnlCard key={row.currency} row={row} />
+            <PnlCard key={row.currency} row={row} tFn={t} />
           ))}
         </div>
       )}
@@ -59,9 +62,10 @@ export function PnlReport(): React.ReactElement {
 
 interface PnlCardProps {
   row: PnlCurrencyRow;
+  tFn: TFunction;
 }
 
-function PnlCard({ row }: PnlCardProps): React.ReactElement {
+function PnlCard({ row, tFn }: PnlCardProps): React.ReactElement {
   const netPositive = Number(row.netProfit) >= 0;
   return (
     <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
@@ -88,32 +92,34 @@ function PnlCard({ row }: PnlCardProps): React.ReactElement {
 
       <div className="space-y-2">
         <BucketBlock
-          label="Daromadlar"
+          label={tFn('report.pnl.revenues')}
           accent="success"
           currency={row.currency}
           bucket={row.revenues}
+          tFn={tFn}
         />
         <SimpleLine
-          label="COGS (sotilgan tovarlar tannarxi)"
+          label={tFn('report.pnl.cogs')}
           amount={row.cogs}
           currency={row.currency}
           tone="muted"
         />
         <SimpleLine
-          label="Yalpi foyda"
+          label={tFn('report.pnl.gross_profit')}
           amount={row.grossProfit}
           currency={row.currency}
           tone={Number(row.grossProfit) >= 0 ? 'success' : 'destructive'}
           bold
         />
         <BucketBlock
-          label="Xarajatlar"
+          label={tFn('report.pnl.expenses')}
           accent="destructive"
           currency={row.currency}
           bucket={row.expenses}
+          tFn={tFn}
         />
         <SimpleLine
-          label="Sof foyda"
+          label={tFn('report.pnl.net_profit')}
           amount={row.netProfit}
           currency={row.currency}
           tone={netPositive ? 'success' : 'destructive'}
@@ -130,6 +136,7 @@ interface BucketBlockProps {
   accent: 'success' | 'destructive';
   currency: string;
   bucket: PnlBucket;
+  tFn: TFunction;
 }
 
 function BucketBlock({
@@ -137,6 +144,7 @@ function BucketBlock({
   accent,
   currency,
   bucket,
+  tFn,
 }: BucketBlockProps): React.ReactElement {
   return (
     <div
@@ -175,13 +183,13 @@ function BucketBlock({
           ))}
           {bucket.truncated ? (
             <p className="text-[11px] italic text-muted-foreground">
-              + boshqalar (50 dan ortiq kategoriya)
+              {tFn('report.pnl.plus_others')}
             </p>
           ) : null}
         </div>
       ) : (
         <p className="mt-1 text-[12px] text-muted-foreground">
-          Ma'lumot yo'q
+          {tFn('report.pnl.no_data')}
         </p>
       )}
     </div>
@@ -231,12 +239,16 @@ function SimpleLine({
   );
 }
 
-function EmptyReport(): React.ReactElement {
+interface EmptyReportProps {
+  tFn: TFunction;
+}
+
+function EmptyReport({ tFn }: EmptyReportProps): React.ReactElement {
   return (
     <div className="px-6 py-12 text-center">
       <FileSearch className="mx-auto h-10 w-10 text-muted-foreground" />
       <p className="mt-3 text-[14px] text-muted-foreground">
-        Tanlangan davr uchun ma'lumot yo'q
+        {tFn('report.pnl.no_data_for_period')}
       </p>
     </div>
   );

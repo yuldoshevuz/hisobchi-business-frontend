@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { formatMoney } from '@/lib/format';
 import {
@@ -34,6 +35,7 @@ export function TransactionListItem({
   showCategoryBadge = true,
   onTap,
 }: TransactionListItemProps): React.ReactElement {
+  const { t } = useTranslation();
   const Icon = TRANSACTION_TYPE_ICON[transaction.type];
   const sign = TRANSACTION_TYPE_SIGN[transaction.type];
   const isVoided = transaction.status === 'voided';
@@ -113,13 +115,13 @@ export function TransactionListItem({
                   variant="outline"
                   className="text-[10px] text-muted-foreground"
                 >
-                  Boshqa
+                  {t('tx_list_item.other_category')}
                 </Badge>
               )
             ) : null}
             {isVoided ? (
               <Badge variant="destructive" className="text-[10px]">
-                Bekor qilingan
+                {t('tx_list_item.voided')}
               </Badge>
             ) : typeHasPaymentLifecycle(transaction.type) ? (
               <Badge

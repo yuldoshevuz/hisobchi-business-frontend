@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useUpdateProduct } from '@/api/hooks/use-products';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
@@ -38,6 +39,7 @@ export function EditProductForm({
   product,
   onClose,
 }: EditProductFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const update = useUpdateProduct();
   const categories = useCategories({ type: 'product', all: true });
 
@@ -145,7 +147,7 @@ export function EditProductForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="edit-product-name">Nom</Label>
+        <Label htmlFor="edit-product-name">{t('edit_product.name')}</Label>
         <Input
           id="edit-product-name"
           value={name}
@@ -158,15 +160,15 @@ export function EditProductForm({
 
       {categories.isPending ? (
         <div className="space-y-1.5">
-          <Label>Kategoriya</Label>
+          <Label>{t('edit_product.category')}</Label>
           <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
-            <Spinner /> Yuklanmoqda…
+            <Spinner /> {t('edit_product.loading')}
           </div>
         </div>
       ) : (
         <SelectField<string>
           id="edit-product-category"
-          label="Kategoriya"
+          label={t('edit_product.category')}
           value={categoryKey === '' ? null : categoryKey}
           onChange={(next) => setCategoryKey(next ?? '')}
           options={options.map((o) => ({
@@ -179,30 +181,29 @@ export function EditProductForm({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="edit-product-price">Narx</Label>
+          <Label htmlFor="edit-product-price">{t('edit_product.price')}</Label>
           <Input
             id="edit-product-price"
             value={formatAmount(defaultPrice)}
             onChange={(e) => setDefaultPrice(unformatAmount(e.target.value))}
-            placeholder="12 000"
+            placeholder={t('edit_product.price_placeholder')}
             inputMode="decimal"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="edit-product-cost">Tannarx</Label>
+          <Label htmlFor="edit-product-cost">{t('edit_product.cost')}</Label>
           <Input
             id="edit-product-cost"
             value={formatAmount(defaultCost)}
             onChange={(e) => setDefaultCost(unformatAmount(e.target.value))}
-            placeholder="8 000"
+            placeholder={t('edit_product.cost_placeholder')}
             inputMode="decimal"
           />
         </div>
       </div>
 
       <p className="text-[12px] text-muted-foreground">
-        Valyuta o‘zgartirilmaydi ({product.currency}). Buning uchun mahsulotni
-        arxivlab, qaytadan yarating.
+        {t('edit_product.currency_locked', { currency: product.currency })}
       </p>
 
       {update.isError ? (
@@ -218,7 +219,7 @@ export function EditProductForm({
         disabled={!isNameValid || !hasChanges || update.isPending}
       >
         {update.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   useCreateCategory,
   useCustomizeSystemCategory,
@@ -51,6 +52,7 @@ export function CategoryEditor({
   mode,
   onClose,
 }: CategoryEditorProps): React.ReactElement {
+  const { t } = useTranslation();
   const create = useCreateCategory();
   const update = useUpdateCategory();
   const customize = useCustomizeSystemCategory();
@@ -164,7 +166,7 @@ export function CategoryEditor({
         />
         <div className="min-w-0 flex-1">
           <div className="truncate text-[15px] font-medium">
-            {trimmedName || 'Yangi kategoriya'}
+            {trimmedName || t('category_editor.new_category_placeholder')}
           </div>
           <div className="text-[12px] text-muted-foreground">
             {CATEGORY_TYPE_LABEL[type]}
@@ -173,12 +175,12 @@ export function CategoryEditor({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="category-name">Nom</Label>
+        <Label htmlFor="category-name">{t('category_editor.name')}</Label>
         <Input
           id="category-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Marketing"
+          placeholder={t('category_editor.name_placeholder')}
           maxLength={CATEGORY_NAME_MAX_LENGTH}
           required
           autoFocus
@@ -187,18 +189,18 @@ export function CategoryEditor({
 
       {mode.kind === 'create' ? (
         <div className="space-y-1.5">
-          <Label>Turi</Label>
+          <Label>{t('category_editor.type')}</Label>
           <div className="grid grid-cols-3 gap-2">
-            {CATEGORY_TYPE_VALUES.map((t) => {
-              const Icon = CATEGORY_TYPE_ICON[t];
-              const selected = type === t;
+            {CATEGORY_TYPE_VALUES.map((tValue) => {
+              const Icon = CATEGORY_TYPE_ICON[tValue];
+              const selected = type === tValue;
               return (
                 <button
-                  key={t}
+                  key={tValue}
                   type="button"
                   onClick={() => {
                     tgHapticImpact('light');
-                    setType(t);
+                    setType(tValue);
                   }}
                   className={`press flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-[13px] ${
                     selected
@@ -207,7 +209,7 @@ export function CategoryEditor({
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  <span>{CATEGORY_TYPE_LABEL[t]}</span>
+                  <span>{CATEGORY_TYPE_LABEL[tValue]}</span>
                 </button>
               );
             })}
@@ -216,12 +218,12 @@ export function CategoryEditor({
       ) : null}
 
       <div className="space-y-1.5">
-        <Label>Rang</Label>
+        <Label>{t('category_editor.color')}</Label>
         <ColorPicker value={color} onChange={setColor} />
       </div>
 
       <div className="space-y-1.5">
-        <Label>Belgi</Label>
+        <Label>{t('category_editor.icon')}</Label>
         <IconPicker value={icon} onChange={setIcon} />
       </div>
 
@@ -238,7 +240,7 @@ export function CategoryEditor({
         disabled={!isNameValid || !dirty || pending}
       >
         {pending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

@@ -110,7 +110,10 @@ export function RolesPage({
                     ) : null}
                   </span>
                 }
-                subtitle={`${role.permissionSlugs.length} ruxsat • ${role.memberCount} xodim`}
+                subtitle={t('roles_page.permissions_count', {
+                  count: role.permissionSlugs.length,
+                  employees: role.memberCount,
+                })}
               />
             ))}
           </Section>
@@ -127,8 +130,7 @@ export function RolesPage({
               {customRolesLabel.name}
             </div>
             <p className="text-[12px] text-amber-800">
-              Yangi rol yaratish uchun tarifni yangilashingiz kerak. Tizim
-              rollari (egasi, sotuvchi, va h.k.) joriy tarifda mavjud.
+              {t('roles_page.upgrade_hint')}
             </p>
           </div>
           <Button
@@ -141,7 +143,7 @@ export function RolesPage({
             }}
           >
             <Sparkles className="h-3.5 w-3.5" />
-            Tariflar
+            {t('organizations.plans_button')}
           </Button>
         </div>
       ) : null}
@@ -187,8 +189,8 @@ export function RolesPage({
         title={editing?.name}
         description={
           editing?.isSystem
-            ? "Tizim roli — faqat ko'rish uchun"
-            : 'Rol nomi va ruxsatlarni tanlang'
+            ? t('roles_page.system_only_view')
+            : t('roles_page.form_description')
         }
       >
         {editing ? (
@@ -240,6 +242,7 @@ function RoleForm({
   onClose,
   onAskDelete,
 }: RoleFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const permissions = usePermissions();
   const create = useCreateRole();
   const update = useUpdateRole();
@@ -303,7 +306,7 @@ function RoleForm({
       className="space-y-4"
     >
         <div className="space-y-1.5">
-          <Label htmlFor="role-name">Nomi</Label>
+          <Label htmlFor="role-name">{t('role_form.name')}</Label>
           <Input
             id="role-name"
             value={name}
@@ -370,7 +373,7 @@ function RoleForm({
             disabled={pending || name.trim().length < 2}
           >
             {pending ? <Spinner /> : null}
-            Saqlash
+            {t('common.save')}
           </Button>
         ) : null}
 
@@ -381,7 +384,7 @@ function RoleForm({
             className="w-full text-destructive"
             onClick={onAskDelete}
           >
-            Rolni o'chirish
+            {t('role_form.delete_role')}
         </Button>
       ) : null}
     </form>
@@ -397,6 +400,7 @@ function DeleteRoleConfirm({
   role,
   onClose,
 }: DeleteRoleConfirmProps): React.ReactElement {
+  const { t } = useTranslation();
   const remove = useDeleteRole();
 
   function confirm(): void {
@@ -420,7 +424,7 @@ function DeleteRoleConfirm({
         disabled={remove.isPending}
       >
         {remove.isPending ? <Spinner /> : null}
-        O'chirish
+        {t('delete_role.confirm')}
       </Button>
       <Button
         variant="ghost"
@@ -429,7 +433,7 @@ function DeleteRoleConfirm({
         onClick={onClose}
         disabled={remove.isPending}
       >
-        Bekor qilish
+        {t('common.cancel')}
       </Button>
     </div>
   );

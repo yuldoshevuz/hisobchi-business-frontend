@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useCreateProduct } from '@/api/hooks/use-products';
@@ -43,6 +44,7 @@ interface CategoryOption {
 export function CreateProductForm({
   onClose,
 }: CreateProductFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const create = useCreateProduct();
   // Pickers need the full catalog in one shot. The backend exposes `all=true`
   // to bypass pagination so the picker never misses options.
@@ -143,12 +145,12 @@ export function CreateProductForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="product-name">Nom</Label>
+        <Label htmlFor="product-name">{t('create_product.name')}</Label>
         <Input
           id="product-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Pepsi 1.5L"
+          placeholder={t('create_product.name_placeholder')}
           maxLength={PRODUCT_NAME_MAX_LENGTH}
           required
           autoFocus
@@ -157,15 +159,15 @@ export function CreateProductForm({
 
       {categories.isPending ? (
         <div className="space-y-1.5">
-          <Label>Kategoriya</Label>
+          <Label>{t('create_product.category')}</Label>
           <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
-            <Spinner /> Yuklanmoqda…
+            <Spinner /> {t('create_product.loading')}
           </div>
         </div>
       ) : options.length > 0 ? (
         <SelectField<string>
           id="product-category"
-          label="Kategoriya"
+          label={t('create_product.category')}
           value={categoryKey === '' ? null : categoryKey}
           onChange={(next) => setCategoryKey(next ?? '')}
           options={options.map((o) => ({
@@ -176,15 +178,15 @@ export function CreateProductForm({
         />
       ) : (
         <div className="space-y-1.5">
-          <Label>Kategoriya</Label>
+          <Label>{t('create_product.category')}</Label>
           <p className="text-[12px] text-muted-foreground">
-            "Mahsulot" turidagi kategoriyalar yo'q. Avval kategoriya yarating.
+            {t('create_product.no_categories')}
           </p>
         </div>
       )}
 
       <div className="space-y-1.5">
-        <Label>Valyuta</Label>
+        <Label>{t('create_product.currency')}</Label>
         <div className="flex flex-wrap gap-2">
           {ACCOUNT_CURRENCY_VALUES.map((c) => {
             const selectedCurrency = currency === c;
@@ -211,22 +213,22 @@ export function CreateProductForm({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="product-price">Narx</Label>
+          <Label htmlFor="product-price">{t('create_product.price')}</Label>
           <Input
             id="product-price"
             value={formatAmount(defaultPrice)}
             onChange={(e) => setDefaultPrice(unformatAmount(e.target.value))}
-            placeholder="12 000"
+            placeholder={t('create_product.price_placeholder')}
             inputMode="decimal"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="product-cost">Tannarx</Label>
+          <Label htmlFor="product-cost">{t('create_product.cost')}</Label>
           <Input
             id="product-cost"
             value={formatAmount(defaultCost)}
             onChange={(e) => setDefaultCost(unformatAmount(e.target.value))}
-            placeholder="8 000"
+            placeholder={t('create_product.cost_placeholder')}
             inputMode="decimal"
           />
         </div>
@@ -249,15 +251,15 @@ export function CreateProductForm({
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 text-[15px] font-medium">
-            Ombor hisobi
+            {t('create_product.track_stock')}
             {!canTrackStock && inventoryGate.isReady ? (
               <Lock className="h-3.5 w-3.5 text-amber-600" />
             ) : null}
           </div>
           <div className="text-[12px] text-muted-foreground">
             {canTrackStock
-              ? "Xizmat yoki raqamli mahsulot uchun o‘chiring"
-              : "Tarifingizda mavjud emas — bu mahsulot xizmat sifatida yaratiladi"}
+              ? t('create_product.track_stock_helper_enabled')
+              : t('create_product.track_stock_helper_locked')}
           </div>
         </div>
       </label>
@@ -266,13 +268,13 @@ export function CreateProductForm({
         <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[12px]">
           <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700" />
           <div className="flex-1 text-amber-900">
-            Ombor kuzatuvi (qoldiq, kelib-ketishi) joriy tarifda yo&apos;q.{' '}
+            {t('create_product.inventory_locked')}
             <button
               type="button"
               onClick={() => navigate('/plans')}
               className="underline"
             >
-              Tariflarni ko&apos;rish
+              {t('create_product.view_plans')}
             </button>
             .
           </div>
@@ -281,12 +283,14 @@ export function CreateProductForm({
 
       {trackStock ? (
         <div className="space-y-1.5">
-          <Label htmlFor="product-stock">Boshlang‘ich qoldiq</Label>
+          <Label htmlFor="product-stock">
+            {t('create_product.opening_stock')}
+          </Label>
           <Input
             id="product-stock"
             value={formatAmount(currentStock)}
             onChange={(e) => setCurrentStock(unformatAmount(e.target.value))}
-            placeholder="0"
+            placeholder={t('create_product.opening_stock_placeholder')}
             inputMode="decimal"
           />
         </div>
@@ -305,7 +309,7 @@ export function CreateProductForm({
         disabled={!isValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

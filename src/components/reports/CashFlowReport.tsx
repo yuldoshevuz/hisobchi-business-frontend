@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { ArrowDownLeft, ArrowUpRight, FileSearch } from 'lucide-react';
 import {
   useCashFlowReport,
@@ -45,6 +47,7 @@ const TOP_CATEGORIES_LIMIT = 7;
  *      same direction.
  */
 export function CashFlowReport(): React.ReactElement {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState(DEFAULT_PERIOD);
   const [direction, setDirection] = useState<DirectionTab>('out');
   const [activeCurrency, setActiveCurrency] = useState<string | null>(null);
@@ -83,7 +86,7 @@ export function CashFlowReport(): React.ReactElement {
         />
       ) : null}
 
-      <DirectionTabs value={direction} onChange={setDirection} />
+      <DirectionTabs value={direction} onChange={setDirection} tFn={t} />
 
       {report.isPending ? (
         <div className="flex justify-center py-12">
@@ -101,15 +104,16 @@ export function CashFlowReport(): React.ReactElement {
           />
         </Section>
       ) : (report.data?.byCurrency ?? []).length === 0 ? (
-        <EmptyReport />
+        <EmptyReport tFn={t} />
       ) : direction === 'all' ? (
-        <AllDirectionsSummary report={report.data!} />
+        <AllDirectionsSummary report={report.data!} tFn={t} />
       ) : currentRow ? (
         <DirectionView
           row={currentRow}
           direction={direction}
           timeseries={timeseries.data}
           timeseriesPending={timeseries.isPending}
+          tFn={t}
         />
       ) : null}
     </div>
@@ -121,6 +125,7 @@ interface DirectionViewProps {
   direction: CashFlowDirectionFilter;
   timeseries: CashFlowTimeseriesReport | undefined;
   timeseriesPending: boolean;
+  tFn: TFunction;
 }
 
 function DirectionView({
@@ -128,11 +133,12 @@ function DirectionView({
   direction,
   timeseries,
   timeseriesPending,
+  tFn,
 }: DirectionViewProps): React.ReactElement {
   const bucket = direction === 'in' ? row.inflow : row.outflow;
-  const slices = buildDonutSlices(bucket);
+  const slices = buildDonutSlices(bucket, tFn);
 
-  const accentLabel = direction === 'in' ? 'Kirim' : 'Chiqim';
+  const accentLabel = direction === 'in' ? tFn('report.cash_flow.inflow') : tFn('report.cash_flow.outflow');
   const accentClass =
     direction === 'in'
       ? 'text-[var(--color-help-success)]'
@@ -167,13 +173,13 @@ function DirectionView({
           />
         ) : (
           <div className="py-8 text-center text-[13px] text-muted-foreground">
-            Tanlangan davrda {accentLabel.toLowerCase()} yo'q
+            {tFn('report.cash_flow.no_data_for_direction', { direction: accentLabel.toLowerCase() })}
           </div>
         )}
       </div>
 
       {bucket.byCategory.length > 0 ? (
-        <Section title="Kategoriyalar">
+        <Section title={tFn('report.cash_flow.categories')}>
           {bucket.byCategory.slice(0, 8).map((c, i) => {
             const pct = (Number(c.amount) / Number(bucket.total || 1)) * 100;
             return (
@@ -210,7 +216,7 @@ function DirectionView({
               asStatic
               title={
                 <span className="text-[12px] italic text-muted-foreground">
-                  + boshqalar
+                  {tFn('report.cash_flow.plus_others')}
                 </span>
               }
             />
@@ -223,7 +229,7 @@ function DirectionView({
           <Spinner />
         </div>
       ) : timeseries ? (
-        <TrendBlock report={timeseries} currency={row.currency} />
+        <TrendBlock report={timeseries} currency={row.currency} tFn={tFn} />
       ) : null}
     </div>
   );
@@ -232,11 +238,13 @@ function DirectionView({
 interface TrendBlockProps {
   report: CashFlowTimeseriesReport;
   currency: string;
+  tFn: TFunction;
 }
 
 function TrendBlock({
   report,
   currency,
+  tFn,
 }: TrendBlockProps): React.ReactElement | null {
   const row = report.byCurrency.find((r) => r.currency === currency);
   if (!row || row.series.length === 0) return null;
@@ -248,7 +256,7 @@ function TrendBlock({
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
       <h3 className="mb-2 text-[14px] font-semibold text-foreground">
-        Kunlik grafik
+        {tFn('report.cash_flow.daily_chart')}
       </h3>
       <MultiLineChart xLabels={xLabels} series={series} />
     </div>
@@ -268,7 +276,7 @@ function toChartSeries(s: CategorySeries): ChartSeries {
  * rollup gets the muted slate color so it visually fades into the background
  * relative to the highlighted top categories.
  */
-function buildDonutSlices(bucket: CashFlowDirection): DonutSlice[] {
+function buildDonutSlices(bucket: CashFlowDirection, tFn: TFunction): DonutSlice[] {
   const top = bucket.byCategory.slice(0, TOP_CATEGORIES_LIMIT);
   const rest = bucket.byCategory.slice(TOP_CATEGORIES_LIMIT);
   const slices: DonutSlice[] = top.map((c, i) => ({
@@ -281,7 +289,7 @@ function buildDonutSlices(bucket: CashFlowDirection): DonutSlice[] {
     const sum = rest.reduce((acc, r) => acc + Number(r.amount), 0);
     slices.push({
       key: 'others',
-      label: 'Boshqalar',
+      label: tFn('report.cash_flow.others'),
       value: sum,
       isOther: true,
     });
@@ -330,29 +338,31 @@ function CurrencyChips({
 interface DirectionTabsProps {
   value: DirectionTab;
   onChange: (next: DirectionTab) => void;
+  tFn: TFunction;
 }
 
 function DirectionTabs({
   value,
   onChange,
+  tFn,
 }: DirectionTabsProps): React.ReactElement {
   const tabs: ReadonlyArray<{ id: DirectionTab; label: string }> = [
-    { id: 'all', label: 'Hammasi' },
-    { id: 'in', label: 'Kirim' },
-    { id: 'out', label: 'Chiqim' },
+    { id: 'all', label: tFn('report.cash_flow.tab_all') },
+    { id: 'in', label: tFn('report.cash_flow.tab_in') },
+    { id: 'out', label: tFn('report.cash_flow.tab_out') },
   ];
   return (
     <div className="flex gap-1 rounded-xl bg-muted p-1">
-      {tabs.map((t) => {
-        const active = t.id === value;
+      {tabs.map((tab) => {
+        const active = tab.id === value;
         return (
           <button
-            key={t.id}
+            key={tab.id}
             type="button"
             onClick={() => {
               if (active) return;
               tgHapticImpact('light');
-              onChange(t.id);
+              onChange(tab.id);
             }}
             className={cn(
               'press flex-1 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
@@ -361,7 +371,7 @@ function DirectionTabs({
                 : 'text-muted-foreground',
             )}
           >
-            {t.label}
+            {tab.label}
           </button>
         );
       })}
@@ -371,10 +381,12 @@ function DirectionTabs({
 
 interface AllDirectionsSummaryProps {
   report: CashFlowReportData;
+  tFn: TFunction;
 }
 
 function AllDirectionsSummary({
   report,
+  tFn,
 }: AllDirectionsSummaryProps): React.ReactElement {
   return (
     <div className="space-y-3">
@@ -403,14 +415,14 @@ function AllDirectionsSummary({
             </div>
             <div className="grid grid-cols-2 gap-2">
               <SummaryStat
-                label="Kirim"
+                label={tFn('report.cash_flow.inflow')}
                 amount={row.inflow.total}
                 currency={row.currency}
                 Icon={ArrowDownLeft}
                 accent="success"
               />
               <SummaryStat
-                label="Chiqim"
+                label={tFn('report.cash_flow.outflow')}
                 amount={row.outflow.total}
                 currency={row.currency}
                 Icon={ArrowUpRight}
@@ -473,12 +485,16 @@ function SummaryStat({
   );
 }
 
-function EmptyReport(): React.ReactElement {
+interface EmptyReportProps {
+  tFn: TFunction;
+}
+
+function EmptyReport({ tFn }: EmptyReportProps): React.ReactElement {
   return (
     <div className="px-6 py-12 text-center">
       <FileSearch className="mx-auto h-10 w-10 text-muted-foreground" />
       <p className="mt-3 text-[14px] text-muted-foreground">
-        Tanlangan davr uchun ma'lumot yo'q
+        {tFn('report.cash_flow.no_data_for_period')}
       </p>
     </div>
   );

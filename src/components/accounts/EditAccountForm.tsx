@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUpdateAccount } from '@/api/hooks/use-accounts';
 import { useCreateAdjustment } from '@/api/hooks/use-adjustments';
 import {
@@ -48,6 +49,7 @@ export function EditAccountForm({
   account,
   onClose,
 }: EditAccountFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const update = useUpdateAccount();
   const adjust = useCreateAdjustment();
   const [name, setName] = useState<string>(account.name);
@@ -102,7 +104,10 @@ export function EditAccountForm({
           accountId: account.id,
           direction: correctionDirection,
           amount: correctionAmount,
-          description: `Balansni tahrirlash (${formatMoney(account.currentBalance)} → ${formatMoney(trimmedActual)})`,
+          description: t('edit_account.adjustment_description', {
+            old: formatMoney(account.currentBalance),
+            new: formatMoney(trimmedActual),
+          }),
         });
       } catch {
         tgHapticNotify('error');
@@ -127,6 +132,7 @@ export function EditAccountForm({
     isNameValid,
     hasChanges,
     onClose,
+    t,
   ]);
 
   return (
@@ -138,7 +144,7 @@ export function EditAccountForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="edit-account-name">Nom</Label>
+        <Label htmlFor="edit-account-name">{t('edit_account.name')}</Label>
         <Input
           id="edit-account-name"
           value={name}
@@ -150,18 +156,18 @@ export function EditAccountForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Turi</Label>
+        <Label>{t('edit_account.type')}</Label>
         <div className="grid grid-cols-2 gap-2">
-          {ACCOUNT_TYPE_VALUES.map((t) => {
-            const Icon = ACCOUNT_TYPE_ICON[t];
-            const selected = type === t;
+          {ACCOUNT_TYPE_VALUES.map((tValue) => {
+            const Icon = ACCOUNT_TYPE_ICON[tValue];
+            const selected = type === tValue;
             return (
               <button
-                key={t}
+                key={tValue}
                 type="button"
                 onClick={() => {
                   tgHapticImpact('light');
-                  setType(t);
+                  setType(tValue);
                 }}
                 className={`press flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-[14px] ${
                   selected
@@ -170,7 +176,7 @@ export function EditAccountForm({
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                <span className="truncate">{ACCOUNT_TYPE_LABEL[t]}</span>
+                <span className="truncate">{ACCOUNT_TYPE_LABEL[tValue]}</span>
               </button>
             );
           })}
@@ -178,7 +184,9 @@ export function EditAccountForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="edit-account-balance">Joriy qoldiq</Label>
+        <Label htmlFor="edit-account-balance">
+          {t('edit_account.current_balance')}
+        </Label>
         <Input
           id="edit-account-balance"
           inputMode="decimal"
@@ -190,8 +198,7 @@ export function EditAccountForm({
           placeholder={formatMoney(account.currentBalance)}
         />
         <p className="text-[12px] text-muted-foreground">
-          Hozir hisobda bor bo'lgan haqiqiy summani kiriting. Tizim farq
-          bo'lsa "tuzatish" tranzaksiyasini avtomatik yozadi.
+          {t('edit_account.current_balance_hint')}
         </p>
         {correctionDirection !== null ? (
           <CorrectionPreview
@@ -215,7 +222,7 @@ export function EditAccountForm({
         disabled={!isNameValid || !hasChanges || isPending}
       >
         {isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );
@@ -232,6 +239,7 @@ function CorrectionPreview({
   amount,
   currency,
 }: CorrectionPreviewProps): React.ReactElement {
+  const { t } = useTranslation();
   const isAdd = direction === 'in';
   return (
     <div
@@ -243,7 +251,7 @@ function CorrectionPreview({
       )}
     >
       <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-        Tuzatish
+        {t('edit_account.correction')}
       </div>
       <div
         className={cn(
@@ -254,7 +262,9 @@ function CorrectionPreview({
         {isAdd ? '+' : '−'} {formatMoney(amount)} {currency}
       </div>
       <div className="mt-0.5 text-[11px] text-muted-foreground">
-        {isAdd ? "Balansga qo'shiladi" : 'Balansdan ayriladi'}
+        {isAdd
+          ? t('edit_account.correction_add')
+          : t('edit_account.correction_subtract')}
       </div>
     </div>
   );

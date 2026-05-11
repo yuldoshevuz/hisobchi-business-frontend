@@ -118,7 +118,7 @@ export function MembersPage({
           <div className="px-6 py-12 text-center">
             <UserPlus className="mx-auto h-10 w-10 text-muted-foreground" />
             <p className="mt-3 text-[14px] text-muted-foreground">
-              Xodim topilmadi
+              {t('members.empty')}
             </p>
           </div>
         )}
@@ -133,11 +133,10 @@ export function MembersPage({
               </div>
               <div className="flex-1 space-y-1">
                 <div className="text-[13px] font-medium text-amber-900">
-                  Xodimlar chegarasiga yetdingiz
+                  {t('members.limit_title')}
                 </div>
                 <p className="text-[12px] text-amber-800">
-                  Joriy tarif: {employeeGuard.label}. Yangi xodim taklif qilish
-                  uchun tarifni yangilang.
+                  {t('members.limit_description', { plan: employeeGuard.label })}
                 </p>
               </div>
               <Button
@@ -149,7 +148,7 @@ export function MembersPage({
                   navigate('/plans');
                 }}
               >
-                Tariflar
+                {t('organizations.plans_button')}
               </Button>
             </div>
           ) : null}
@@ -172,12 +171,12 @@ export function MembersPage({
                 <Lock className="h-5 w-5" />
               )}
               {employeeGuard.canCreate
-                ? `Xodim taklif qilish${
+                ? `${t('members.invite_button')}${
                     employeeGuard.limit !== null && typeof employeeGuard.limit === 'number'
                       ? ` (${employeeGuard.label})`
                       : ''
                   }`
-                : 'Tarif chegarasi tugadi'}
+                : t('dashboard.plan_limit_reached')}
             </Button>
           </ScreenAction>
         </>
@@ -431,6 +430,7 @@ interface InviteMemberFormProps {
 function InviteMemberForm({
   onClose,
 }: InviteMemberFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const invite = useInviteMember();
   const [phone, setPhone] = useState<string>('+998');
   const [name, setName] = useState<string>('');
@@ -462,7 +462,7 @@ function InviteMemberForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="invite-phone">Telefon</Label>
+        <Label htmlFor="invite-phone">{t('invite_member.phone')}</Label>
         <Input
           id="invite-phone"
           value={phone}
@@ -474,12 +474,12 @@ function InviteMemberForm({
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="invite-name">Ism (ixtiyoriy)</Label>
+        <Label htmlFor="invite-name">{t('invite_member.name_optional')}</Label>
         <Input
           id="invite-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Azizbek Karimov"
+          placeholder={t('invite_member.name_placeholder')}
         />
       </div>
       {invite.isError ? (
@@ -494,7 +494,7 @@ function InviteMemberForm({
         disabled={invite.isPending || phone.trim().length < 9}
       >
         {invite.isPending ? <Spinner /> : null}
-        Taklif qilish
+        {t('invite_member.submit')}
       </Button>
     </form>
   );
@@ -524,6 +524,7 @@ function EditEmployeeForm({
   rolesLoading,
   onClose,
 }: EditEmployeeFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const updateDefaults = useUpdateEmployeeDefaults();
   const assign = useAssignMemberRoles();
 
@@ -639,7 +640,7 @@ function EditEmployeeForm({
       {/* ── Oylik (salary) + valyuta ──────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="emp-salary">Oylik (ixtiyoriy)</Label>
+          <Label htmlFor="emp-salary">{t('edit_employee.salary_optional')}</Label>
           <Input
             id="emp-salary"
             inputMode="decimal"
@@ -649,7 +650,7 @@ function EditEmployeeForm({
           />
         </div>
         <div className="space-y-1.5">
-          <Label>Valyuta</Label>
+          <Label>{t('edit_employee.currency')}</Label>
           <div className="flex flex-wrap gap-2">
             {EMP_CURRENCIES.map((c) => {
               const selected = salaryCurrency === c;
@@ -677,7 +678,7 @@ function EditEmployeeForm({
 
       {/* ── Sotuvdan foiz (commission %) ──────────────────────────────── */}
       <div className="space-y-1.5">
-        <Label htmlFor="emp-percentage">Sotuvdan foiz (ixtiyoriy)</Label>
+        <Label htmlFor="emp-percentage">{t('edit_employee.commission_optional')}</Label>
         <Input
           id="emp-percentage"
           inputMode="decimal"
@@ -686,20 +687,20 @@ function EditEmployeeForm({
           placeholder="0–100"
         />
         <p className="text-[12px] text-muted-foreground">
-          Komissiya yaratishda asosiy qiymat sifatida ishlatiladi.
+          {t('edit_employee.commission_hint')}
         </p>
       </div>
 
       {/* ── Rollar ─────────────────────────────────────────────────────── */}
       <div className="space-y-1.5">
-        <Label>Rollar</Label>
+        <Label>{t('edit_employee.roles')}</Label>
         {rolesLoading ? (
           <div className="flex justify-center py-6">
             <Spinner />
           </div>
         ) : roles.length === 0 ? (
           <p className="text-[13px] text-muted-foreground">
-            Tashkilotda hali rol mavjud emas
+            {t('edit_employee.no_roles')}
           </p>
         ) : (
           <div className="-mx-4 divide-y divide-border bg-card">
@@ -717,12 +718,12 @@ function EditEmployeeForm({
                 <div className="min-w-0 flex-1">
                   <div className="text-[15px] font-medium">{r.name}</div>
                   <div className="text-[12px] text-muted-foreground">
-                    {r.permissionSlugs.length} ruxsat
+                    {t('edit_employee.permissions_count', { count: r.permissionSlugs.length })}
                   </div>
                 </div>
                 {r.isSystem ? (
                   <Badge variant="outline" className="text-[10px]">
-                    tizim
+                    {t('edit_employee.system_badge')}
                   </Badge>
                 ) : null}
               </label>
@@ -746,7 +747,7 @@ function EditEmployeeForm({
         }
       >
         {isPending ? <Spinner className="h-5 w-5" /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

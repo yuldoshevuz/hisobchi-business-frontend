@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMembers } from '@/api/hooks/use-members';
 import { useTransactions } from '@/api/hooks/use-transactions';
 import { useCreateCommission } from '@/api/hooks/use-commissions';
@@ -26,6 +27,7 @@ export function CreateCommissionForm({
   onClose,
   defaultSaleId,
 }: CreateCommissionFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const create = useCreateCommission();
   // Active sales only — backend rejects voided parents anyway, but filtering
   // here keeps the picker tidy.
@@ -146,30 +148,30 @@ export function CreateCommissionForm({
     >
       <SelectField
         id="comm-sale"
-        label="Sotuv"
+        label={t('create_commission.sale')}
         value={saleId}
         onChange={(next) => setSaleId(next)}
         options={saleOptions}
         emptyText={
-          sales.isPending ? 'Yuklanmoqda...' : "Faol sotuvlar yo'q"
+          sales.isPending ? t('create_commission.loading') : t('create_commission.no_sales')
         }
         disabled={defaultSaleId !== undefined}
       />
 
       <SelectField
         id="comm-member"
-        label="Xodim"
+        label={t('create_commission.member')}
         value={memberId}
         onChange={(next) => setMemberId(next)}
         options={memberOptions}
         emptyText={
-          members.isPending ? 'Yuklanmoqda...' : "Faol xodimlar yo'q"
+          members.isPending ? t('create_commission.loading') : t('create_commission.no_members')
         }
       />
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="comm-amount">Summa</Label>
+          <Label htmlFor="comm-amount">{t('create_commission.amount')}</Label>
           <Input
             id="comm-amount"
             inputMode="decimal"
@@ -183,12 +185,12 @@ export function CreateCommissionForm({
           />
           {selectedSale ? (
             <p className="text-[12px] text-muted-foreground">
-              Valyuta: {selectedSale.currency}
+              {t('create_commission.currency_label', { currency: selectedSale.currency })}
             </p>
           ) : null}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="comm-percentage">Foiz (ixtiyoriy)</Label>
+          <Label htmlFor="comm-percentage">{t('create_commission.percentage')}</Label>
           <Input
             id="comm-percentage"
             inputMode="decimal"
@@ -215,7 +217,7 @@ export function CreateCommissionForm({
         disabled={!isValid || create.isPending}
       >
         {create.isPending ? <Spinner className="h-5 w-5" /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Search, Users, X } from 'lucide-react';
 import { useContactsReport } from '@/api/hooks/use-reports';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -19,21 +21,9 @@ import type {
 
 type TypeFilter = ContactType | 'all';
 
-const TYPE_LABEL: Record<ContactType, string> = {
-  customer: 'Mijozlar',
-  supplier: 'Ta’minotchilar',
-  partner: 'Hamkorlar',
-};
-
-const TYPE_BADGE_LABEL: Record<ContactType, string> = {
-  customer: 'mijoz',
-  supplier: "ta'minotchi",
-  partner: 'hamkor',
-};
-
-const MONTHS_UZ_SHORT = [
-  'Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn',
-  'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek',
+const MONTH_KEYS = [
+  'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+  'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
 ] as const;
 
 /**
@@ -50,6 +40,7 @@ const MONTHS_UZ_SHORT = [
  *      receivable / payable).
  */
 export function ContactsReport(): React.ReactElement {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState(DEFAULT_PERIOD);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [search, setSearch] = useState<string>('');
@@ -76,7 +67,7 @@ export function ContactsReport(): React.ReactElement {
         onChange={setPeriod}
       />
 
-      <TypeChips value={typeFilter} onChange={setTypeFilter} />
+      <TypeChips value={typeFilter} onChange={setTypeFilter} tFn={t} />
 
       {report.isPending ? (
         <div className="flex justify-center py-10">
@@ -95,20 +86,20 @@ export function ContactsReport(): React.ReactElement {
         </Section>
       ) : (
         <>
-          <TotalsCard totals={report.data?.totals ?? []} />
+          <TotalsCard totals={report.data?.totals ?? []} tFn={t} />
 
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Kontakt nomi yoki telefoni"
+              placeholder={t('report.contacts.search_placeholder')}
               className="pl-9 pr-9"
             />
             {term !== '' ? (
               <button
                 type="button"
-                aria-label="Tozalash"
+                aria-label={t('report.contacts.clear')}
                 onClick={() => setSearch('')}
                 className="press absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground active:bg-accent"
               >
@@ -118,9 +109,9 @@ export function ContactsReport(): React.ReactElement {
           </div>
 
           {filtered.length > 0 ? (
-            <Section title={`${filtered.length} ta kontakt`}>
+            <Section title={t('report.contacts.count', { count: filtered.length })}>
               {filtered.map((row) => (
-                <ContactRow key={row.contactId} row={row} />
+                <ContactRow key={row.contactId} row={row} tFn={t} />
               ))}
             </Section>
           ) : (
@@ -128,8 +119,8 @@ export function ContactsReport(): React.ReactElement {
               <Users className="mx-auto h-10 w-10 text-muted-foreground" />
               <p className="mt-3 text-[14px] text-muted-foreground">
                 {term !== '' || typeFilter !== 'all'
-                  ? "Filtrga mos kontakt yo'q"
-                  : 'Tanlangan davrda faollik yo‘q'}
+                  ? t('report.contacts.no_match')
+                  : t('report.contacts.no_activity')}
               </p>
             </div>
           )}
@@ -144,14 +135,15 @@ export function ContactsReport(): React.ReactElement {
 interface TypeChipsProps {
   value: TypeFilter;
   onChange: (next: TypeFilter) => void;
+  tFn: TFunction;
 }
 
-function TypeChips({ value, onChange }: TypeChipsProps): React.ReactElement {
+function TypeChips({ value, onChange, tFn }: TypeChipsProps): React.ReactElement {
   const options: ReadonlyArray<{ key: TypeFilter; label: string }> = [
-    { key: 'all', label: 'Hammasi' },
-    { key: 'customer', label: TYPE_LABEL.customer },
-    { key: 'supplier', label: TYPE_LABEL.supplier },
-    { key: 'partner', label: TYPE_LABEL.partner },
+    { key: 'all', label: tFn('report.contacts.all') },
+    { key: 'customer', label: tFn('report.contacts.type.customer') },
+    { key: 'supplier', label: tFn('report.contacts.type.supplier') },
+    { key: 'partner', label: tFn('report.contacts.type.partner') },
   ];
   return (
     <div className="flex flex-wrap gap-2">
@@ -185,34 +177,35 @@ function TypeChips({ value, onChange }: TypeChipsProps): React.ReactElement {
 
 interface TotalsCardProps {
   totals: ContactsReportTotalsByCurrency[];
+  tFn: TFunction;
 }
 
-function TotalsCard({ totals }: TotalsCardProps): React.ReactElement {
+function TotalsCard({ totals, tFn }: TotalsCardProps): React.ReactElement {
   if (totals.length === 0) {
     return (
       <div className="rounded-2xl bg-muted/40 p-4 text-center">
         <p className="text-[13px] text-muted-foreground">
-          Tanlangan davrda yozuv topilmadi
+          {tFn('report.contacts.totals_empty')}
         </p>
       </div>
     );
   }
   return (
     <div className="space-y-2">
-      {totals.map((t) => (
+      {totals.map((tot) => (
         <div
-          key={t.currency}
+          key={tot.currency}
           className="rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-4"
         >
           <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
             <Users className="h-3.5 w-3.5" />
-            Jami {t.currency}
+            {tFn('report.contacts.totals_label', { currency: tot.currency })}
           </div>
           <div className="mt-2 grid grid-cols-2 gap-3">
-            <TotalCell label="Sotuvlar" value={t.totalSales} currency={t.currency} positive />
-            <TotalCell label="Xaridlar" value={t.totalPurchases} currency={t.currency} />
-            <TotalCell label="Olinadigan" value={t.receivable} currency={t.currency} positive />
-            <TotalCell label="Beriladigan" value={t.payable} currency={t.currency} negative />
+            <TotalCell label={tFn('report.contacts.totals.sales')} value={tot.totalSales} currency={tot.currency} positive />
+            <TotalCell label={tFn('report.contacts.totals.purchases')} value={tot.totalPurchases} currency={tot.currency} />
+            <TotalCell label={tFn('report.contacts.totals.receivable')} value={tot.receivable} currency={tot.currency} positive />
+            <TotalCell label={tFn('report.contacts.totals.payable')} value={tot.payable} currency={tot.currency} negative />
           </div>
         </div>
       ))}
@@ -260,9 +253,10 @@ function TotalCell({
 
 interface ContactRowProps {
   row: ContactsReportRow;
+  tFn: TFunction;
 }
 
-function ContactRow({ row }: ContactRowProps): React.ReactElement {
+function ContactRow({ row, tFn }: ContactRowProps): React.ReactElement {
   const initials = row.name
     .split(' ')
     .map((p) => p[0])
@@ -285,7 +279,7 @@ function ContactRow({ row }: ContactRowProps): React.ReactElement {
         <span className="flex items-center gap-2">
           <span className="truncate">{row.name}</span>
           <Badge variant="secondary" className="text-[10px]">
-            {TYPE_BADGE_LABEL[row.type]}
+            {tFn(`report.contacts.badge.${row.type}`)}
           </Badge>
         </span>
       }
@@ -296,12 +290,12 @@ function ContactRow({ row }: ContactRowProps): React.ReactElement {
             {row.lastActivityAt ? (
               <>
                 <span className="text-muted-foreground/50">·</span>
-                <span>oxirgi: {formatDateUz(row.lastActivityAt)}</span>
+                <span>{tFn('report.contacts.last_activity', { date: formatDateUz(row.lastActivityAt, tFn) })}</span>
               </>
             ) : null}
           </span>
           {row.byCurrency.map((c) => (
-            <CurrencyMini key={c.currency} c={c} />
+            <CurrencyMini key={c.currency} c={c} tFn={tFn} />
           ))}
         </span>
       }
@@ -318,25 +312,26 @@ interface CurrencyMiniProps {
     payable: string;
     txCount: number;
   };
+  tFn: TFunction;
 }
 
-function CurrencyMini({ c }: CurrencyMiniProps): React.ReactElement {
+function CurrencyMini({ c, tFn }: CurrencyMiniProps): React.ReactElement {
   // Mini grid showing a contact's volumes + open balances for ONE currency.
   // We surface the four numbers most users glance at (sales/purchases/
   // receivable/payable). Other types (debt_in/out, income/expense) are
   // captured in totals via the aggregate but hidden here to keep the row
   // compact.
   const cells: ReadonlyArray<{ label: string; value: string; tone?: 'pos' | 'neg' }> = [
-    { label: 'Sotuv', value: c.totalSales, tone: 'pos' },
-    { label: 'Xarid', value: c.totalPurchases },
-    { label: 'Olinadigan', value: c.receivable, tone: 'pos' },
-    { label: 'Beriladigan', value: c.payable, tone: 'neg' },
+    { label: tFn('report.contacts.cell.sale'), value: c.totalSales, tone: 'pos' },
+    { label: tFn('report.contacts.cell.purchase'), value: c.totalPurchases },
+    { label: tFn('report.contacts.cell.receivable'), value: c.receivable, tone: 'pos' },
+    { label: tFn('report.contacts.cell.payable'), value: c.payable, tone: 'neg' },
   ];
   return (
     <span className="block rounded-lg bg-muted/40 px-2 py-1.5">
       <span className="flex items-center justify-between text-[10px] uppercase tracking-wide text-muted-foreground">
         <span>{c.currency}</span>
-        <span>{c.txCount} yozuv</span>
+        <span>{tFn('report.contacts.records_count', { count: c.txCount })}</span>
       </span>
       <span className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1">
         {cells.map((cell) => (
@@ -363,9 +358,9 @@ function CurrencyMini({ c }: CurrencyMiniProps): React.ReactElement {
 
 // ─────────────────────────────────────────────────────── utils ─────
 
-function formatDateUz(iso: string): string {
+function formatDateUz(iso: string, tFn: TFunction): string {
   const [datePart] = iso.split('T');
   const [y, m, d] = (datePart ?? '').split('-').map((p) => Number(p));
   if (!y || !m || !d) return iso;
-  return `${d.toString().padStart(2, '0')} ${MONTHS_UZ_SHORT[m - 1]} ${y}`;
+  return `${d.toString().padStart(2, '0')} ${tFn(`report.contacts.month.${MONTH_KEYS[m - 1]}`)} ${y}`;
 }

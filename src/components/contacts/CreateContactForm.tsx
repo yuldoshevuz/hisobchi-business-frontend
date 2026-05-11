@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCreateContact } from '@/api/hooks/use-contacts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,8 +16,8 @@ import {
 } from '@/types/contact.types';
 import {
   CONTACT_TYPE_ICON,
-  CONTACT_TYPE_LABEL,
   CONTACT_TYPE_NONE_ICON,
+  getContactTypeLabel,
   getContactTypeNoneLabel,
 } from './contact-meta';
 
@@ -38,6 +39,7 @@ export function CreateContactForm({
   onClose,
   initialValues,
 }: CreateContactFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const create = useCreateContact();
   const [name, setName] = useState<string>(initialValues?.name ?? '');
   const [type, setType] = useState<ContactType | null>(
@@ -84,12 +86,12 @@ export function CreateContactForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="contact-name">Nom</Label>
+        <Label htmlFor="contact-name">{t('create_contact.name')}</Label>
         <Input
           id="contact-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Hisobchi Demo LLC"
+          placeholder={t('create_contact.name_placeholder')}
           maxLength={CONTACT_NAME_MAX_LENGTH}
           required
           autoFocus
@@ -97,18 +99,18 @@ export function CreateContactForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Turi</Label>
+        <Label>{t('create_contact.type')}</Label>
         <div className="grid grid-cols-2 gap-2">
-          {CONTACT_TYPE_VALUES.map((t) => {
-            const Icon = CONTACT_TYPE_ICON[t];
-            const selected = type === t;
+          {CONTACT_TYPE_VALUES.map((tValue) => {
+            const Icon = CONTACT_TYPE_ICON[tValue];
+            const selected = type === tValue;
             return (
               <button
-                key={t}
+                key={tValue}
                 type="button"
                 onClick={() => {
                   tgHapticImpact('light');
-                  setType(t);
+                  setType(tValue);
                 }}
                 className={`press flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-[12px] ${
                   selected
@@ -117,7 +119,7 @@ export function CreateContactForm({
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                <span className="truncate">{CONTACT_TYPE_LABEL[t]}</span>
+                <span className="truncate">{getContactTypeLabel(tValue)}</span>
               </button>
             );
           })}
@@ -141,36 +143,38 @@ export function CreateContactForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="contact-phone">Telefon</Label>
+        <Label htmlFor="contact-phone">{t('create_contact.phone')}</Label>
         <Input
           id="contact-phone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+998901234567"
+          placeholder={t('create_contact.phone_placeholder')}
           inputMode="tel"
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="contact-credit">Kredit limiti</Label>
+        <Label htmlFor="contact-credit">
+          {t('create_contact.credit_limit')}
+        </Label>
         <Input
           id="contact-credit"
           value={creditLimit}
           onChange={(e) => setCreditLimit(e.target.value)}
-          placeholder="5000000"
+          placeholder={t('create_contact.credit_limit_placeholder')}
           inputMode="decimal"
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="contact-notes">Eslatma</Label>
+        <Label htmlFor="contact-notes">{t('create_contact.notes')}</Label>
         <textarea
           id="contact-notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           maxLength={CONTACT_NOTES_MAX_LENGTH}
           rows={3}
-          placeholder="Qo‘shimcha izoh"
+          placeholder={t('create_contact.notes_placeholder')}
           className="flex min-h-[80px] w-full rounded-xl border border-input bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
@@ -188,7 +192,7 @@ export function CreateContactForm({
         disabled={!isValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

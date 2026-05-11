@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -34,6 +35,7 @@ export function TransactionFiltersSheet({
   value,
   onChange,
 }: TransactionFiltersSheetProps): React.ReactElement {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<ListTransactionsQuery>(value);
   const [lastSeenOpen, setLastSeenOpen] = useState<boolean>(open);
   const accounts = useAccounts({ status: 'active' }, { enabled: open });
@@ -121,21 +123,21 @@ export function TransactionFiltersSheet({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Saralash"
-      description="Tranzaktsiyalar bo'yicha filterlar"
+      title={t('tx_filters.title')}
+      description={t('tx_filters.description')}
     >
       <div className="space-y-5">
         <div className="space-y-2">
-          <Label>Turi</Label>
+          <Label>{t('tx_filters.type')}</Label>
           <div className="flex flex-wrap gap-2">
-            {TRANSACTION_TYPE_VALUES.map((t) => {
-              const Icon = TRANSACTION_TYPE_ICON[t];
-              const selected = (draft.type ?? []).includes(t);
+            {TRANSACTION_TYPE_VALUES.map((typeKey) => {
+              const Icon = TRANSACTION_TYPE_ICON[typeKey];
+              const selected = (draft.type ?? []).includes(typeKey);
               return (
                 <button
-                  key={t}
+                  key={typeKey}
                   type="button"
-                  onClick={() => toggleType(t)}
+                  onClick={() => toggleType(typeKey)}
                   className={cn(
                     'press inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px]',
                     selected
@@ -144,7 +146,7 @@ export function TransactionFiltersSheet({
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
-                  {TRANSACTION_TYPE_LABEL[t]}
+                  {TRANSACTION_TYPE_LABEL[typeKey]}
                 </button>
               );
             })}
@@ -152,7 +154,7 @@ export function TransactionFiltersSheet({
         </div>
 
         <div className="space-y-2">
-          <Label>Sana oralig'i</Label>
+          <Label>{t('tx_filters.date_range')}</Label>
           <div className="grid grid-cols-2 gap-2">
             <DatePicker value={draft.dateFrom ?? ''}
               onChange={(next) => setDraft({ ...draft, dateFrom: next || undefined })}
@@ -164,11 +166,11 @@ export function TransactionFiltersSheet({
         </div>
 
         <div className="space-y-2">
-          <Label>Hisoblar</Label>
+          <Label>{t('tx_filters.accounts')}</Label>
           {accounts.isPending ? (
-            <p className="text-[13px] text-muted-foreground">Yuklanmoqda...</p>
+            <p className="text-[13px] text-muted-foreground">{t('tx_filters.loading')}</p>
           ) : (accounts.data ?? []).length === 0 ? (
-            <p className="text-[13px] text-muted-foreground">Hisoblar yo'q</p>
+            <p className="text-[13px] text-muted-foreground">{t('tx_filters.no_accounts')}</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {(accounts.data ?? []).map((a) => {
@@ -194,16 +196,16 @@ export function TransactionFiltersSheet({
         </div>
 
         {([
-          { label: 'Kirim kategoriyalari', list: incomeCategories },
-          { label: 'Chiqim kategoriyalari', list: expenseCategories },
+          { label: t('tx_filters.income_categories'), list: incomeCategories },
+          { label: t('tx_filters.expense_categories'), list: expenseCategories },
         ] as const).map(({ label, list }) => (
           <div key={label} className="space-y-2">
             <Label>{label}</Label>
             {list.isPending ? (
-              <p className="text-[13px] text-muted-foreground">Yuklanmoqda...</p>
+              <p className="text-[13px] text-muted-foreground">{t('tx_filters.loading')}</p>
             ) : (list.data?.data ?? []).length === 0 ? (
               <p className="text-[13px] text-muted-foreground">
-                Kategoriyalar yo'q
+                {t('tx_filters.no_categories')}
               </p>
             ) : (
               <div className="grid grid-cols-4 gap-2">
@@ -261,7 +263,7 @@ export function TransactionFiltersSheet({
         ))}
 
         <div className="space-y-2">
-          <Label>To'lov holati</Label>
+          <Label>{t('tx_filters.payment_status')}</Label>
           <div className="flex flex-wrap gap-2">
             {PAYMENT_STATUS_VALUES.map((s) => {
               const selected = draft.paymentStatus === s;
@@ -285,7 +287,7 @@ export function TransactionFiltersSheet({
         </div>
 
         <div className="space-y-2">
-          <Label>Status</Label>
+          <Label>{t('tx_filters.status')}</Label>
           <div className="flex gap-2">
             {(['active', 'voided'] as const).map((s) => {
               // Multi-toggle: both selected (or neither) = no status filter
@@ -322,7 +324,7 @@ export function TransactionFiltersSheet({
                       : 'border-border bg-card text-foreground',
                   )}
                 >
-                  {s === 'active' ? 'Faol' : 'Bekor qilingan'}
+                  {s === 'active' ? t('tx_filters.status_active') : t('tx_filters.status_voided')}
                 </button>
               );
             })}
@@ -337,10 +339,10 @@ export function TransactionFiltersSheet({
             className="flex-1"
             onClick={reset}
           >
-            Tozalash
+            {t('tx_filters.reset')}
           </Button>
           <Button type="button" size="lg" className="flex-1" onClick={apply}>
-            Qo'llash
+            {t('tx_filters.apply')}
           </Button>
         </div>
       </div>

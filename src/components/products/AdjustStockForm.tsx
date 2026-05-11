@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAdjustStock } from '@/api/hooks/use-products';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +24,7 @@ export function AdjustStockForm({
   product,
   onClose,
 }: AdjustStockFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const adjust = useAdjustStock();
   const [direction, setDirection] = useState<Direction>('IN');
   const [amount, setAmount] = useState<string>('');
@@ -64,7 +66,7 @@ export function AdjustStockForm({
     >
       <div className="rounded-xl bg-muted/40 px-3 py-3 text-center">
         <div className="text-[12px] uppercase tracking-wide text-muted-foreground">
-          Joriy qoldiq
+          {t('adjust_stock.current_stock')}
         </div>
         <div className="mt-1 text-[20px] font-semibold tabular-nums">
           {product.currentStock ?? '—'}
@@ -79,7 +81,7 @@ export function AdjustStockForm({
             setDirection('IN');
           }}
           icon={<Plus className="h-4 w-4" />}
-          label="Kirim"
+          label={t('adjust_stock.direction_in')}
         />
         <DirectionButton
           active={direction === 'OUT'}
@@ -88,17 +90,17 @@ export function AdjustStockForm({
             setDirection('OUT');
           }}
           icon={<Minus className="h-4 w-4" />}
-          label="Chiqim"
+          label={t('adjust_stock.direction_out')}
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="adjust-amount">Miqdor</Label>
+        <Label htmlFor="adjust-amount">{t('adjust_stock.amount')}</Label>
         <Input
           id="adjust-amount"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="5"
+          placeholder={t('adjust_stock.amount_placeholder')}
           inputMode="decimal"
           required
           autoFocus
@@ -106,12 +108,12 @@ export function AdjustStockForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="adjust-reason">Sabab</Label>
+        <Label htmlFor="adjust-reason">{t('adjust_stock.reason')}</Label>
         <Input
           id="adjust-reason"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          placeholder="Recount, sinish, topilgan…"
+          placeholder={t('adjust_stock.reason_placeholder')}
           maxLength={STOCK_ADJUSTMENT_REASON_MAX_LENGTH}
           required
         />
@@ -130,7 +132,7 @@ export function AdjustStockForm({
         disabled={!isValid || adjust.isPending}
       >
         {adjust.isPending ? <Spinner /> : null}
-        Qo‘llash
+        {t('adjust_stock.apply')}
       </Button>
     </form>
   );

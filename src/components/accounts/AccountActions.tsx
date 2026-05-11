@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRightLeft,
@@ -31,6 +32,7 @@ export function AccountActions({
   onClose,
   onEdit,
 }: AccountActionsProps): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const archive = useArchiveAccount();
   const remove = useDeleteAccount();
@@ -77,7 +79,7 @@ export function AccountActions({
   }
 
   function handleDelete(): void {
-    if (!confirm(`${account.name} hisobini o'chirishni tasdiqlaysizmi?`))
+    if (!confirm(t('account_actions.delete_confirm', { name: account.name })))
       return;
     tgHapticImpact('heavy');
     remove.mutate(account.id, {
@@ -121,37 +123,37 @@ export function AccountActions({
         {!isArchived ? (
           <ActionRow
             icon={ArrowRightLeft}
-            title="Balansdan balansga o'tkazish"
-            subtitle="Boshqa hisobga pul ko'chirish"
+            title={t('account_actions.transfer_title')}
+            subtitle={t('account_actions.transfer_subtitle')}
             onClick={openTransfer}
           />
         ) : null}
         <ActionRow
           icon={ListChecks}
-          title="Balans hisobotlarini ko'rish"
-          subtitle="Shu hisob bo'yicha tranzaksiyalar tarixi"
+          title={t('account_actions.reports_title')}
+          subtitle={t('account_actions.reports_subtitle')}
           onClick={openReports}
         />
         {!isArchived && !account.isPrimary ? (
           <ActionRow
             icon={Star}
-            title="Asosiy qilib tayinlash"
-            subtitle="Yangi tranzaksiyalar uchun avtomatik tanlanadi"
+            title={t('account_actions.make_default_title')}
+            subtitle={t('account_actions.make_default_subtitle')}
             onClick={makeDefault}
             loading={update.isPending}
           />
         ) : null}
         <ActionRow
           icon={Pencil}
-          title="Balansni tahrirlash"
-          subtitle="Nom va asosiy belgisini o'zgartirish"
+          title={t('account_actions.edit_title')}
+          subtitle={t('account_actions.edit_subtitle')}
           onClick={onEdit}
         />
         {canArchive ? (
           <ActionRow
             icon={Archive}
-            title="Arxivlash"
-            subtitle="Tarix saqlanadi, lekin yangi yozuvlar yopiladi"
+            title={t('account_actions.archive_title')}
+            subtitle={t('account_actions.archive_subtitle')}
             onClick={handleArchive}
             loading={archive.isPending}
           />
@@ -159,8 +161,8 @@ export function AccountActions({
         {canRestore ? (
           <ActionRow
             icon={ArchiveRestore}
-            title="Arxivdan tiklash"
-            subtitle="Hisob yana faol bo'ladi"
+            title={t('account_actions.restore_title')}
+            subtitle={t('account_actions.restore_subtitle')}
             onClick={handleRestore}
             loading={update.isPending}
           />
@@ -168,8 +170,8 @@ export function AccountActions({
         {canDelete ? (
           <ActionRow
             icon={Trash2}
-            title="Balansni o'chirish"
-            subtitle="Qaytarib bo'lmaydi"
+            title={t('account_actions.delete_title')}
+            subtitle={t('account_actions.delete_subtitle')}
             destructive
             onClick={handleDelete}
             loading={remove.isPending}

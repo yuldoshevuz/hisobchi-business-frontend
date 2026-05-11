@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, SlidersHorizontal, Users } from 'lucide-react';
 import {
   CONTACT_TYPE_ICON,
@@ -64,6 +65,7 @@ export function ContactPickerField({
   defaultTypeFilter = 'all',
   emptyText,
 }: ContactPickerFieldProps): React.ReactElement {
+  const { t } = useTranslation();
   const [typeFilter, setTypeFilter] = useState<TypeFilter>(defaultTypeFilter);
 
   const filtered =
@@ -76,8 +78,13 @@ export function ContactPickerField({
   const computedEmpty =
     emptyText ??
     (typeFilter === 'all'
-      ? "Kontakt yo'q"
-      : `${typeFilter === CONTACT_TYPE_NONE ? getContactTypeNoneLabel() : CONTACT_TYPE_LABEL[typeFilter]} toifasida kontakt yo'q`);
+      ? t('contact_picker.empty')
+      : t('contact_picker.empty_for_type', {
+          type:
+            typeFilter === CONTACT_TYPE_NONE
+              ? getContactTypeNoneLabel()
+              : CONTACT_TYPE_LABEL[typeFilter],
+        }));
 
   return (
     <SelectField
@@ -115,6 +122,7 @@ function TypeFilterButton({
   value,
   onChange,
 }: TypeFilterButtonProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState<boolean>(false);
   const isFiltered = value !== 'all';
   const TriggerIcon =
@@ -134,7 +142,7 @@ function TypeFilterButton({
     <>
       <button
         type="button"
-        aria-label="Turi bo'yicha filter"
+        aria-label={t('contact_picker.filter_by_type')}
         aria-pressed={isFiltered}
         onClick={() => {
           tgHapticImpact('light');
@@ -150,7 +158,7 @@ function TypeFilterButton({
         <TriggerIcon className="h-4 w-4" />
       </button>
 
-      <Modal open={open} onOpenChange={setOpen} title="Turi bo'yicha filter">
+      <Modal open={open} onOpenChange={setOpen} title={t('contact_picker.filter_by_type')}>
         <div className="-mx-4 divide-y divide-border bg-card">
           {(
             ['all', ...CONTACT_TYPE_VALUES, CONTACT_TYPE_NONE] as TypeFilter[]
@@ -164,7 +172,7 @@ function TypeFilterButton({
                   : CONTACT_TYPE_ICON[key];
             const labelText =
               key === 'all'
-                ? 'Hammasi'
+                ? t('contact_picker.all')
                 : key === CONTACT_TYPE_NONE
                   ? getContactTypeNoneLabel()
                   : CONTACT_TYPE_LABEL[key];

@@ -51,9 +51,9 @@ const MONTHS_UZ_SHORT = [
   'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek',
 ] as const;
 
-const TABS: ReadonlyArray<{ id: Tab; label: string; icon: typeof ListChecks }> = [
-  { id: 'list', label: 'Komissiyalar', icon: ListChecks },
-  { id: 'reports', label: 'Hisobotlar', icon: TrendingUp },
+const TAB_DEFS: ReadonlyArray<{ id: Tab; icon: typeof ListChecks }> = [
+  { id: 'list', icon: ListChecks },
+  { id: 'reports', icon: TrendingUp },
 ];
 
 export function CommissionsPage(): React.ReactElement {
@@ -88,7 +88,7 @@ export function CommissionsPage(): React.ReactElement {
       <AccessDeniedView
         title={t('commissions_page.title')}
         description={t('commissions_page.no_access')}
-        hint="'commissions.read' ruxsati kerak."
+        hint={t('commissions_page.no_access_hint')}
       />
     );
   }
@@ -134,17 +134,17 @@ export function CommissionsPage(): React.ReactElement {
       {/* ── Top tabs ──────────────────────────────────────────────────── */}
       <div className="px-4 pb-3">
         <div className="flex gap-1 rounded-xl bg-muted p-1">
-          {TABS.map((t) => {
-            const active = t.id === tab;
-            const Icon = t.icon;
+          {TAB_DEFS.map((def) => {
+            const active = def.id === tab;
+            const Icon = def.icon;
             return (
               <button
-                key={t.id}
+                key={def.id}
                 type="button"
                 onClick={() => {
                   if (active) return;
                   tgHapticImpact('light');
-                  setTab(t.id);
+                  setTab(def.id);
                 }}
                 className={cn(
                   'press flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-[14px] font-medium transition-colors',
@@ -154,7 +154,7 @@ export function CommissionsPage(): React.ReactElement {
                 )}
               >
                 <Icon className="h-4 w-4" />
-                {t.label}
+                {t(`commissions_page.tab.${def.id}`)}
               </button>
             );
           })}
@@ -202,7 +202,7 @@ export function CommissionsPage(): React.ReactElement {
             }}
           >
             <Plus className="h-5 w-5" />
-            Yangi komissiya
+            {t('commissions_page.new_commission_button')}
           </Button>
         </ScreenAction>
       ) : null}
@@ -210,8 +210,8 @@ export function CommissionsPage(): React.ReactElement {
       <Modal
         open={filtersOpen}
         onOpenChange={setFiltersOpen}
-        title="Filtrlash"
-        description="Komissiyalarni tanlangan sharoitlar bo'yicha filtrlang"
+        title={t('commissions_page.filter_title')}
+        description={t('commissions_page.filter_description')}
       >
         <FiltersForm
           status={statusFilter}
@@ -233,8 +233,8 @@ export function CommissionsPage(): React.ReactElement {
       <Modal
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Yangi komissiya"
-        description="Sotuvga xodim ulushini biriktiring"
+        title={t('commissions_page.new_commission_title')}
+        description={t('commissions_page.new_commission_description')}
       >
         <CreateCommissionForm onClose={() => setCreateOpen(false)} />
       </Modal>
@@ -244,7 +244,7 @@ export function CommissionsPage(): React.ReactElement {
         onOpenChange={(o) => {
           if (!o) setVoiding(null);
         }}
-        title="Komissiyani bekor qilish"
+        title={t('commissions_page.void_title')}
         description={
           voiding
             ? `#${voiding.id} · ${formatMoney(voiding.amount, voiding.currency)}`
@@ -300,6 +300,7 @@ function ListTab({
   onVoid,
   onCreate,
 }: ListTabProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <>
       {/* Search + single filter button */}
@@ -310,13 +311,13 @@ function ListTab({
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Xodim, sotuv yoki summa"
+              placeholder={t('commissions_page.search_placeholder')}
               className="pl-9 pr-9"
             />
             {term !== '' ? (
               <button
                 type="button"
-                aria-label="Tozalash"
+                aria-label={t('commissions_page.clear_aria')}
                 onClick={() => onSearchChange('')}
                 className="press absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground active:bg-accent"
               >
@@ -326,7 +327,7 @@ function ListTab({
           </div>
           <button
             type="button"
-            aria-label="Filtrlar"
+            aria-label={t('commissions_page.filters_aria')}
             onClick={() => {
               tgHapticImpact('light');
               onOpenFilters();
@@ -357,7 +358,7 @@ function ListTab({
             className="press mt-2 inline-flex items-center gap-1 text-[12px] font-medium text-primary"
           >
             <X className="h-3.5 w-3.5" />
-            Hammasini tozalash
+            {t('commissions_page.clear_all')}
           </button>
         ) : null}
       </div>
@@ -414,7 +415,16 @@ function GroupedList({
   canManage,
   onVoid,
 }: GroupedListProps): React.ReactElement {
-  const groups = useMemo(() => groupByDate(rows), [rows]);
+  const { t } = useTranslation();
+  const groups = useMemo(
+    () =>
+      groupByDate(rows, {
+        today: t('commissions_page.group.today'),
+        yesterday: t('commissions_page.group.yesterday'),
+        thisMonth: t('commissions_page.group.this_month'),
+      }),
+    [rows, t],
+  );
   return (
     <div className="space-y-4">
       {groups.map((g) => (
@@ -447,6 +457,7 @@ function CommissionRow({
   canManage,
   onVoid,
 }: CommissionRowProps): React.ReactElement {
+  const { t } = useTranslation();
   const isActive = commission.status === 'active';
   const initials = computeInitials(member?.user.fullName ?? '');
 
@@ -474,18 +485,19 @@ function CommissionRow({
       title={
         <span className="flex items-center gap-2">
           <span className="truncate">
-            {member?.user.fullName ?? `Xodim #${commission.memberId}`}
+            {member?.user.fullName ??
+              t('commissions_page.employee_fallback', { id: commission.memberId })}
           </span>
           {!isActive ? (
             <Badge variant="secondary" className="text-[10px]">
-              Bekor qilingan
+              {t('commissions_page.voided_badge')}
             </Badge>
           ) : null}
         </span>
       }
       subtitle={
         <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-          <span>Sotuv #{commission.saleId}</span>
+          <span>{t('commissions_page.sale_label', { id: commission.saleId })}</span>
           {commission.percentage ? (
             <>
               <span className="text-muted-foreground/50">·</span>
@@ -511,7 +523,7 @@ function CommissionRow({
           {canManage && isActive ? (
             <button
               type="button"
-              aria-label="Bekor qilish"
+              aria-label={t('commissions_page.void_aria')}
               onClick={(e) => {
                 e.stopPropagation();
                 tgHapticImpact('light');
@@ -543,6 +555,7 @@ function ReportsTab({
   error,
   rows,
 }: ReportsTabProps): React.ReactElement {
+  const { t } = useTranslation();
   const totals = useMemo(() => {
     const byCurrency = new Map<string, { total: number; count: number }>();
     for (const row of rows) {
@@ -595,7 +608,7 @@ function ReportsTab({
       <div className="rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-4">
         <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
           <TrendingUp className="h-3.5 w-3.5" />
-          Jami faol komissiyalar
+          {t('commissions_page.total_active')}
         </div>
         {totals.length > 0 ? (
           <div className="mt-2 space-y-1">
@@ -612,10 +625,12 @@ function ReportsTab({
             <div className="flex items-center gap-3 pt-1 text-[12px] text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Users className="h-3.5 w-3.5" />
-                {rows.length} xodim
+                {t('commissions_page.employees_count', { count: rows.length })}
               </span>
               <span className="text-muted-foreground/50">·</span>
-              <span>{totalCount} ta yozuv</span>
+              <span>
+                {t('commissions_page.records_count', { count: totalCount })}
+              </span>
             </div>
           </div>
         ) : (
@@ -624,7 +639,7 @@ function ReportsTab({
               0
             </div>
             <p className="text-[12px] text-muted-foreground">
-              Hozircha faol komissiya yo'q
+              {t('commissions_page.no_active')}
             </p>
           </div>
         )}
@@ -633,7 +648,7 @@ function ReportsTab({
       {/* Per-employee detail */}
       {rows.length > 0 ? (
         <div className="-mx-4">
-          <Section title="Xodimlar bo'yicha">
+          <Section title={t('commissions_page.by_employee')}>
             {rows.map((row) => (
               <ListItem
                 key={row.memberId}
@@ -645,7 +660,10 @@ function ReportsTab({
                     </AvatarFallback>
                   </Avatar>
                 }
-                title={row.fullName || `Xodim #${row.memberId}`}
+                title={
+                  row.fullName ||
+                  t('commissions_page.employee_fallback', { id: row.memberId })
+                }
                 subtitle={
                   <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                     {row.byCurrency.map((c, idx) => (
@@ -671,7 +689,7 @@ function ReportsTab({
         <div className="px-6 py-12 text-center">
           <Users className="mx-auto h-10 w-10 text-muted-foreground" />
           <p className="mt-3 text-[14px] text-muted-foreground">
-            Hisobot uchun ma'lumot yo'q
+            {t('commissions_page.no_report_data')}
           </p>
         </div>
       )}
@@ -696,6 +714,7 @@ function FiltersForm({
   onApply,
   onReset,
 }: FiltersFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const [draftStatus, setDraftStatus] = useState<StatusFilter>(status);
   const [draftMember, setDraftMember] = useState<number | 'all'>(member);
   const [memberQuery, setMemberQuery] = useState<string>('');
@@ -711,17 +730,17 @@ function FiltersForm({
     );
   }, [members, memberQuery]);
 
-  const statusOptions: ReadonlyArray<{ value: StatusFilter; label: string }> = [
-    { value: 'active', label: 'Faol' },
-    { value: 'voided', label: 'Bekor qilingan' },
-    { value: 'all', label: 'Barchasi' },
+  const statusOptions: ReadonlyArray<{ value: StatusFilter; labelKey: string }> = [
+    { value: 'active', labelKey: 'commissions_page.filter.status.active' },
+    { value: 'voided', labelKey: 'commissions_page.filter.status.voided' },
+    { value: 'all', labelKey: 'commissions_page.filter.status.all' },
   ];
 
   return (
     <div className="space-y-5">
       <section className="space-y-2">
         <h3 className="text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
-          Holat
+          {t('commissions_page.filter.status')}
         </h3>
         <div className="flex flex-wrap gap-2">
           {statusOptions.map((o) => {
@@ -741,7 +760,7 @@ function FiltersForm({
                     : 'border-border bg-card text-foreground',
                 )}
               >
-                {o.label}
+                {t(o.labelKey)}
               </button>
             );
           })}
@@ -750,14 +769,14 @@ function FiltersForm({
 
       <section className="space-y-2">
         <h3 className="text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
-          Xodim
+          {t('commissions_page.filter.employee')}
         </h3>
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={memberQuery}
             onChange={(e) => setMemberQuery(e.target.value)}
-            placeholder="Xodim ismi yoki telefoni"
+            placeholder={t('commissions_page.filter.employee_placeholder')}
             className="pl-9"
           />
         </div>
@@ -772,7 +791,7 @@ function FiltersForm({
                 <Users className="h-4 w-4" />
               </div>
             }
-            title="Barcha xodimlar"
+            title={t('commissions_page.filter.all_employees')}
             trailing={
               draftMember === 'all' ? (
                 <span className="h-4 w-4 rounded-full bg-primary" />
@@ -807,7 +826,7 @@ function FiltersForm({
           })}
           {filteredMembers.length === 0 ? (
             <div className="px-4 py-6 text-center text-[13px] text-muted-foreground">
-              Xodim topilmadi
+              {t('commissions_page.filter.no_employee')}
             </div>
           ) : null}
         </div>
@@ -823,7 +842,7 @@ function FiltersForm({
             onReset();
           }}
         >
-          Tozalash
+          {t('commissions_page.filter.reset')}
         </Button>
         <Button
           type="button"
@@ -833,7 +852,7 @@ function FiltersForm({
             onApply(draftStatus, draftMember);
           }}
         >
-          Qo'llash
+          {t('commissions_page.filter.apply')}
         </Button>
       </div>
     </div>
@@ -853,18 +872,21 @@ function EmptyState({
   canManage,
   onCreate,
 }: EmptyStateProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <div className="px-6 py-16 text-center">
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
         <Coins className="h-7 w-7" />
       </div>
       <p className="mt-4 text-[16px] font-semibold text-foreground">
-        {filtered ? "Filtrga mos komissiya yo'q" : "Hozircha komissiya yo'q"}
+        {filtered
+          ? t('commissions_page.empty_filtered')
+          : t('commissions_page.empty_unfiltered')}
       </p>
       <p className="mx-auto mt-1 max-w-[260px] text-[13px] text-muted-foreground">
         {filtered
-          ? "Filtrlarni o'zgartirib qayta urinib ko'ring."
-          : "Sotuvdan xodimlarga foiz bermoqchimisiz? Quyidagi tugma orqali yozuv qo'shing."}
+          ? t('commissions_page.empty_filtered_hint')
+          : t('commissions_page.empty_unfiltered_hint')}
       </p>
       {!filtered && canManage ? (
         <Button
@@ -875,7 +897,7 @@ function EmptyState({
           }}
         >
           <Plus className="h-4 w-4" />
-          Yangi komissiya
+          {t('commissions_page.new_commission_button')}
         </Button>
       ) : null}
     </div>
@@ -912,7 +934,13 @@ interface DateGroup {
   rows: Commission[];
 }
 
-function groupByDate(rows: Commission[]): DateGroup[] {
+interface GroupLabels {
+  today: string;
+  yesterday: string;
+  thisMonth: string;
+}
+
+function groupByDate(rows: Commission[], labels: GroupLabels): DateGroup[] {
   const today = new Date();
   const todayKey = isoDate(today);
   const yesterday = new Date(today);
@@ -930,9 +958,9 @@ function groupByDate(rows: Commission[]): DateGroup[] {
       created.getMonth() === today.getMonth();
 
     let label: string;
-    if (dateKey === todayKey) label = 'Bugun';
-    else if (dateKey === yesterdayKey) label = 'Kecha';
-    else if (inSameMonth) label = 'Bu oy';
+    if (dateKey === todayKey) label = labels.today;
+    else if (dateKey === yesterdayKey) label = labels.yesterday;
+    else if (inSameMonth) label = labels.thisMonth;
     else
       label = `${MONTHS_UZ_SHORT[created.getMonth()]} ${created.getFullYear()}`;
 

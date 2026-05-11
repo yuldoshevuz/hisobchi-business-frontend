@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useContacts } from '@/api/hooks/use-contacts';
@@ -49,6 +50,7 @@ const CURRENCIES = ['UZS', 'USD', 'EUR', 'RUB'] as const;
 export function CreateScheduledForm({
   onClose,
 }: CreateScheduledFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const create = useCreateScheduled();
   const accounts = useAccounts({ status: 'active' });
   const contacts = useContacts({ status: 'active', all: true });
@@ -137,9 +139,9 @@ export function CreateScheduledForm({
 
   const typeOptions = useMemo(
     () =>
-      SCHEDULED_TYPE_VALUES.map((t) => ({
-        value: t,
-        label: TRANSACTION_TYPE_LABEL[t],
+      SCHEDULED_TYPE_VALUES.map((tv) => ({
+        value: tv,
+        label: TRANSACTION_TYPE_LABEL[tv],
       })),
     [],
   );
@@ -183,7 +185,7 @@ export function CreateScheduledForm({
     >
       <SelectField
         id="sched-type"
-        label="Turi"
+        label={t('create_scheduled.type')}
         value={type}
         onChange={(next) => next && setType(next as ScheduledType)}
         options={typeOptions}
@@ -191,26 +193,26 @@ export function CreateScheduledForm({
 
       <SelectField
         id="sched-recurrence"
-        label="Takrorlanish"
+        label={t('create_scheduled.recurrence')}
         value={recurrence}
         onChange={(next) => next && setRecurrence(next as RecurrenceType)}
         options={recurrenceOptions}
       />
 
       <div className="space-y-1.5">
-        <Label htmlFor="sched-description">Tavsif</Label>
+        <Label htmlFor="sched-description">{t('create_scheduled.description')}</Label>
         <Input
           id="sched-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Masalan: Ofis ijarasi"
+          placeholder={t('create_scheduled.description_placeholder')}
           autoFocus
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="sched-amount">Summa</Label>
+          <Label htmlFor="sched-amount">{t('create_scheduled.amount')}</Label>
           <Input
             id="sched-amount"
             inputMode="decimal"
@@ -221,7 +223,7 @@ export function CreateScheduledForm({
           />
         </div>
         <div className="space-y-1.5">
-          <Label>Valyuta</Label>
+          <Label>{t('create_scheduled.currency')}</Label>
           <div className="flex flex-wrap gap-2">
             {CURRENCIES.map((c) => {
               const selected = currency === c;
@@ -259,44 +261,44 @@ export function CreateScheduledForm({
         />
         <span className="flex-1">
           <span className="block text-[14px] font-medium leading-tight">
-            Summa har safar so'ralsin
+            {t('create_scheduled.ask_on_confirm')}
           </span>
           <span className="mt-0.5 block text-[12px] text-muted-foreground">
-            Masalan: kommunal to'lovlar — har oy summa har xil bo'lganda.
+            {t('create_scheduled.ask_on_confirm_hint')}
           </span>
         </span>
       </label>
 
       <ContactPickerField
         id="sched-contact"
-        label="Kontakt"
+        label={t('create_scheduled.contact')}
         value={contactId ?? ''}
         onChange={setContactId}
         contacts={contactList}
-        helperText="Ixtiyoriy. Qarz turlarida foydali bo'ladi."
+        helperText={t('create_scheduled.contact_helper')}
       />
 
       <SelectField
         id="sched-account"
-        label="Standart hisob"
+        label={t('create_scheduled.default_account')}
         value={accountId ?? ''}
         onChange={setAccountId}
         options={accountOptions}
-        helperText="Ixtiyoriy. Tasdiqlashda boshqa hisob ham tanlash mumkin."
+        helperText={t('create_scheduled.default_account_helper')}
       />
 
       <SelectField
         id="sched-category"
-        label="Kategoriya"
+        label={t('create_scheduled.category')}
         value={categoryId ?? ''}
         onChange={setCategoryId}
         options={categoryOptions}
-        helperText="Ixtiyoriy"
+        helperText={t('create_scheduled.optional')}
       />
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="sched-start">Boshlanish *</Label>
+          <Label htmlFor="sched-start">{t('create_scheduled.start_date')}</Label>
           <DatePicker
             id="sched-start"
             value={startDate}
@@ -304,7 +306,7 @@ export function CreateScheduledForm({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="sched-end">Tugash sanasi</Label>
+          <Label htmlFor="sched-end">{t('create_scheduled.end_date')}</Label>
           <DatePicker
             id="sched-end"
             value={endDate}
@@ -316,12 +318,11 @@ export function CreateScheduledForm({
       </div>
       {!endDateValid ? (
         <p className="text-[12px] text-destructive">
-          Tugash sanasi boshlanishdan keyin bo'lishi kerak
+          {t('create_scheduled.end_after_start')}
         </p>
       ) : (
         <p className="text-[12px] text-muted-foreground">
-          ℹ️ Eslatma har kuni 00:15 (Toshkent) da yuboriladi. Bugungi sana tanlasangiz,
-          birinchi eslatma ertaga keladi.
+          {t('create_scheduled.reminder_time_hint')}
         </p>
       )}
 
@@ -338,7 +339,7 @@ export function CreateScheduledForm({
         disabled={!isValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

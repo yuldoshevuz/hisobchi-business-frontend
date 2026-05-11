@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowDownLeft,
@@ -68,6 +69,7 @@ import type { Product } from '@/types/product.types';
 import type { Contact } from '@/types/contact.types';
 
 export function TransactionDetailPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -165,9 +167,9 @@ export function TransactionDetailPage(): React.ReactElement {
   if (isReady && !canRead) {
     return (
       <AccessDeniedView
-        title="Tranzaktsiya"
-        description="Bu tranzaktsiyani ko'rish uchun ruxsat yo'q"
-        hint="'transactions.read' ruxsati kerak."
+        title={t('tx_detail.access_denied_title')}
+        description={t('tx_detail.access_denied_description')}
+        hint={t('tx_detail.access_denied_hint')}
       />
     );
   }
@@ -183,7 +185,7 @@ export function TransactionDetailPage(): React.ReactElement {
     return (
       <div className="px-4 py-8">
         <p className="text-[14px] text-destructive">
-          {getApiErrorMessage(transactionQuery.error, 'Yozuv topilmadi')}
+          {getApiErrorMessage(transactionQuery.error, t('tx_detail.not_found'))}
         </p>
         <Button
           type="button"
@@ -192,7 +194,7 @@ export function TransactionDetailPage(): React.ReactElement {
           className="mt-4"
           onClick={() => navigate('/transactions')}
         >
-          Ro'yxatga qaytish
+          {t('tx_detail.back_to_list')}
         </Button>
       </div>
     );
@@ -231,12 +233,10 @@ export function TransactionDetailPage(): React.ReactElement {
               <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <div className="space-y-1">
                 <div className="font-medium text-primary">
-                  AI taklifi — tekshirib tasdiqlang
+                  {t('tx_detail.ai_banner.title')}
                 </div>
                 <div className="text-muted-foreground">
-                  Bu yozuv hisobotlarga, balansga va qoldiqqa hozircha ta'sir
-                  qilmaydi. Tasdiqlasangiz amalga oshadi, bekor qilsangiz
-                  butunlay o'chiriladi.
+                  {t('tx_detail.ai_banner.body')}
                 </div>
               </div>
             </div>
@@ -274,12 +274,12 @@ export function TransactionDetailPage(): React.ReactElement {
                 {isInitial ? (
                   <Badge variant="default" className="gap-1 text-[11px]">
                     <Sparkles className="h-3 w-3" />
-                    Tasdiqlash kerak
+                    {t('tx_detail.badge.needs_confirm')}
                   </Badge>
                 ) : null}
                 {isVoided ? (
                   <Badge variant="destructive" className="text-[11px]">
-                    Bekor qilingan
+                    {t('tx_detail.badge.voided')}
                   </Badge>
                 ) : null}
                 {!isInitial && typeHasPaymentLifecycle(tx.type) ? (
@@ -306,29 +306,31 @@ export function TransactionDetailPage(): React.ReactElement {
       <section className="px-4 pt-3">
         <div className="space-y-2 rounded-2xl bg-card p-4 text-[14px]">
           <DetailRow
-            label="Sana"
+            label={t('tx_detail.field.date')}
             value={new Intl.DateTimeFormat('uz-UZ', {
               dateStyle: 'long',
             }).format(new Date(tx.date))}
           />
           <DetailRow
-            label="Izoh"
+            label={t('tx_detail.field.description')}
             value={transactionDescription(tx)}
           />
-          {contactName ? <DetailRow label="Kontakt" value={contactName} /> : null}
+          {contactName ? (
+            <DetailRow label={t('tx_detail.field.contact')} value={contactName} />
+          ) : null}
           {categoryName ? (
-            <DetailRow label="Kategoriya" value={categoryName} />
+            <DetailRow label={t('tx_detail.field.category')} value={categoryName} />
           ) : null}
           {tx.dueDate ? (
             <DetailRow
-              label="Muddat"
+              label={t('tx_detail.field.due_date')}
               value={new Intl.DateTimeFormat('uz-UZ', {
                 dateStyle: 'long',
               }).format(new Date(tx.dueDate))}
             />
           ) : null}
           <DetailRow
-            label="Yaratdi"
+            label={t('tx_detail.field.created_by')}
             value={`${memberNameById.get(tx.createdBy) ?? `#${tx.createdBy}`} · ${new Intl.DateTimeFormat(
               'uz-UZ',
               {
@@ -343,13 +345,15 @@ export function TransactionDetailPage(): React.ReactElement {
       {/* Cash flows */}
       <section className="px-4 pt-4">
         <h2 className="px-1 pb-1.5 text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
-          {isInitial ? "Taklif qilingan to'lovlar" : "To'lovlar"}
+          {isInitial
+            ? t('tx_detail.cash_flows.proposed_section')
+            : t('tx_detail.repayment_section')}
         </h2>
         <div className="overflow-hidden rounded-2xl bg-card">
           {isInitial ? (
             deferredCashFlows.length === 0 ? (
               <div className="px-4 py-6 text-center text-[13px] text-muted-foreground">
-                AI to'lov taklif qilmadi (qarzga deb hisoblanadi)
+                {t('tx_detail.cash_flows.empty_initial')}
               </div>
             ) : (
               <ul className="divide-y divide-border">
@@ -367,7 +371,7 @@ export function TransactionDetailPage(): React.ReactElement {
             )
           ) : tx.cashFlows.length === 0 ? (
             <div className="px-4 py-6 text-center text-[13px] text-muted-foreground">
-              Hali to'lovlar yo'q
+              {t('tx_detail.cash_flows.empty')}
             </div>
           ) : (
             <ul className="divide-y divide-border">
@@ -396,7 +400,7 @@ export function TransactionDetailPage(): React.ReactElement {
       tx.saleItems.length > 0 ? (
         <section className="px-4 pt-4">
           <h2 className="px-1 pb-1.5 text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
-            Mahsulotlar
+            {t('tx_detail.items_section')}
           </h2>
           <div className="overflow-hidden rounded-2xl bg-card">
             <ul className="divide-y divide-border">
@@ -422,7 +426,7 @@ export function TransactionDetailPage(): React.ReactElement {
               ))}
             </ul>
             <div className="flex justify-between border-t border-border px-4 py-3 text-[14px]">
-              <span className="text-muted-foreground">Jami</span>
+              <span className="text-muted-foreground">{t('form.total')}</span>
               <span className="font-semibold tabular-nums">
                 {formatMoney(tx.amount, tx.currency)}
               </span>
@@ -450,7 +454,7 @@ export function TransactionDetailPage(): React.ReactElement {
                 }}
               >
                 <Pencil className="h-5 w-5" />
-                Tahrirlash
+                {t('common.edit')}
               </Button>
               <Button
                 type="button"
@@ -464,7 +468,7 @@ export function TransactionDetailPage(): React.ReactElement {
                     await confirmTx.mutateAsync({ transactionId: tx.id });
                   } catch (err) {
                     setConfirmError(
-                      getApiErrorMessage(err, 'Tasdiqlab bo\'lmadi'),
+                      getApiErrorMessage(err, t('tx_detail.errors.confirm_failed')),
                     );
                   }
                 }}
@@ -474,7 +478,7 @@ export function TransactionDetailPage(): React.ReactElement {
                 ) : (
                   <Check className="h-5 w-5" />
                 )}
-                Tasdiqlash
+                {t('common.confirm')}
               </Button>
             </div>
             <Button
@@ -488,7 +492,7 @@ export function TransactionDetailPage(): React.ReactElement {
               }}
             >
               <Trash2 className="h-4 w-4" />
-              Bekor qilish (o'chirish)
+              {t('tx_detail.actions.cancel_initial')}
             </Button>
           </div>
         </ScreenAction>
@@ -506,7 +510,7 @@ export function TransactionDetailPage(): React.ReactElement {
                 }}
               >
                 <Plus className="h-5 w-5" />
-                To'lov qo'shish
+                {t('tx_detail.add_payment')}
               </Button>
             ) : null}
             {canVoid && !isVoided ? (
@@ -521,7 +525,7 @@ export function TransactionDetailPage(): React.ReactElement {
                 }}
               >
                 <XCircle className="h-5 w-5" />
-                Bekor qilish
+                {t('tx_detail.void')}
               </Button>
             ) : null}
           </div>
@@ -531,8 +535,8 @@ export function TransactionDetailPage(): React.ReactElement {
       <Modal
         open={addCashFlowOpen}
         onOpenChange={setAddCashFlowOpen}
-        title="To'lov qo'shish"
-        description="Tranzaktsiyaga yangi to'lov yoziladi"
+        title={t('tx_detail.add_cash_flow_modal.title')}
+        description={t('tx_detail.add_cash_flow_modal.description')}
       >
         <AddCashFlowForm
           transaction={tx}
@@ -574,8 +578,8 @@ export function TransactionDetailPage(): React.ReactElement {
       <Modal
         open={editOpen}
         onOpenChange={setEditOpen}
-        title="Tranzaktsiyani tahrirlash"
-        description="Faqat asosiy maydonlar — to'lov qo'shish uchun avval tasdiqlang"
+        title={t('tx_detail.edit_modal.title')}
+        description={t('tx_detail.edit_modal.description')}
       >
         <InitialEditForm
           transaction={tx}
@@ -596,12 +600,12 @@ export function TransactionDetailPage(): React.ReactElement {
       <Modal
         open={cancelOpen}
         onOpenChange={setCancelOpen}
-        title="AI taklifini bekor qilish"
-        description="Bu yozuv to'liq o'chiriladi. Mahsulot va kontaktlar saqlanadi."
+        title={t('tx_detail.cancel_modal.title')}
+        description={t('tx_detail.cancel_modal.description')}
       >
         {cancelTx.error ? (
           <p className="mb-3 text-[12px] text-destructive">
-            {getApiErrorMessage(cancelTx.error, 'Bekor qilib bo\'lmadi')}
+            {getApiErrorMessage(cancelTx.error, t('tx_detail.errors.cancel_failed'))}
           </p>
         ) : null}
         <div className="flex gap-2">
@@ -613,7 +617,7 @@ export function TransactionDetailPage(): React.ReactElement {
             disabled={cancelTx.isPending}
             onClick={() => setCancelOpen(false)}
           >
-            Yo'q
+            {t('common.no')}
           </Button>
           <Button
             type="button"
@@ -629,7 +633,7 @@ export function TransactionDetailPage(): React.ReactElement {
             {cancelTx.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : null}
-            Ha, o'chir
+            {t('tx_detail.cancel_modal.confirm')}
           </Button>
         </div>
       </Modal>
@@ -702,6 +706,7 @@ function InitialEditForm({
   }) => Promise<void>;
   onCancel: () => void;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const initialDrafts = useMemo(
     () => buildInitialItemDrafts(transaction),
     [transaction],
@@ -878,12 +883,12 @@ function InitialEditForm({
       }}
     >
       <div className="block text-[12px] font-medium">
-        Sana
+        {t('tx_detail.field.date')}
         <div className="mt-1">
           <DatePicker
             value={date}
             onChange={(v) => setDate(v ?? initialDateIso)}
-            placeholder="Sana tanlang"
+            placeholder={t('tx_detail.edit_form.date_placeholder')}
           />
         </div>
       </div>
@@ -891,20 +896,19 @@ function InitialEditForm({
       {supportsItems ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <div className="text-[12px] font-medium">Mahsulotlar</div>
+            <div className="text-[12px] font-medium">{t('tx_detail.items_section')}</div>
             <button
               type="button"
               onClick={addItem}
               className="press flex items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-primary"
             >
               <Plus className="h-3.5 w-3.5" />
-              Qo'shish
+              {t('tx_detail.edit_form.items_add')}
             </button>
           </div>
           {items.length === 0 ? (
             <p className="rounded-xl bg-muted/40 px-3 py-2 text-[12px] text-muted-foreground">
-              Mahsulot yo'q. Sotilgan / olingan mahsulotlarni qo'shing — har
-              biriga soni va narxini kiriting.
+              {t('tx_detail.edit_form.items_empty_hint')}
             </p>
           ) : (
             <ul className="space-y-2">
@@ -928,7 +932,7 @@ function InitialEditForm({
                             id={`item-product-${idx}`}
                             label=""
                             value={it.productId === null ? -1 : it.productId}
-                            placeholder="Mahsulot tanlang"
+                            placeholder={t('tx_detail.edit_form.product_placeholder')}
                             onChange={(picked) => {
                               if (picked === -1 || picked === null) {
                                 updateItem(idx, {
@@ -952,7 +956,7 @@ function InitialEditForm({
                             options={[
                               {
                                 value: -1,
-                                label: "+ Yangi mahsulot…",
+                                label: t('tx_detail.edit_form.new_product_option'),
                               },
                               ...products.map((p) => ({
                                 value: p.id,
@@ -964,7 +968,7 @@ function InitialEditForm({
                         {!isExisting && it.productId === null ? (
                           <input
                             type="text"
-                            placeholder="Yangi mahsulot nomi"
+                            placeholder={t('tx_detail.edit_form.new_product_placeholder')}
                             value={it.name}
                             onChange={(e) =>
                               updateItem(idx, { name: e.target.value })
@@ -983,7 +987,7 @@ function InitialEditForm({
                     </div>
                     <div className="flex gap-2">
                       <label className="block flex-1 text-[11px] text-muted-foreground">
-                        Soni
+                        {t('tx_detail.edit_form.item_quantity')}
                         <input
                           type="text"
                           inputMode="decimal"
@@ -997,7 +1001,7 @@ function InitialEditForm({
                         />
                       </label>
                       <label className="block flex-[2] text-[11px] text-muted-foreground">
-                        Narx ({transaction.currency})
+                        {t('tx_detail.edit_form.item_price', { currency: transaction.currency })}
                         <input
                           type="text"
                           inputMode="decimal"
@@ -1012,7 +1016,7 @@ function InitialEditForm({
                       </label>
                     </div>
                     <div className="text-right text-[12px] text-muted-foreground tabular-nums">
-                      Jami:{' '}
+                      {t('tx_detail.edit_form.line_total')}{' '}
                       <span className="font-semibold text-foreground">
                         {formatMoney(lineTotal, transaction.currency)}
                       </span>
@@ -1021,7 +1025,7 @@ function InitialEditForm({
                 );
               })}
               <div className="flex justify-between rounded-xl bg-muted/40 px-3 py-2 text-[14px]">
-                <span className="text-muted-foreground">Umumiy summa</span>
+                <span className="text-muted-foreground">{t('tx_detail.edit_form.grand_total')}</span>
                 <span className="font-semibold tabular-nums">
                   {formatMoney(computedTotal ?? 0, transaction.currency)}
                 </span>
@@ -1031,7 +1035,7 @@ function InitialEditForm({
         </div>
       ) : (
         <label className="block text-[12px] font-medium">
-          Summa ({transaction.currency})
+          {t('tx_detail.edit_form.amount_label', { currency: transaction.currency })}
           <input
             type="text"
             inputMode="decimal"
@@ -1048,7 +1052,7 @@ function InitialEditForm({
       )}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <div className="text-[12px] font-medium">To'lovlar</div>
+          <div className="text-[12px] font-medium">{t('tx_detail.repayment_section')}</div>
           <button
             type="button"
             onClick={addCashFlow}
@@ -1056,18 +1060,16 @@ function InitialEditForm({
             className="press flex items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-primary disabled:opacity-50"
           >
             <Plus className="h-3.5 w-3.5" />
-            Qo'shish
+            {t('tx_detail.edit_form.items_add')}
           </button>
         </div>
         {accounts.length === 0 ? (
           <p className="rounded-xl bg-muted/40 px-3 py-2 text-[12px] text-muted-foreground">
-            Hisob (Kassa / Bank) topilmadi. Avval Hisoblar bo'limidan biror
-            hisob yarating.
+            {t('tx_detail.edit_form.no_accounts_hint')}
           </p>
         ) : cashFlows.length === 0 ? (
           <p className="rounded-xl bg-muted/40 px-3 py-2 text-[12px] text-muted-foreground">
-            To'lov yo'q — qarz sifatida saqlanadi. To'lov bo'lgan bo'lsa,
-            "Qo'shish"ni bosing.
+            {t('tx_detail.edit_form.no_cash_flow_hint')}
           </p>
         ) : (
           <ul className="space-y-2">
@@ -1078,7 +1080,7 @@ function InitialEditForm({
               >
                 <SelectField
                   id={`cf-account-${idx}`}
-                  label="Hisob"
+                  label={t('form.account')}
                   value={cf.accountId}
                   onChange={(id) => updateCashFlow(idx, { accountId: id })}
                   options={accounts.map((a) => ({
@@ -1089,7 +1091,7 @@ function InitialEditForm({
                 />
                 <div className="flex gap-2">
                   <label className="block flex-1 text-[11px] text-muted-foreground">
-                    Summa ({transaction.currency})
+                    {t('tx_detail.edit_form.amount_label', { currency: transaction.currency })}
                     <input
                       type="text"
                       inputMode="decimal"
@@ -1121,19 +1123,19 @@ function InitialEditForm({
           id="initial-contact"
           label={
             transaction.type === 'sale'
-              ? 'Mijoz (ixtiyoriy)'
+              ? t('tx_detail.edit_form.contact_customer')
               : transaction.type === 'purchase'
-                ? "Yetkazib beruvchi (ixtiyoriy)"
-                : 'Kontakt (ixtiyoriy)'
+                ? t('tx_detail.edit_form.contact_supplier')
+                : t('tx_detail.edit_form.contact_other')
           }
           value={contactId}
-          placeholder="Kontakt tanlang"
+          placeholder={t('tx_detail.edit_form.contact_placeholder')}
           onChange={(picked) => setContactId(picked)}
           options={relevantContacts.map((c) => ({
             value: c.id,
             label: c.name,
           }))}
-          emptyText="Bu turga mos kontakt yo'q"
+          emptyText={t('tx_detail.edit_form.contact_empty')}
         />
         {contactId !== null ? (
           <button
@@ -1141,13 +1143,13 @@ function InitialEditForm({
             onClick={() => setContactId(null)}
             className="press text-[11px] text-muted-foreground active:text-destructive"
           >
-            Tozalash
+            {t('tx_detail.edit_form.contact_clear')}
           </button>
         ) : null}
       </div>
 
       <label className="block text-[12px] font-medium">
-        Izoh
+        {t('tx_detail.field.description')}
         <textarea
           className="mt-1 min-h-[64px] w-full resize-y rounded-xl border border-border bg-card px-3 py-2 text-[14px] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/30"
           value={description}
@@ -1156,19 +1158,19 @@ function InitialEditForm({
         />
       </label>
       <div className="block text-[12px] font-medium">
-        Muddat (qarz holatlarida)
+        {t('tx_detail.edit_form.due_date_label')}
         <div className="mt-1">
           <DatePicker
             value={dueDate}
             onChange={setDueDate}
-            placeholder="Sana tanlang"
+            placeholder={t('tx_detail.edit_form.date_placeholder')}
             clearable
           />
         </div>
       </div>
       {error ? (
         <p className="text-[12px] text-destructive">
-          {getApiErrorMessage(error, 'Saqlab bo\'lmadi')}
+          {getApiErrorMessage(error, t('tx_detail.errors.save_failed'))}
         </p>
       ) : null}
       <div className="flex gap-2 pt-1">
@@ -1180,7 +1182,7 @@ function InitialEditForm({
           disabled={isPending}
           onClick={onCancel}
         >
-          Bekor
+          {t('common.cancel')}
         </Button>
         <Button
           type="submit"
@@ -1189,7 +1191,7 @@ function InitialEditForm({
           disabled={isPending}
         >
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          Saqlash
+          {t('common.save')}
         </Button>
       </div>
     </form>
@@ -1210,6 +1212,7 @@ function DeferredCashFlowRow({
   accountName: string;
   currency: string;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const isIn = leg.direction === 'in';
   return (
     <li className="flex items-start justify-between gap-3 px-4 py-3">
@@ -1231,7 +1234,7 @@ function DeferredCashFlowRow({
         <div className="min-w-0">
           <div className="truncate text-[14px] font-medium">{accountName}</div>
           <div className="text-[12px] text-muted-foreground">
-            Tasdiqlanmagan · kutilmoqda
+            {t('tx_detail.cash_flows.pending')}
           </div>
         </div>
       </div>
@@ -1307,6 +1310,7 @@ function CashFlowRow({
   canVoid,
   onVoidClick,
 }: CashFlowRowProps): React.ReactElement {
+  const { t } = useTranslation();
   const isVoided = cashFlow.status === 'voided';
   const isIn = cashFlow.direction === 'in';
   return (
@@ -1345,8 +1349,8 @@ function CashFlowRow({
               new Date(cashFlow.date),
             )}
             {cashFlow.notes ? ` · ${cashFlow.notes}` : ''}
-            {cashFlow.pairedCashFlowId ? ' · juftlangan' : ''}
-            {isVoided ? ' · bekor qilingan' : ''}
+            {cashFlow.pairedCashFlowId ? ` · ${t('tx_detail.cash_flows.paired')}` : ''}
+            {isVoided ? ` · ${t('tx_detail.cash_flows.voided')}` : ''}
           </div>
         </div>
       </div>

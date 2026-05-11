@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useCreateAccount } from '@/api/hooks/use-accounts';
 import { useCurrentOrganization } from '@/api/hooks/use-organizations';
@@ -31,6 +32,7 @@ interface CreateAccountFormProps {
 export function CreateAccountForm({
   onClose,
 }: CreateAccountFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const create = useCreateAccount();
   const org = useCurrentOrganization();
@@ -89,12 +91,12 @@ export function CreateAccountForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="account-name">Nom</Label>
+        <Label htmlFor="account-name">{t('create_account.name')}</Label>
         <Input
           id="account-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Asosiy kassa"
+          placeholder={t('create_account.name_placeholder')}
           maxLength={ACCOUNT_NAME_MAX_LENGTH}
           required
           autoFocus
@@ -102,18 +104,18 @@ export function CreateAccountForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Turi</Label>
+        <Label>{t('create_account.type')}</Label>
         <div className="grid grid-cols-2 gap-2">
-          {ACCOUNT_TYPE_VALUES.map((t) => {
-            const Icon = ACCOUNT_TYPE_ICON[t];
-            const selected = type === t;
+          {ACCOUNT_TYPE_VALUES.map((tValue) => {
+            const Icon = ACCOUNT_TYPE_ICON[tValue];
+            const selected = type === tValue;
             return (
               <button
-                key={t}
+                key={tValue}
                 type="button"
                 onClick={() => {
                   tgHapticImpact('light');
-                  setType(t);
+                  setType(tValue);
                 }}
                 className={`press flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-[14px] ${
                   selected
@@ -122,7 +124,7 @@ export function CreateAccountForm({
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                <span className="truncate">{ACCOUNT_TYPE_LABEL[t]}</span>
+                <span className="truncate">{ACCOUNT_TYPE_LABEL[tValue]}</span>
               </button>
             );
           })}
@@ -130,7 +132,7 @@ export function CreateAccountForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Valyuta</Label>
+        <Label>{t('create_account.currency')}</Label>
         <div className="flex flex-wrap gap-2">
           {ACCOUNT_CURRENCY_VALUES.map((c) => {
             const selected = currency === c;
@@ -166,14 +168,15 @@ export function CreateAccountForm({
             <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700" />
             <div className="flex-1">
               <span className="text-amber-900">
-                Faqat asosiy valyuta ({baseCurrency}) mavjud. Boshqa valyutada
-                hisob ochish uchun{' '}
+                {t('create_account.base_currency_only', {
+                  currency: baseCurrency,
+                })}
                 <button
                   type="button"
                   onClick={() => navigate('/plans')}
                   className="underline"
                 >
-                  tarifni yangilang
+                  {t('create_account.upgrade_plan')}
                 </button>
                 .
               </span>
@@ -183,17 +186,18 @@ export function CreateAccountForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="account-opening-balance">Boshlang'ich qoldiq</Label>
+        <Label htmlFor="account-opening-balance">
+          {t('create_account.opening_balance')}
+        </Label>
         <Input
           id="account-opening-balance"
           inputMode="decimal"
           value={formatAmount(openingBalance)}
           onChange={(e) => setOpeningBalance(unformatAmount(e.target.value))}
-          placeholder="0"
+          placeholder={t('create_account.opening_balance_placeholder')}
         />
         <p className="text-[12px] text-muted-foreground">
-          Ixtiyoriy. Hozirda hisobda bor bo'lgan summa. Bo'sh qoldirilsa 0
-          dan boshlanadi.
+          {t('create_account.opening_balance_hint')}
         </p>
       </div>
 
@@ -210,7 +214,7 @@ export function CreateAccountForm({
         disabled={!isValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

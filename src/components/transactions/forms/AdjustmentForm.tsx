@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { useCreateAdjustment } from '@/api/hooks/use-adjustments';
@@ -28,6 +29,7 @@ interface AdjustmentFormProps {
 export function AdjustmentForm({
   onCreated,
 }: AdjustmentFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const accounts = useAccounts({ status: 'active' });
 
   const accountList = useMemo(
@@ -92,7 +94,7 @@ export function AdjustmentForm({
     >
       <SelectField
         id="adjust-account"
-        label="Hisob *"
+        label={`${t('form.account')} *`}
         value={accountId ?? ''}
         onChange={(id) => {
           setAccountId(id);
@@ -105,14 +107,14 @@ export function AdjustmentForm({
         }))}
         helperText={
           account
-            ? `Joriy qoldiq: ${formatAmountDisplay(account.currentBalance)} ${account.currency}`
+            ? `${t('adjustment_form.current_balance')}: ${formatAmountDisplay(account.currentBalance)} ${account.currency}`
             : undefined
         }
       />
 
       <AmountField
         id="adjust-actual"
-        label="Miqdor *"
+        label={`${t('form.amount')} *`}
         value={actualBalance}
         onChange={setActualBalance}
         currencyDisplay={currency}
@@ -139,7 +141,7 @@ export function AdjustmentForm({
         disabled={!isFormValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );
@@ -156,10 +158,11 @@ function AdjustmentPreview({
   amount,
   currency,
 }: AdjustmentPreviewProps): React.ReactElement {
+  const { t } = useTranslation();
   if (direction === null) {
     return (
       <div className="rounded-xl border border-input bg-muted/40 px-3 py-2.5 text-[13px] text-muted-foreground">
-        Qoldiq mos kelmoqda — tuzatish kerak emas
+        {t('adjustment_form.no_change')}
       </div>
     );
   }
@@ -174,7 +177,7 @@ function AdjustmentPreview({
       )}
     >
       <div className="text-[12px] uppercase tracking-wide text-muted-foreground">
-        Tuzatish summasi
+        {t('adjustment_form.correction_amount')}
       </div>
       <div
         className={cn(
@@ -185,7 +188,9 @@ function AdjustmentPreview({
         {isAdd ? '+' : '−'} {formatAmountDisplay(amount)} {currency}
       </div>
       <div className="mt-0.5 text-[12px] text-muted-foreground">
-        {isAdd ? "Balansga qo'shiladi" : 'Balansdan ayriladi'}
+        {isAdd
+          ? t('adjustment_form.added_to_balance')
+          : t('adjustment_form.subtracted_from_balance')}
       </div>
     </div>
   );

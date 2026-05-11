@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUpdateContact } from '@/api/hooks/use-contacts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,8 +18,8 @@ import {
 } from '@/types/contact.types';
 import {
   CONTACT_TYPE_ICON,
-  CONTACT_TYPE_LABEL,
   CONTACT_TYPE_NONE_ICON,
+  getContactTypeLabel,
   getContactTypeNoneLabel,
 } from './contact-meta';
 
@@ -31,6 +32,7 @@ export function EditContactForm({
   contact,
   onClose,
 }: EditContactFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const update = useUpdateContact();
   const [name, setName] = useState<string>(contact.name);
   const [type, setType] = useState<ContactType | null>(contact.type);
@@ -110,7 +112,7 @@ export function EditContactForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="edit-contact-name">Nom</Label>
+        <Label htmlFor="edit-contact-name">{t('edit_contact.name')}</Label>
         <Input
           id="edit-contact-name"
           value={name}
@@ -122,18 +124,18 @@ export function EditContactForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Turi</Label>
+        <Label>{t('edit_contact.type')}</Label>
         <div className="grid grid-cols-2 gap-2">
-          {CONTACT_TYPE_VALUES.map((t) => {
-            const Icon = CONTACT_TYPE_ICON[t];
-            const selected = type === t;
+          {CONTACT_TYPE_VALUES.map((tValue) => {
+            const Icon = CONTACT_TYPE_ICON[tValue];
+            const selected = type === tValue;
             return (
               <button
-                key={t}
+                key={tValue}
                 type="button"
                 onClick={() => {
                   tgHapticImpact('light');
-                  setType(t);
+                  setType(tValue);
                 }}
                 className={`press flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-[12px] ${
                   selected
@@ -142,7 +144,7 @@ export function EditContactForm({
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                <span className="truncate">{CONTACT_TYPE_LABEL[t]}</span>
+                <span className="truncate">{getContactTypeLabel(tValue)}</span>
               </button>
             );
           })}
@@ -166,29 +168,31 @@ export function EditContactForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="edit-contact-phone">Telefon</Label>
+        <Label htmlFor="edit-contact-phone">{t('edit_contact.phone')}</Label>
         <Input
           id="edit-contact-phone"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="+998901234567"
+          placeholder={t('edit_contact.phone_placeholder')}
           inputMode="tel"
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="edit-contact-credit">Kredit limiti</Label>
+        <Label htmlFor="edit-contact-credit">
+          {t('edit_contact.credit_limit')}
+        </Label>
         <Input
           id="edit-contact-credit"
           value={creditLimit}
           onChange={(e) => setCreditLimit(e.target.value)}
-          placeholder="5000000"
+          placeholder={t('edit_contact.credit_limit_placeholder')}
           inputMode="decimal"
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="edit-contact-notes">Eslatma</Label>
+        <Label htmlFor="edit-contact-notes">{t('edit_contact.notes')}</Label>
         <textarea
           id="edit-contact-notes"
           value={notes}
@@ -212,7 +216,7 @@ export function EditContactForm({
         disabled={!isValid || !hasChanges || update.isPending}
       >
         {update.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

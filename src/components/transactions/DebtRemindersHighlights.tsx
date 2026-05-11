@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { AlertCircle, ArrowRight, CalendarClock } from 'lucide-react';
 import { useTransactions } from '@/api/hooks/use-transactions';
 import { useContacts } from '@/api/hooks/use-contacts';
@@ -9,9 +11,9 @@ import { cn } from '@/lib/utils';
 import { tgHapticImpact } from '@/lib/telegram';
 import type { Transaction } from '@/types/transaction.types';
 
-const MONTHS_UZ_SHORT = [
-  'Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn',
-  'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek',
+const MONTH_KEYS = [
+  'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+  'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
 ] as const;
 
 /**
@@ -32,6 +34,7 @@ const HORIZON_DAYS = 14;
  */
 export function DebtRemindersHighlights(): React.ReactElement | null {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   // Two queries: in-debts (qarz olganlar — pul kim bizdan oladi) and
   // out-debts (qarz berganlar — pul kim bizga qaytaradi). The backend list
   // accepts a `type[]` param so we could in theory do one round-trip, but
@@ -58,10 +61,10 @@ export function DebtRemindersHighlights(): React.ReactElement | null {
     ];
     return rows
       .filter(
-        (t) =>
-          t.dueDate !== null &&
-          t.paymentStatus !== 'paid' &&
-          t.dueDate <= horizon,
+        (r) =>
+          r.dueDate !== null &&
+          r.paymentStatus !== 'paid' &&
+          r.dueDate <= horizon,
       )
       .sort((a, b) =>
         (a.dueDate ?? '') < (b.dueDate ?? '')
@@ -83,7 +86,7 @@ export function DebtRemindersHighlights(): React.ReactElement | null {
     <div className="space-y-2 px-4">
       <div className="flex items-center gap-2">
         <h2 className="flex-1 text-[14px] font-semibold uppercase tracking-wide text-destructive">
-          Qarz eslatmalari
+          {t('debt_reminders.title')}
         </h2>
         <Badge variant="destructive" className="text-[11px]">
           {dueRows.length}
@@ -93,19 +96,20 @@ export function DebtRemindersHighlights(): React.ReactElement | null {
       {isCarousel ? (
         <div className="-mx-4 overflow-x-auto px-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex snap-x snap-mandatory gap-3">
-            {dueRows.map((t) => (
-              <div key={t.id} className="w-[88%] shrink-0 snap-start last:pr-1">
+            {dueRows.map((row) => (
+              <div key={row.id} className="w-[88%] shrink-0 snap-start last:pr-1">
                 <DebtCard
-                  transaction={t}
+                  transaction={row}
                   today={today}
+                  tFn={t}
                   contactName={
-                    t.contactId !== null
-                      ? (contactById.get(t.contactId)?.name ?? null)
+                    row.contactId !== null
+                      ? (contactById.get(row.contactId)?.name ?? null)
                       : null
                   }
                   onTap={() => {
                     tgHapticImpact('light');
-                    navigate(`/transactions/${t.id}`);
+                    navigate(`/transactions/${row.id}`);
                   }}
                 />
               </div>
@@ -116,6 +120,7 @@ export function DebtRemindersHighlights(): React.ReactElement | null {
         <DebtCard
           transaction={dueRows[0]!}
           today={today}
+          tFn={t}
           contactName={
             dueRows[0]!.contactId !== null
               ? (contactById.get(dueRows[0]!.contactId)?.name ?? null)
@@ -135,6 +140,7 @@ interface DebtCardProps {
   transaction: Transaction;
   contactName: string | null;
   today: string;
+  tFn: TFunction;
   onTap: () => void;
 }
 
@@ -142,11 +148,14 @@ function DebtCard({
   transaction,
   contactName,
   today,
+  tFn,
   onTap,
 }: DebtCardProps): React.ReactElement {
   const overdue = transaction.dueDate !== null && transaction.dueDate < today;
   const direction =
-    transaction.type === 'debt_in' ? 'Qarz olingan' : 'Qarz berilgan';
+    transaction.type === 'debt_in'
+      ? tFn('debt_reminders.direction_in')
+      : tFn('debt_reminders.direction_out');
   const remaining = remainingAmount(transaction);
 
   return (
@@ -173,10 +182,12 @@ function DebtCard({
             <span className="truncate text-[15px] font-semibold text-foreground">
               {contactName ??
                 transaction.description ??
-                `Tranzaktsiya #${transaction.id}`}
+                tFn('debt_reminders.tx_placeholder', { id: transaction.id })}
             </span>
             <Badge variant="destructive" className="shrink-0 text-[10px]">
-              {overdue ? "Muddati o'tgan" : 'Yaqinlashmoqda'}
+              {overdue
+                ? tFn('debt_reminders.overdue')
+                : tFn('debt_reminders.approaching')}
             </Badge>
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[12px] text-muted-foreground">
@@ -188,15 +199,15 @@ function DebtCard({
                   : 'text-destructive/80',
               )}
             >
-              {transaction.dueDate ? formatDateUz(transaction.dueDate) : '—'}
+              {transaction.dueDate ? formatDateUz(transaction.dueDate, tFn) : '—'}
             </span>
             <span>·</span>
             <span>{direction}</span>
             <span>·</span>
             <span>
               {transaction.paymentStatus === 'partial'
-                ? "Qisman to'langan"
-                : "To'lanmagan"}
+                ? tFn('debt_reminders.partial_paid')
+                : tFn('debt_reminders.unpaid')}
             </span>
           </div>
         </div>
@@ -215,18 +226,19 @@ function DebtCard({
   );
 }
 
-function remainingAmount(t: Transaction): string {
-  const total = Number(t.amount);
-  const paid = Number(t.paidAmount);
-  if (!Number.isFinite(total) || !Number.isFinite(paid)) return t.amount;
+function remainingAmount(tx: Transaction): string {
+  const total = Number(tx.amount);
+  const paid = Number(tx.paidAmount);
+  if (!Number.isFinite(total) || !Number.isFinite(paid)) return tx.amount;
   return Math.max(total - paid, 0).toString();
 }
 
-function formatDateUz(iso: string): string {
+function formatDateUz(iso: string, tFn: TFunction): string {
   const [datePart] = iso.split('T');
   const [y, m, d] = (datePart ?? '').split('-').map((p) => Number(p));
   if (!y || !m || !d) return iso;
-  return `${d.toString().padStart(2, '0')} ${MONTHS_UZ_SHORT[m - 1]} ${y}`;
+  const monthKey = MONTH_KEYS[m - 1];
+  return `${d.toString().padStart(2, '0')} ${tFn(`debt_reminders.month.${monthKey}`)} ${y}`;
 }
 
 function isoToday(): string {
@@ -246,4 +258,3 @@ function toIso(d: Date): string {
   const day = d.getDate().toString().padStart(2, '0');
   return `${y}-${mo}-${day}`;
 }
-

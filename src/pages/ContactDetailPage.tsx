@@ -121,18 +121,18 @@ export function ContactDetailPage(): React.ReactElement {
   if (isReady && !canRead) {
     return (
       <AccessDeniedView
-        title="Kontakt"
-        description="Bu bo'limga kirish uchun ruxsat yo'q"
-        hint="'contacts.read' ruxsati kerak."
+        title={t('contact_detail.fallback_title')}
+        description={t('contact_detail.no_access_description')}
+        hint={t('contact_detail.no_access_hint')}
       />
     );
   }
   if (id === null) {
     return (
       <AccessDeniedView
-        title="Kontakt"
-        description="Kontakt topilmadi"
-        hint="Iltimos, qaytib ko'ring."
+        title={t('contact_detail.fallback_title')}
+        description={t('contact_detail.not_found_description')}
+        hint={t('contact_detail.not_found_hint')}
       />
     );
   }
@@ -169,7 +169,7 @@ export function ContactDetailPage(): React.ReactElement {
           canManage && contactData ? (
             <button
               type="button"
-              aria-label="Amallar"
+              aria-label={t('contact_detail.actions_aria')}
               onClick={() => {
                 tgHapticImpact('light');
                 setActionsOpen(true);
@@ -238,10 +238,13 @@ export function ContactDetailPage(): React.ReactElement {
             isPending={transactions.isPending}
             isError={transactions.isError}
             error={transactions.error}
-            groups={groupByDate(filteredForList)}
-            onTap={(t) => {
+            groups={groupByDate(filteredForList, {
+              today: t('common.today'),
+              yesterday: t('common.yesterday'),
+            })}
+            onTap={(tx) => {
               tgHapticImpact('light');
-              navigate(`/transactions/${t.id}`);
+              navigate(`/transactions/${tx.id}`);
             }}
             isFiltered={typeFilter !== 'all'}
           />
@@ -269,7 +272,7 @@ export function ContactDetailPage(): React.ReactElement {
       <Modal
         open={editing}
         onOpenChange={setEditing}
-        title="Kontaktni tahrirlash"
+        title={t('contacts.edit_title')}
         description={contactData?.name}
       >
         {contactData ? (
@@ -310,6 +313,7 @@ function aggregateByType(rows: Transaction[]): TypeAggregate[] {
 // ─────────────────────────────────────────── header card ────────────
 
 function ContactHeader({ contact }: { contact: Contact }): React.ReactElement {
+  const { t } = useTranslation();
   const TypeIcon = getContactTypeIcon(contact.type);
   const initials = computeInitials(contact.name);
 
@@ -341,7 +345,7 @@ function ContactHeader({ contact }: { contact: Contact }): React.ReactElement {
             </a>
           ) : (
             <p className="mt-1 text-[13px] text-muted-foreground">
-              Telefon raqami yo'q
+              {t('contact_detail.no_phone')}
             </p>
           )}
         </div>
@@ -362,12 +366,13 @@ function BalanceSection({
 }: {
   balances: ContactBalanceRow[];
 }): React.ReactElement {
+  const { t } = useTranslation();
   if (balances.length === 0) {
     return (
       <div className="px-4">
         <div className="rounded-2xl bg-muted/40 p-4 text-center">
           <p className="text-[13px] text-muted-foreground">
-            Hozircha oldi-berdi yozuvi yo'q
+            {t('contact_detail.empty_ledger')}
           </p>
         </div>
       </div>
@@ -386,7 +391,7 @@ function BalanceSection({
           >
             <div className="flex items-baseline justify-between">
               <span className="text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
-                {b.currency} balansi
+                {t('contact_detail.balance_label', { currency: b.currency })}
               </span>
               <span
                 className={cn(
@@ -404,22 +409,22 @@ function BalanceSection({
             </div>
             <p className="mt-1 text-[12px] text-muted-foreground">
               {sign === 'positive'
-                ? 'Bizdan olishi kerak'
+                ? t('contact_detail.balance_positive')
                 : sign === 'negative'
-                  ? 'Bizga berishi kerak'
-                  : 'Hisob teng'}
+                  ? t('contact_detail.balance_negative')
+                  : t('contact_detail.balance_neutral')}
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <BalanceCell
                 icon={<ArrowDownLeft className="h-3.5 w-3.5" />}
-                label="Olinadigan"
+                label={t('contact_detail.receivable')}
                 value={b.receivable}
                 currency={b.currency}
                 positive
               />
               <BalanceCell
                 icon={<ArrowUpRight className="h-3.5 w-3.5" />}
-                label="Beriladigan"
+                label={t('contact_detail.payable')}
                 value={b.payable}
                 currency={b.currency}
                 negative
@@ -517,6 +522,7 @@ function TypeBreakdown({
   aggregates: TypeAggregate[];
   currency: string;
 }): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <div className="px-4">
       <div className="grid grid-cols-2 gap-2">
@@ -538,7 +544,7 @@ function TypeBreakdown({
                 {formatMoney(a.total.toString(), currency)}
               </div>
               <div className="text-[11px] text-muted-foreground">
-                {a.count} ta yozuv
+                {t('contact_detail.records_count', { count: a.count })}
               </div>
             </div>
           );
@@ -557,6 +563,7 @@ function DonutSection({
   aggregates: TypeAggregate[];
   currency: string;
 }): React.ReactElement | null {
+  const { t } = useTranslation();
   const slices: DonutSlice[] = useMemo(
     () =>
       aggregates
@@ -574,10 +581,14 @@ function DonutSection({
     <div className="px-4">
       <div className="rounded-2xl border border-border bg-card p-4">
         <div className="text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
-          Tur bo'yicha taqsimot
+          {t('contact_detail.type_breakdown_title')}
         </div>
         <div className="mt-2 flex justify-center">
-          <DonutChart slices={slices} currency={currency} centerLabel="Jami" />
+          <DonutChart
+            slices={slices}
+            currency={currency}
+            centerLabel={t('contact_detail.donut_center_label')}
+          />
         </div>
       </div>
     </div>
@@ -595,6 +606,7 @@ function TypeFilterChips({
   onChange: (next: TypeFilter) => void;
   aggregates: TypeAggregate[];
 }): React.ReactElement {
+  const { t } = useTranslation();
   const totalCount = aggregates.reduce((acc, a) => acc + a.count, 0);
   return (
     <div className="-mx-4 overflow-x-auto px-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -602,14 +614,17 @@ function TypeFilterChips({
         <Chip
           active={value === 'all'}
           onClick={() => onChange('all')}
-          label={`Hammasi · ${totalCount}`}
+          label={t('contact_detail.filter_all', { count: totalCount })}
         />
         {aggregates.map((a) => (
           <Chip
             key={a.type}
             active={value === a.type}
             onClick={() => onChange(a.type)}
-            label={`${TRANSACTION_TYPE_LABEL[a.type]} · ${a.count}`}
+            label={t('contact_detail.filter_item', {
+              label: TRANSACTION_TYPE_LABEL[a.type],
+              count: a.count,
+            })}
           />
         ))}
       </div>
@@ -663,6 +678,7 @@ function HistorySection({
   onTap: (tx: Transaction) => void;
   isFiltered: boolean;
 }): React.ReactElement {
+  const { t } = useTranslation();
   if (isPending) {
     return (
       <div className="flex justify-center py-10">
@@ -691,8 +707,8 @@ function HistorySection({
       <div className="px-6 py-12 text-center">
         <p className="text-[14px] text-muted-foreground">
           {isFiltered
-            ? "Tanlangan tur bo'yicha tranzaktsiya yo'q"
-            : "Bu kontakt bo'yicha hozircha tranzaktsiya yo'q"}
+            ? t('contact_detail.history_empty_filtered')
+            : t('contact_detail.history_empty')}
         </p>
       </div>
     );
@@ -725,13 +741,14 @@ function ContactActions({
   onClose: () => void;
   onEdit: () => void;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const archive = useArchiveContact();
   const restore = useUpdateContact();
   const remove = useDeleteContact();
 
   function handleArchive(): void {
-    if (!confirm(`${contact.name} ni arxivga yuborilsinmi?`)) return;
+    if (!confirm(t('contact_detail.confirm_archive', { name: contact.name }))) return;
     tgHapticImpact('medium');
     archive.mutate(contact.id, {
       onSuccess: () => {
@@ -757,7 +774,7 @@ function ContactActions({
   }
 
   function handleRemove(): void {
-    if (!confirm(`${contact.name} butunlay o'chirilsinmi?`)) return;
+    if (!confirm(t('contact_detail.confirm_delete', { name: contact.name }))) return;
     tgHapticImpact('heavy');
     remove.mutate(contact.id, {
       onSuccess: () => {
@@ -773,31 +790,31 @@ function ContactActions({
     <div className="-mx-4 divide-y divide-border bg-card">
       <ActionRow
         icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
-        title="Tahrirlash"
-        subtitle="Nom, telefon, eslatmalar"
+        title={t('contact_detail.action.edit')}
+        subtitle={t('contact_detail.action.edit_subtitle')}
         onClick={onEdit}
       />
       {contact.status === 'active' ? (
         <ActionRow
           icon={<Archive className="h-4 w-4 text-muted-foreground" />}
-          title="Arxivlash"
-          subtitle="Faollardan olib qo'yish"
+          title={t('contact_detail.action.archive')}
+          subtitle={t('contact_detail.action.archive_subtitle')}
           onClick={handleArchive}
           loading={archive.isPending}
         />
       ) : (
         <ActionRow
           icon={<RotateCcw className="h-4 w-4 text-muted-foreground" />}
-          title="Faollashtirish"
-          subtitle="Arxivdan qaytarish"
+          title={t('contact_detail.action.restore')}
+          subtitle={t('contact_detail.action.restore_subtitle')}
           onClick={handleRestore}
           loading={restore.isPending}
         />
       )}
       <ActionRow
         icon={<Trash2 className="h-4 w-4 text-destructive" />}
-        title="O'chirish"
-        subtitle="Bu amal qaytarib bo'lmaydi"
+        title={t('contact_detail.action.delete')}
+        subtitle={t('contact_detail.action.delete_subtitle')}
         destructive
         onClick={handleRemove}
         loading={remove.isPending}
@@ -861,7 +878,15 @@ function computeInitials(name: string): string {
     .toUpperCase();
 }
 
-function groupByDate(items: Transaction[]): Array<{
+interface DateHeaderLabels {
+  today: string;
+  yesterday: string;
+}
+
+function groupByDate(
+  items: Transaction[],
+  labels: DateHeaderLabels,
+): Array<{
   key: string;
   label: string;
   items: Transaction[];
@@ -875,12 +900,12 @@ function groupByDate(items: Transaction[]): Array<{
   }
   return Array.from(buckets.entries()).map(([key, list]) => ({
     key,
-    label: formatDateHeader(key),
+    label: formatDateHeader(key, labels),
     items: list,
   }));
 }
 
-function formatDateHeader(iso: string): string {
+function formatDateHeader(iso: string, labels: DateHeaderLabels): string {
   const [y, m, d] = iso.split('-').map((p) => Number(p));
   if (!y || !m || !d) return iso;
   const today = new Date();
@@ -888,8 +913,8 @@ function formatDateHeader(iso: string): string {
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   const yesterdayKey = isoDate(yesterday);
-  if (iso === todayKey) return 'Bugun';
-  if (iso === yesterdayKey) return 'Kecha';
+  if (iso === todayKey) return labels.today;
+  if (iso === yesterdayKey) return labels.yesterday;
   return `${d.toString().padStart(2, '0')} ${MONTHS_UZ_SHORT[m - 1]} ${y}`;
 }
 

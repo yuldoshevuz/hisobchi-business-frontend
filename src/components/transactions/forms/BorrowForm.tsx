@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { useContacts } from '@/api/hooks/use-contacts';
@@ -29,6 +30,7 @@ interface BorrowFormProps {
 export function BorrowForm({
   onCreated,
 }: BorrowFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const accounts = useAccounts({ status: 'active' });
   const contacts = useContacts({ all: true, status: 'active' });
 
@@ -97,7 +99,7 @@ export function BorrowForm({
     >
       <SelectField
         id="borrow-account"
-        label="Balans (qayerga keldi) *"
+        label={`${t('borrow_form.to_account')} *`}
         value={accountId ?? ''}
         onChange={setAccountId}
         options={accountList.map((a) => ({
@@ -117,15 +119,15 @@ export function BorrowForm({
 
       <ContactPickerField
         id="borrow-contact"
-        label="Kimdan *"
+        label={`${t('borrow_form.lender')} *`}
         value={contactId ?? ''}
         onChange={setContactId}
         contacts={contactList}
-        helperText="Qarz beruvchini tanlash majburiy"
+        helperText={t('borrow_form.lender_helper')}
       />
 
       <div className="space-y-1.5">
-        <Label htmlFor="borrow-due">Qaytarish sanasi</Label>
+        <Label htmlFor="borrow-due">{t('borrow_form.due_date')}</Label>
         <DatePicker
           id="borrow-due" value={dueDate}
           onChange={setDueDate}
@@ -145,7 +147,7 @@ export function BorrowForm({
         disabled={!isFormValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

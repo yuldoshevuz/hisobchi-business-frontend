@@ -54,19 +54,7 @@ import {
 
 type StatusFilter = ScheduledStatus | 'all';
 
-const TABS: ReadonlyArray<{ id: 'plans' | 'reminders'; label: string }> = [
-  { id: 'plans', label: 'Rejalar' },
-  { id: 'reminders', label: 'Eslatmalar' },
-];
-
-/**
- * Mirrors the backend cron — see `scheduled.cron.ts`:
- *   `@Cron('15 0 * * *', { timeZone: 'Asia/Tashkent' })`.
- * Surfaced in the UI so users understand why a freshly-created plan won't
- * fire its first reminder until tomorrow 00:15. Update both sides together
- * if the cadence ever changes.
- */
-const REMINDER_CRON_HINT = "Eslatmalar har kuni 00:15 (Toshkent) da yuboriladi";
+const TAB_IDS: ReadonlyArray<'plans' | 'reminders'> = ['plans', 'reminders'];
 
 export function ScheduledPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -98,7 +86,7 @@ export function ScheduledPage(): React.ReactElement {
       <AccessDeniedView
         title={t('scheduled_page.title')}
         description={t('scheduled_page.no_access')}
-        hint="'scheduled.read' ruxsati kerak."
+        hint={t('scheduled_page.no_access_hint')}
       />
     );
   }
@@ -117,16 +105,16 @@ export function ScheduledPage(): React.ReactElement {
 
       <div className="px-4 pb-3">
         <div className="flex gap-1 rounded-xl bg-muted p-1">
-          {TABS.map((t) => {
-            const active = t.id === tab;
+          {TAB_IDS.map((tabId) => {
+            const active = tabId === tab;
             return (
               <button
-                key={t.id}
+                key={tabId}
                 type="button"
                 onClick={() => {
                   if (active) return;
                   tgHapticImpact('light');
-                  setTab(t.id);
+                  setTab(tabId);
                 }}
                 className={cn(
                   'press flex-1 rounded-lg px-3 py-2 text-[14px] font-medium transition-colors',
@@ -135,7 +123,7 @@ export function ScheduledPage(): React.ReactElement {
                     : 'text-muted-foreground',
                 )}
               >
-                {t.label}
+                {t(`scheduled_page.tab.${tabId}`)}
               </button>
             );
           })}
@@ -184,8 +172,10 @@ export function ScheduledPage(): React.ReactElement {
               <CalendarClock className="mx-auto h-10 w-10 text-muted-foreground" />
               <p className="mt-3 text-[14px] text-muted-foreground">
                 {statusFilter === 'all'
-                  ? "Hozircha reja yo'q"
-                  : `${SCHEDULED_STATUS_LABEL[statusFilter as ScheduledStatus]} rejalar yo'q`}
+                  ? t('scheduled_page.empty_plans')
+                  : t('scheduled_page.empty_status_plans', {
+                      status: SCHEDULED_STATUS_LABEL[statusFilter as ScheduledStatus],
+                    })}
               </p>
             </div>
           )}
@@ -211,7 +201,7 @@ export function ScheduledPage(): React.ReactElement {
             }}
           >
             <Plus className="h-5 w-5" />
-            Yangi reja
+            {t('scheduled_page.new_plan_button')}
           </Button>
         </ScreenAction>
       ) : null}
@@ -277,6 +267,7 @@ function ScheduledRow({
   scheduled,
   onTap,
 }: ScheduledRowProps): React.ReactElement {
+  const { t } = useTranslation();
   const RecurrenceIcon = RECURRENCE_ICON[scheduled.recurrenceType];
   return (
     <ListItem
@@ -312,7 +303,7 @@ function ScheduledRow({
             </>
           ) : (
             <Badge variant="secondary" className="text-[10px]">
-              summa so'raladi
+              {t('scheduled_page.amount_asked')}
             </Badge>
           )}
         </span>
@@ -334,6 +325,7 @@ function ScheduledActions({
   onClose,
   onEdit,
 }: ScheduledActionsProps): React.ReactElement {
+  const { t } = useTranslation();
   const pause = usePauseScheduled();
   const resume = useResumeScheduled();
   const cancel = useCancelScheduled();
@@ -362,43 +354,52 @@ function ScheduledActions({
   return (
     <div className="space-y-3">
       <div className="space-y-2 rounded-xl bg-muted/40 px-3 py-3 text-[13px]">
-        <Row label="Keyingi sana" value={formatDateUz(scheduled.nextOccurrence)} />
+        <Row
+          label={t('scheduled_page.next_date')}
+          value={formatDateUz(scheduled.nextOccurrence)}
+        />
         {scheduled.endDate ? (
-          <Row label="Tugash" value={formatDateUz(scheduled.endDate)} />
+          <Row
+            label={t('scheduled_page.end_date')}
+            value={formatDateUz(scheduled.endDate)}
+          />
         ) : null}
         <Row
-          label="Summa"
+          label={t('scheduled_page.amount')}
           value={
             scheduled.amount !== null
               ? `${formatMoney(scheduled.amount, scheduled.currency)} ${scheduled.currency}`
-              : "Har safar so'raladi"
+              : t('scheduled_page.amount_each_time')
           }
         />
         {scheduled.lastTriggeredAt ? (
           <Row
-            label="Oxirgi tasdiq"
+            label={t('scheduled_page.last_triggered')}
             value={formatDateUz(scheduled.lastTriggeredAt)}
           />
         ) : null}
-        <Row label="Eslatma vaqti" value="00:15 (Toshkent)" />
+        <Row
+          label={t('scheduled_page.reminder_time')}
+          value={t('scheduled_page.reminder_time_value')}
+        />
       </div>
 
       <p className="text-[12px] text-muted-foreground">
-        ℹ️ {REMINDER_CRON_HINT}. Bot eslatma kelgach Tasdiqlash / O'tkazish tugmalarini ko'rsatadi.
+        {t('scheduled_page.bot_hint', { hint: t('scheduled_page.cron_hint') })}
       </p>
 
       {canManage && !isTerminal ? (
         <div className="-mx-4 divide-y divide-border bg-card">
           <ActionRow
-            title="Tahrirlash"
-            subtitle="Tavsif, summa, tugash sanasi"
+            title={t('scheduled_page.action.edit')}
+            subtitle={t('scheduled_page.action.edit_subtitle')}
             onClick={onEdit}
             icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
           />
           {isActive ? (
             <ActionRow
-              title="To'xtatish"
-              subtitle="Eslatmalar yaratilmaydi"
+              title={t('scheduled_page.action.pause')}
+              subtitle={t('scheduled_page.action.pause_subtitle')}
               onClick={() => run(pause)}
               loading={pending}
               icon={<Pause className="h-4 w-4 text-muted-foreground" />}
@@ -406,16 +407,16 @@ function ScheduledActions({
           ) : null}
           {isPaused ? (
             <ActionRow
-              title="Davom ettirish"
-              subtitle="Eslatmalar yana yaratiladi"
+              title={t('scheduled_page.action.resume')}
+              subtitle={t('scheduled_page.action.resume_subtitle')}
               onClick={() => run(resume)}
               loading={pending}
               icon={<Play className="h-4 w-4 text-muted-foreground" />}
             />
           ) : null}
           <ActionRow
-            title="Bekor qilish"
-            subtitle="Reja butunlay to'xtatiladi"
+            title={t('scheduled_page.action.cancel')}
+            subtitle={t('scheduled_page.action.cancel_subtitle')}
             destructive
             onClick={() => run(cancel, 'heavy')}
             loading={pending}
@@ -454,6 +455,7 @@ function RemindersTab({
   plans,
   canManage,
 }: RemindersTabProps): React.ReactElement {
+  const { t } = useTranslation();
   const skip = useSkipScheduledReminder();
   const planById = new Map(plans.map((p) => [p.id, p] as const));
 
@@ -483,7 +485,7 @@ function RemindersTab({
       <div className="px-6 py-12 text-center">
         <CalendarClock className="mx-auto h-10 w-10 text-muted-foreground" />
         <p className="mt-3 text-[14px] text-muted-foreground">
-          Hozircha eslatma yo'q
+          {t('scheduled_page.empty_reminders')}
         </p>
       </div>
     );
@@ -533,7 +535,7 @@ function RemindersTab({
               canSkip ? (
                 <button
                   type="button"
-                  aria-label="O'tkazish"
+                  aria-label={t('scheduled_page.skip_aria')}
                   onClick={(e) => {
                     e.stopPropagation();
                     tgHapticImpact('medium');
@@ -565,6 +567,7 @@ function StatusFilterButton({
   value,
   onChange,
 }: StatusFilterButtonProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState<boolean>(false);
   const isFiltered = value !== 'active';
 
@@ -572,7 +575,7 @@ function StatusFilterButton({
     <>
       <button
         type="button"
-        aria-label="Holati bo'yicha filter"
+        aria-label={t('scheduled_page.filter_aria')}
         onClick={() => {
           tgHapticImpact('light');
           setOpen(true);
@@ -586,16 +589,24 @@ function StatusFilterButton({
       >
         <SlidersHorizontal className="h-3.5 w-3.5" />
         <span>
-          {value === 'all' ? 'Hammasi' : SCHEDULED_STATUS_LABEL[value]}
+          {value === 'all'
+            ? t('scheduled_page.filter_all')
+            : SCHEDULED_STATUS_LABEL[value]}
         </span>
       </button>
 
-      <Modal open={open} onOpenChange={setOpen} title="Holati bo'yicha filter">
+      <Modal
+        open={open}
+        onOpenChange={setOpen}
+        title={t('scheduled_page.filter_title')}
+      >
         <div className="-mx-4 divide-y divide-border bg-card">
           {(['all', ...SCHEDULED_STATUS_VALUES] as StatusFilter[]).map((key) => {
             const active = value === key;
             const labelText =
-              key === 'all' ? 'Hammasi' : SCHEDULED_STATUS_LABEL[key];
+              key === 'all'
+                ? t('scheduled_page.filter_all')
+                : SCHEDULED_STATUS_LABEL[key];
             return (
               <button
                 key={key}
