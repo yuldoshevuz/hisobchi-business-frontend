@@ -180,7 +180,7 @@ export function EditTransactionCategoryPage(): React.ReactElement {
           id="edit-tx-category"
           label="Kategoriya"
           value={selectedKey}
-          onChange={setSelectedKey}
+          onChange={(v) => setSelectedKey(v ?? CLEAR_KEY)}
           options={options}
           placeholder={
             categoriesQuery.isPending
