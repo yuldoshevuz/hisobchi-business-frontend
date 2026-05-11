@@ -123,18 +123,18 @@ export function EditTransactionCategoryPage(): React.ReactElement {
   if (tx.status === 'voided') {
     return (
       <AccessDeniedView
-        title="O'zgartirib bo'lmaydi"
-        description="Bu yozuv bekor qilingan."
-        hint="Yangi yozuv qo'shing yoki tafsilotlarini ko'rib chiqing."
+        title={t('edit_tx_account.voided_title')}
+        description={t('edit_tx_account.voided_description')}
+        hint={t('edit_tx_account.voided_hint')}
       />
     );
   }
   if (tx.type === 'transfer' || tx.type === 'adjustment') {
     return (
       <AccessDeniedView
-        title="Kategoriya yo'q"
-        description="Bu tranzaksiya turi kategoriya talab qilmaydi."
-        hint="O'tkazma / korrektsiya tranzaksiyalarida kategoriya bo'lmaydi."
+        title={t('edit_tx_category.no_category_title')}
+        description={t('edit_tx_category.no_category_description')}
+        hint={t('edit_tx_category.no_category_hint')}
       />
     );
   }

@@ -575,7 +575,7 @@ function AccountsOverview(): React.ReactElement {
           </div>
         ) : (
           <div className="py-8 text-center text-[14px] text-muted-foreground">
-            Arxivlangan hisoblar yo'q
+            {t('dashboard.archive_empty')}
           </div>
         )}
       </Modal>

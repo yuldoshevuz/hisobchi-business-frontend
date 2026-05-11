@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useVoidCommission } from '@/api/hooks/use-commissions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ export function VoidCommissionForm({
   commissionId,
   onClose,
 }: VoidCommissionFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const voidMutation = useVoidCommission();
   const [reason, setReason] = useState<string>('');
 
@@ -44,12 +46,12 @@ export function VoidCommissionForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="comm-void-reason">Sabab (ixtiyoriy)</Label>
+        <Label htmlFor="comm-void-reason">{t('void_commission.reason')}</Label>
         <Input
           id="comm-void-reason"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          placeholder="Masalan: noto'g'ri summa"
+          placeholder={t('void_commission.reason_placeholder')}
           autoFocus
         />
       </div>
@@ -68,7 +70,7 @@ export function VoidCommissionForm({
         disabled={voidMutation.isPending}
       >
         {voidMutation.isPending ? <Spinner className="h-5 w-5" /> : null}
-        Bekor qilish
+        {t('common.cancel')}
       </Button>
     </form>
   );

@@ -107,6 +107,9 @@
   "edit_tx_category": {
     "title": "Category",
     "clear": "Clear category",
+    "no_category_title": "No category",
+    "no_category_description": "This transaction type doesn't use a category.",
+    "no_category_hint": "Transfers and adjustments don't have categories.",
     "subtitle": "#{id} · {amount}",
     "placeholder": "Pick one (or leave uncategorised)",
     "empty": "No categories of this type. Add one from the Catalog section.",
@@ -142,7 +145,8 @@
     "new_account_description": "Cash, bank, wallet or card",
     "edit_account_title": "Edit account",
     "archive_title": "Archive",
-    "archived_count": "{count} archived account(s)"
+    "archived_count": "{count} archived account(s)",
+    "archive_empty": "No archived accounts"
   },
   "katalog": {
     "products": "Products",
@@ -158,7 +162,14 @@
   "sales_list": {
     "subtitle": "Recent sales and their contents",
     "empty": "No sales yet",
-    "default_label": "Sale"
+    "default_label": "Sale",
+    "items_summary": "{count} items",
+    "items_summary_qty": "{count} items · {qty} pcs",
+    "more_items": "+ {count} more items",
+    "payments_count": "{count} payments",
+    "paid_label": "Paid: {amount}",
+    "no_payments": "No payment yet (credit sale)",
+    "voided_badge": "Cancelled"
   },
   "contact_detail": {
     "fallback_title": "Contact",
@@ -246,7 +257,14 @@
     "action.edit": "Edit",
     "action.edit_subtitle": "Name, category, price, cost",
     "action.adjust": "Adjust stock",
-    "action.adjust_subtitle": "Recount, breakage, found inventory"
+    "action.adjust_subtitle": "Recount, breakage, found inventory",
+    "action.archive": "Archive",
+    "action.archive_subtitle": "Hidden from new records",
+    "action.unarchive": "Restore",
+    "action.unarchive_subtitle": "Makes the product active again",
+    "action.delete": "Delete",
+    "action.delete_subtitle": "Only for products never used in transactions",
+    "no_manage_permission": "You don't have permission to edit this product."
   },
   "categories_page": {
     "title": "Categories",
@@ -258,7 +276,19 @@
     "new_title": "New category",
     "customize_title": "Customise system category",
     "edit_title": "Edit category",
-    "no_access": "You don't have access to this section"
+    "no_access": "You don't have access to this section",
+    "action.edit": "Edit",
+    "action.customize": "Customise",
+    "action.edit_subtitle": "Change name, colour or icon",
+    "action.archive": "Archive",
+    "action.archive_subtitle": "Hidden from new records, history kept",
+    "action.unarchive": "Restore",
+    "action.unarchive_subtitle": "Makes the category active again",
+    "action.delete": "Delete",
+    "action.delete_subtitle": "Only for unused custom categories",
+    "action.reset_default": "Reset to system default",
+    "action.reset_default_subtitle": "Only for unused categories",
+    "reset_confirm": "Organisation overrides will be removed and system defaults restored. Continue?"
   },
   "organizations": {
     "title": "Pick an organisation",
@@ -326,6 +356,14 @@
     "limit_description": "Current plan: {plan}. Upgrade to invite more members.",
     "invite_button": "Invite member",
     "permissions_count": "{count} permissions • {employees} members",
+    "no_roles": "No role",
+    "row_subtitle": "Salary: {salary} · Commission: {commission} · Roles: {roles}",
+    "action.suspend": "Suspend member",
+    "action.suspend_subtitle": "Member can no longer access the organisation",
+    "action.resume": "Reactivate",
+    "action.resume_subtitle": "Restore the member's access",
+    "action.remove": "Remove member",
+    "action.remove_subtitle": "This action cannot be undone",
     "section.active": "Active and suspended",
     "invite.title": "Invite member",
     "invite.description": "Send an invite by phone number",
@@ -599,6 +637,11 @@
     "currency_locked": "Currency cannot be changed ({{currency}}). To change it, archive the product and create it again."
   },
   "expense_form": {
+    "kind_label": "Expense type",
+    "kind.general": "General expense",
+    "kind.general_description": "Rent, utilities, taxes, etc.",
+    "kind.salary": "Employee salary",
+    "kind.salary_description": "Selected employee is linked automatically",
     "account": "Account (paid from)",
     "employee": "Employee",
     "no_employees": "No active employees. Add one in Settings first.",
@@ -694,7 +737,32 @@
     "total_debt": "Total debt",
     "total_sum": "Total amount",
     "due_date": "Due date",
-    "due_date_helper": "Optional. Used for reminders"
+    "due_date_helper": "Optional. Used for reminders",
+    "on_credit_title": "On credit",
+    "on_credit_description": "No payment is recorded now. The customer can pay later.",
+    "fallback_label": "Sale"
+  },
+  "void_commission": {
+    "reason": "Reason (optional)",
+    "reason_placeholder": "e.g. wrong amount"
+  },
+  "void_confirm": {
+    "tx_title": "Cancel transaction",
+    "cf_title": "Cancel payment",
+    "tx_warning": "All linked payments will be cancelled. Account balance and stock movements will be reversed.",
+    "cf_warning": "Only this payment is cancelled. The transaction stays open and its payment status is recomputed.",
+    "reason": "Reason",
+    "reason_placeholder": "Why are you cancelling?"
+  },
+  "add_cash_flow": {
+    "not_supported": "This transaction type can't take additional payments.",
+    "remaining": "Remaining",
+    "direction": "Direction",
+    "direction_in": "Inflow",
+    "direction_out": "Outflow",
+    "notes": "Note",
+    "allow_overpayment_title": "Confirm overpayment",
+    "allow_overpayment_description": "The amount exceeds the remaining balance. Confirming will mark it as \"overpaid\"."
   },
   "form": {
     "amount": "Amount",

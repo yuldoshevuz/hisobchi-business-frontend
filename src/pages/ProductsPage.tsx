@@ -488,6 +488,7 @@ function ProductActions({
   onEdit,
   onAdjust,
 }: ProductActionsProps): React.ReactElement {
+  const { t } = useTranslation();
   const update = useUpdateProduct();
   const remove = useDeleteProduct();
 
@@ -540,7 +541,7 @@ function ProductActions({
   if (!canManage) {
     return (
       <p className="px-4 py-3 text-[13px] text-muted-foreground">
-        Bu mahsulotni o‘zgartirish uchun ruxsat yo‘q.
+        {t('products.no_manage_permission')}
       </p>
     );
   }
@@ -550,40 +551,40 @@ function ProductActions({
       <div className="-mx-4 divide-y divide-border bg-card">
         {!isArchived ? (
           <ActionRow
-            title="Tahrirlash"
-            subtitle="Nom, kategoriya, narx, tannarx"
+            title={t('products.action.edit')}
+            subtitle={t('products.action.edit_subtitle')}
             onClick={onEdit}
             icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
           />
         ) : null}
         {!isArchived && trackStock ? (
           <ActionRow
-            title="Qoldiqni tuzatish"
-            subtitle="Recount, sinish, topilgan tovar"
+            title={t('products.action.adjust')}
+            subtitle={t('products.action.adjust_subtitle')}
             onClick={onAdjust}
             icon={<Sliders className="h-4 w-4 text-muted-foreground" />}
           />
         ) : null}
         {!isArchived ? (
           <ActionRow
-            title="Arxivlash"
-            subtitle="Yangi yozuvlardan yashiradi"
+            title={t('products.action.archive')}
+            subtitle={t('products.action.archive_subtitle')}
             onClick={handleArchive}
             loading={pending}
             icon={<Archive className="h-4 w-4 text-muted-foreground" />}
           />
         ) : (
           <ActionRow
-            title="Arxivdan tiklash"
-            subtitle="Mahsulot yana faol bo‘ladi"
+            title={t('products.action.unarchive')}
+            subtitle={t('products.action.unarchive_subtitle')}
             onClick={handleRestore}
             loading={pending}
             icon={<RotateCcw className="h-4 w-4 text-muted-foreground" />}
           />
         )}
         <ActionRow
-          title="O'chirish"
-          subtitle="Faqat tranzaksiyalarda ishlatilmagan mahsulot uchun"
+          title={t('products.action.delete')}
+          subtitle={t('products.action.delete_subtitle')}
           destructive
           onClick={handleDelete}
           loading={pending}

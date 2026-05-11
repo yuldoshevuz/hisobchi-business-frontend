@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -21,11 +22,6 @@ interface VoidConfirmDialogProps {
   onSuccess?: () => void;
 }
 
-const TX_WARNING =
-  "Bu tranzaktsiyaga bog'liq barcha to'lovlar bekor qilinadi. Hisob qoldig'i va ombor harakati teskari yoziladi.";
-const CF_WARNING =
-  "Faqat shu to'lov bekor qilinadi. Tranzaktsiya o'zi ochiq qoladi va to'lov holati qayta hisoblanadi.";
-
 export function VoidConfirmDialog({
   open,
   onOpenChange,
@@ -35,6 +31,7 @@ export function VoidConfirmDialog({
   onConfirm,
   onSuccess,
 }: VoidConfirmDialogProps): React.ReactElement {
+  const { t } = useTranslation();
   const [reason, setReason] = useState<string>('');
 
   const trimmed = reason.trim();
@@ -63,8 +60,16 @@ export function VoidConfirmDialog({
         if (!o) setReason('');
         onOpenChange(o);
       }}
-      title={scope === 'transaction' ? 'Tranzaktsiyani bekor qilish' : "To'lovni bekor qilish"}
-      description={scope === 'transaction' ? TX_WARNING : CF_WARNING}
+      title={
+        scope === 'transaction'
+          ? t('void_confirm.tx_title')
+          : t('void_confirm.cf_title')
+      }
+      description={
+        scope === 'transaction'
+          ? t('void_confirm.tx_warning')
+          : t('void_confirm.cf_warning')
+      }
     >
       <form
         onSubmit={(e) => {
@@ -74,14 +79,14 @@ export function VoidConfirmDialog({
         className="space-y-4"
       >
         <div className="space-y-1.5">
-          <Label htmlFor="void-reason">Sabab</Label>
+          <Label htmlFor="void-reason">{t('void_confirm.reason')}</Label>
           <textarea
             id="void-reason"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             maxLength={VOID_REASON_MAX_LENGTH}
             rows={3}
-            placeholder="Nima uchun bekor qilinmoqda?"
+            placeholder={t('void_confirm.reason_placeholder')}
             className="flex min-h-[80px] w-full rounded-xl border border-input bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             autoFocus
           />
@@ -101,7 +106,7 @@ export function VoidConfirmDialog({
           disabled={!isValid || isPending}
         >
           {isPending ? <Spinner /> : null}
-          Tasdiqlash
+          {t('common.confirm')}
         </Button>
       </form>
     </Modal>

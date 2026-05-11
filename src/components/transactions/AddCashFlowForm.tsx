@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { useAddDebtRepayment } from '@/api/hooks/use-debts';
 import { useAddPurchasePayment } from '@/api/hooks/use-purchases';
@@ -68,6 +69,7 @@ export function AddCashFlowForm({
   defaultAllowOverpayment = false,
   onClose,
 }: AddCashFlowFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const direction = repaymentDirection(transaction.type);
   const accounts = useAccounts({ status: 'active' });
   const matchingAccounts = useMemo(
@@ -171,7 +173,7 @@ export function AddCashFlowForm({
   if (!supportsRepayment(transaction.type) || direction === null) {
     return (
       <p className="px-2 py-4 text-[13px] text-muted-foreground">
-        Bu turdagi tranzaktsiyaga to'lov qo'shib bo'lmaydi.
+        {t('add_cash_flow.not_supported')}
       </p>
     );
   }
@@ -191,22 +193,24 @@ export function AddCashFlowForm({
     >
       <div className="rounded-xl bg-muted/40 px-3 py-2 text-[13px]">
         <div className="flex justify-between text-muted-foreground">
-          <span>Qoldiq</span>
+          <span>{t('add_cash_flow.remaining')}</span>
           <span className="tabular-nums text-foreground">
             {remaining} {transaction.currency}
           </span>
         </div>
         <div className="flex justify-between text-muted-foreground">
-          <span>Yo'nalish</span>
+          <span>{t('add_cash_flow.direction')}</span>
           <span className="text-foreground">
-            {direction === 'in' ? 'Kirim' : 'Chiqim'}
+            {direction === 'in'
+              ? t('add_cash_flow.direction_in')
+              : t('add_cash_flow.direction_out')}
           </span>
         </div>
       </div>
 
       <SelectField
         id="cf-account"
-        label="Hisob"
+        label={t('form.account')}
         value={accountId === 0 ? null : accountId}
         onChange={(id) => setAccountId(id ?? 0)}
         options={matchingAccounts.map((a) => ({
@@ -218,7 +222,7 @@ export function AddCashFlowForm({
 
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1.5">
-          <Label htmlFor="cf-amount">Summa</Label>
+          <Label htmlFor="cf-amount">{t('form.amount')}</Label>
           <Input
             id="cf-amount"
             inputMode="decimal"
@@ -228,7 +232,7 @@ export function AddCashFlowForm({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="cf-date">Sana</Label>
+          <Label htmlFor="cf-date">{t('form.date')}</Label>
           <DatePicker
             id="cf-date" value={date}
             onChange={setDate}
@@ -237,14 +241,14 @@ export function AddCashFlowForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="cf-notes">Eslatma</Label>
+        <Label htmlFor="cf-notes">{t('add_cash_flow.notes')}</Label>
         <textarea
           id="cf-notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           maxLength={CASH_FLOW_NOTES_MAX_LENGTH}
           rows={2}
-          placeholder="Ixtiyoriy"
+          placeholder={t('form.note_placeholder')}
           className="flex min-h-[60px] w-full rounded-xl border border-input bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </div>
@@ -259,10 +263,10 @@ export function AddCashFlowForm({
           />
           <span className="text-[13px]">
             <span className="font-medium text-foreground">
-              Ortiqcha to'lovni tasdiqlash
+              {t('add_cash_flow.allow_overpayment_title')}
             </span>
             <span className="block text-muted-foreground">
-              Summa qoldiqdan ortiq. Tasdiqlasangiz, "overpaid" holatiga o'tadi.
+              {t('add_cash_flow.allow_overpayment_description')}
             </span>
           </span>
         </label>
@@ -283,7 +287,7 @@ export function AddCashFlowForm({
         }
       >
         {isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

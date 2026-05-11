@@ -57,6 +57,11 @@ void i18n
     supportedLngs: [...SUPPORTED_LOCALES_ARRAY],
     interpolation: {
       escapeValue: false, // React already escapes
+      // Dictionaries use {name} (single brace) instead of i18next's default
+      // {{name}}. Switching the markers project-wide keeps the JSON files
+      // human-readable for translators while still resolving correctly.
+      prefix: '{',
+      suffix: '}',
     },
     detection: {
       order: ["localStorage", "navigator"],

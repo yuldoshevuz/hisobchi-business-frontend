@@ -107,6 +107,9 @@
   "edit_tx_category": {
     "title": "Kategoriya",
     "clear": "Kategoriyadan tozalash",
+    "no_category_title": "Kategoriya yo'q",
+    "no_category_description": "Bu tranzaksiya turi kategoriya talab qilmaydi.",
+    "no_category_hint": "O'tkazma / korrektsiya tranzaksiyalarida kategoriya bo'lmaydi.",
     "subtitle": "#{id} · {amount}",
     "placeholder": "Tanlang (yoki kategoriyasiz)",
     "empty": "Bu turdagi kategoriyalar yo'q. Avval Katalog bo'limidan kategoriya qo'shing.",
@@ -142,7 +145,8 @@
     "new_account_description": "Kassa, bank, hamyon yoki karta",
     "edit_account_title": "Hisobni tahrirlash",
     "archive_title": "Arxiv",
-    "archived_count": "{count} ta arxivlangan hisob"
+    "archived_count": "{count} ta arxivlangan hisob",
+    "archive_empty": "Arxivlangan hisoblar yo'q"
   },
   "katalog": {
     "products": "Mahsulotlar",
@@ -158,7 +162,14 @@
   "sales_list": {
     "subtitle": "Oxirgi sotuvlar va ularning tarkibi",
     "empty": "Hali sotuvlar yo'q",
-    "default_label": "Sotuv"
+    "default_label": "Sotuv",
+    "items_summary": "{count} ta tovar",
+    "items_summary_qty": "{count} ta tovar · {qty} dona",
+    "more_items": "+ yana {count} ta tovar",
+    "payments_count": "{count} ta to'lov",
+    "paid_label": "To'langan: {amount}",
+    "no_payments": "To'lov yo'q (qarzga sotuv)",
+    "voided_badge": "Bekor qilingan"
   },
   "contact_detail": {
     "fallback_title": "Kontakt",
@@ -246,7 +257,14 @@
     "action.edit": "Tahrirlash",
     "action.edit_subtitle": "Nom, kategoriya, narx, tannarx",
     "action.adjust": "Qoldiqni tuzatish",
-    "action.adjust_subtitle": "Qayta sanash, sinish, topilgan tovar"
+    "action.adjust_subtitle": "Qayta sanash, sinish, topilgan tovar",
+    "action.archive": "Arxivlash",
+    "action.archive_subtitle": "Yangi yozuvlardan yashiradi",
+    "action.unarchive": "Arxivdan tiklash",
+    "action.unarchive_subtitle": "Mahsulot yana faol bo'ladi",
+    "action.delete": "O'chirish",
+    "action.delete_subtitle": "Faqat tranzaksiyalarda ishlatilmagan mahsulot uchun",
+    "no_manage_permission": "Bu mahsulotni o'zgartirish uchun ruxsat yo'q."
   },
   "categories_page": {
     "title": "Kategoriyalar",
@@ -258,7 +276,19 @@
     "new_title": "Yangi kategoriya",
     "customize_title": "Tizim kategoriyasini sozlash",
     "edit_title": "Kategoriyani tahrirlash",
-    "no_access": "Bu bo'limga kirish uchun ruxsat yo'q"
+    "no_access": "Bu bo'limga kirish uchun ruxsat yo'q",
+    "action.edit": "Tahrirlash",
+    "action.customize": "Sozlash",
+    "action.edit_subtitle": "Nom, rang yoki belgini o'zgartirish",
+    "action.archive": "Arxivlash",
+    "action.archive_subtitle": "Yangi yozuvlarda yashiradi, tarix saqlanadi",
+    "action.unarchive": "Arxivdan tiklash",
+    "action.unarchive_subtitle": "Kategoriya yana faol bo'ladi",
+    "action.delete": "O'chirish",
+    "action.delete_subtitle": "Faqat ishlatilmagan maxsus kategoriyalar uchun",
+    "action.reset_default": "Tizim defaultiga qaytarish",
+    "action.reset_default_subtitle": "Faqat ishlatilmagan kategoriya uchun",
+    "reset_confirm": "Tashkilotning sozlamalari o'chiriladi, tizim qiymatlari tiklanadi. Davom etamizmi?"
   },
   "organizations": {
     "title": "Tashkilotni tanlang",
@@ -326,11 +356,19 @@
     "limit_description": "Joriy tarif: {plan}. Yangi xodim taklif qilish uchun tarifni yangilang.",
     "invite_button": "Xodim taklif qilish",
     "permissions_count": "{count} ruxsat • {employees} xodim",
+    "no_roles": "Rol yo'q",
+    "row_subtitle": "Oylik: {salary} · Foiz: {commission} · Rollar: {roles}",
+    "action.edit": "Tahrirlash",
+    "action.suspend": "Xodimni to'xtatish",
+    "action.suspend_subtitle": "Xodim tashkilotga kira olmaydi",
+    "action.resume": "Faollashtirish",
+    "action.resume_subtitle": "Xodimga kirish ruxsatini qaytaring",
+    "action.remove": "Xodimni o'chirish",
+    "action.remove_subtitle": "Bu amal qaytarib bo'lmaydi",
     "section.active": "Faol va to'xtatilgan xodimlar",
     "invite.title": "Xodim taklif qilish",
     "invite.description": "Telefon raqami bo'yicha taklif yuboring",
     "edit.title": "Xodimni tahrirlash",
-    "action.edit": "Tahrirlash",
     "delete.title": "Xodimni o'chirish",
     "delete.subtitle": "Bu amal qaytarib bo'lmaydi",
     "field.phone": "Telefon",
@@ -599,6 +637,11 @@
     "currency_locked": "Valyuta o'zgartirilmaydi ({{currency}}). Buning uchun mahsulotni arxivlab, qaytadan yarating."
   },
   "expense_form": {
+    "kind_label": "Xarajat turi",
+    "kind.general": "Oddiy xarajat",
+    "kind.general_description": "Ijara, kommunal, soliq va boshqalar",
+    "kind.salary": "Xodimga oylik",
+    "kind.salary_description": "Tanlangan xodim avtomatik bog'lanadi",
     "account": "Balans (qayerdan ketdi)",
     "employee": "Xodim",
     "no_employees": "Faol xodim yo'q. Avval Sozlamalardan xodim qo'shing.",
@@ -694,7 +737,32 @@
     "total_debt": "Jami qarz",
     "total_sum": "Jami summa",
     "due_date": "Qaytarish sanasi",
-    "due_date_helper": "Ixtiyoriy. Eslatmalar uchun ishlatiladi"
+    "due_date_helper": "Ixtiyoriy. Eslatmalar uchun ishlatiladi",
+    "on_credit_title": "Qarzga sotdim",
+    "on_credit_description": "To'lov hozir tushmaydi. Mijoz keyinroq to'lashi mumkin.",
+    "fallback_label": "Sotuv"
+  },
+  "void_commission": {
+    "reason": "Sabab (ixtiyoriy)",
+    "reason_placeholder": "Masalan: noto'g'ri summa"
+  },
+  "void_confirm": {
+    "tx_title": "Tranzaktsiyani bekor qilish",
+    "cf_title": "To'lovni bekor qilish",
+    "tx_warning": "Bu tranzaktsiyaga bog'liq barcha to'lovlar bekor qilinadi. Hisob qoldig'i va ombor harakati teskari yoziladi.",
+    "cf_warning": "Faqat shu to'lov bekor qilinadi. Tranzaktsiya o'zi ochiq qoladi va to'lov holati qayta hisoblanadi.",
+    "reason": "Sabab",
+    "reason_placeholder": "Nima uchun bekor qilinmoqda?"
+  },
+  "add_cash_flow": {
+    "not_supported": "Bu turdagi tranzaktsiyaga to'lov qo'shib bo'lmaydi.",
+    "remaining": "Qoldiq",
+    "direction": "Yo'nalish",
+    "direction_in": "Kirim",
+    "direction_out": "Chiqim",
+    "notes": "Eslatma",
+    "allow_overpayment_title": "Ortiqcha to'lovni tasdiqlash",
+    "allow_overpayment_description": "Summa qoldiqdan ortiq. Tasdiqlasangiz, \"overpaid\" holatiga o'tadi."
   },
   "form": {
     "amount": "Summa",

@@ -107,6 +107,9 @@
   "edit_tx_category": {
     "title": "Категория",
     "clear": "Снять категорию",
+    "no_category_title": "Категория не нужна",
+    "no_category_description": "Для этого типа транзакции категория не используется.",
+    "no_category_hint": "Переводы и корректировки не имеют категории.",
     "subtitle": "#{id} · {amount}",
     "placeholder": "Выберите (или без категории)",
     "empty": "Нет категорий этого типа. Добавьте категорию в разделе Каталог.",
@@ -142,7 +145,8 @@
     "new_account_description": "Касса, банк, кошелёк или карта",
     "edit_account_title": "Изменить счёт",
     "archive_title": "Архив",
-    "archived_count": "Архивных счетов: {count}"
+    "archived_count": "Архивных счетов: {count}",
+    "archive_empty": "Архивных счетов нет"
   },
   "katalog": {
     "products": "Товары",
@@ -158,7 +162,14 @@
   "sales_list": {
     "subtitle": "Последние продажи и их состав",
     "empty": "Пока нет продаж",
-    "default_label": "Продажа"
+    "default_label": "Продажа",
+    "items_summary": "{count} позиций",
+    "items_summary_qty": "{count} позиций · {qty} шт.",
+    "more_items": "+ ещё {count} позиций",
+    "payments_count": "Платежей: {count}",
+    "paid_label": "Оплачено: {amount}",
+    "no_payments": "Без оплаты (в долг)",
+    "voided_badge": "Отменена"
   },
   "contact_detail": {
     "fallback_title": "Контакт",
@@ -246,7 +257,14 @@
     "action.edit": "Изменить",
     "action.edit_subtitle": "Название, категория, цена, себестоимость",
     "action.adjust": "Корректировка остатка",
-    "action.adjust_subtitle": "Пересчёт, бой, найденный товар"
+    "action.adjust_subtitle": "Пересчёт, бой, найденный товар",
+    "action.archive": "В архив",
+    "action.archive_subtitle": "Скрывает в новых записях",
+    "action.unarchive": "Восстановить",
+    "action.unarchive_subtitle": "Товар снова станет активным",
+    "action.delete": "Удалить",
+    "action.delete_subtitle": "Только для товаров, не использованных в транзакциях",
+    "no_manage_permission": "Нет прав на изменение этого товара."
   },
   "categories_page": {
     "title": "Категории",
@@ -258,7 +276,19 @@
     "new_title": "Новая категория",
     "customize_title": "Настроить системную категорию",
     "edit_title": "Изменить категорию",
-    "no_access": "Нет прав на просмотр этого раздела"
+    "no_access": "Нет прав на просмотр этого раздела",
+    "action.edit": "Изменить",
+    "action.customize": "Настроить",
+    "action.edit_subtitle": "Название, цвет или иконку",
+    "action.archive": "В архив",
+    "action.archive_subtitle": "Скрывает в новых записях, история сохраняется",
+    "action.unarchive": "Восстановить",
+    "action.unarchive_subtitle": "Категория снова станет активной",
+    "action.delete": "Удалить",
+    "action.delete_subtitle": "Только для неиспользуемых пользовательских категорий",
+    "action.reset_default": "Сбросить к системному",
+    "action.reset_default_subtitle": "Только для неиспользуемой категории",
+    "reset_confirm": "Настройки организации будут удалены, восстановятся системные значения. Продолжить?"
   },
   "organizations": {
     "title": "Выберите организацию",
@@ -326,6 +356,14 @@
     "limit_description": "Текущий тариф: {plan}. Чтобы пригласить ещё, обновите тариф.",
     "invite_button": "Пригласить сотрудника",
     "permissions_count": "{count} прав • {employees} сотр.",
+    "no_roles": "Нет роли",
+    "row_subtitle": "Оклад: {salary} · Процент: {commission} · Роли: {roles}",
+    "action.suspend": "Приостановить сотрудника",
+    "action.suspend_subtitle": "Сотрудник не сможет войти в организацию",
+    "action.resume": "Активировать",
+    "action.resume_subtitle": "Вернуть сотруднику доступ",
+    "action.remove": "Удалить сотрудника",
+    "action.remove_subtitle": "Это действие нельзя отменить",
     "section.active": "Активные и приостановленные",
     "invite.title": "Пригласить сотрудника",
     "invite.description": "Отправьте приглашение по номеру телефона",
@@ -599,6 +637,11 @@
     "currency_locked": "Валюту изменить нельзя ({{currency}}). Для этого заархивируйте товар и создайте заново."
   },
   "expense_form": {
+    "kind_label": "Тип расхода",
+    "kind.general": "Обычный расход",
+    "kind.general_description": "Аренда, коммуналка, налоги и др.",
+    "kind.salary": "Зарплата сотруднику",
+    "kind.salary_description": "Выбранный сотрудник привязывается автоматически",
     "account": "Счёт (откуда списано)",
     "employee": "Сотрудник",
     "no_employees": "Нет активных сотрудников. Сначала добавьте сотрудника в Настройках.",
@@ -694,7 +737,32 @@
     "total_debt": "Итого в долг",
     "total_sum": "Итого",
     "due_date": "Срок возврата",
-    "due_date_helper": "Необязательно. Используется для напоминаний"
+    "due_date_helper": "Необязательно. Используется для напоминаний",
+    "on_credit_title": "В долг",
+    "on_credit_description": "Деньги сейчас не поступают. Клиент рассчитается позже.",
+    "fallback_label": "Продажа"
+  },
+  "void_commission": {
+    "reason": "Причина (необязательно)",
+    "reason_placeholder": "Например: неверная сумма"
+  },
+  "void_confirm": {
+    "tx_title": "Отменить транзакцию",
+    "cf_title": "Отменить платёж",
+    "tx_warning": "Все связанные платежи будут отменены. Остаток на счёте и движения товара будут отзеркалены.",
+    "cf_warning": "Будет отменён только этот платёж. Транзакция останется открытой, статус оплаты пересчитается.",
+    "reason": "Причина",
+    "reason_placeholder": "Почему отменяете?"
+  },
+  "add_cash_flow": {
+    "not_supported": "К транзакции этого типа нельзя добавить платёж.",
+    "remaining": "Остаток",
+    "direction": "Направление",
+    "direction_in": "Поступление",
+    "direction_out": "Списание",
+    "notes": "Заметка",
+    "allow_overpayment_title": "Подтвердить переплату",
+    "allow_overpayment_description": "Сумма превышает остаток. После подтверждения статус станет «overpaid»."
   },
   "form": {
     "amount": "Сумма",

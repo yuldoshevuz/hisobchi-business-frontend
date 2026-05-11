@@ -37,20 +37,20 @@ type ExpenseKind = 'general' | 'salary';
 
 interface KindOption {
   value: ExpenseKind;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
 }
 
 const KIND_OPTIONS: readonly KindOption[] = [
   {
     value: 'general',
-    label: 'Oddiy xarajat',
-    description: 'Ijara, kommunal, soliq va boshqalar',
+    labelKey: 'expense_form.kind.general',
+    descriptionKey: 'expense_form.kind.general_description',
   },
   {
     value: 'salary',
-    label: 'Xodimga oylik',
-    description: 'Tanlangan xodim avtomatik bog\'lanadi',
+    labelKey: 'expense_form.kind.salary',
+    descriptionKey: 'expense_form.kind.salary_description',
   },
 ];
 
@@ -302,9 +302,12 @@ function KindSelector({
   value,
   onChange,
 }: KindSelectorProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <div className="space-y-1.5">
-      <span className="text-sm font-medium leading-none">Xarajat turi</span>
+      <span className="text-sm font-medium leading-none">
+        {t('expense_form.kind_label')}
+      </span>
       <div className="grid grid-cols-2 gap-2">
         {KIND_OPTIONS.map((option) => {
           const selected = option.value === value;
@@ -321,9 +324,9 @@ function KindSelector({
                   : 'border-input bg-card text-muted-foreground active:bg-accent')
               }
             >
-              <span className="font-medium text-foreground">{option.label}</span>
+              <span className="font-medium text-foreground">{t(option.labelKey)}</span>
               <span className="text-[11px] leading-tight">
-                {option.description}
+                {t(option.descriptionKey)}
               </span>
             </button>
           );
@@ -356,6 +359,7 @@ function CategoryPicker({
   options,
   helperText,
 }: CategoryPickerProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <SelectField<string>
       id={id}
@@ -363,7 +367,7 @@ function CategoryPicker({
       value={value === '' ? null : value}
       onChange={(next) => onChange(next ?? '')}
       options={options}
-      placeholder="Tanlang (ixtiyoriy)"
+      placeholder={t('edit_tx_category.placeholder')}
       helperText={helperText}
     />
   );

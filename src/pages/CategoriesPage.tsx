@@ -430,6 +430,7 @@ function CategoryActions({
   onClose,
   onEdit,
 }: CategoryActionsProps): React.ReactElement {
+  const { t } = useTranslation();
   const update = useUpdateCategory();
   const customize = useCustomizeSystemCategory();
   const remove = useDeleteCategory();
@@ -521,16 +522,20 @@ function CategoryActions({
       <div className="-mx-4 divide-y divide-border bg-card">
         {!item.isArchived ? (
           <ActionRow
-            title={isInstantiated ? 'Tahrirlash' : 'Sozlash'}
-            subtitle="Nom, rang yoki belgini o'zgartirish"
+            title={
+              isInstantiated
+                ? t('categories_page.action.edit')
+                : t('categories_page.action.customize')
+            }
+            subtitle={t('categories_page.action.edit_subtitle')}
             onClick={onEdit}
             icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
           />
         ) : null}
         {canArchive ? (
           <ActionRow
-            title="Arxivlash"
-            subtitle="Yangi yozuvlarda yashiradi, tarix saqlanadi"
+            title={t('categories_page.action.archive')}
+            subtitle={t('categories_page.action.archive_subtitle')}
             onClick={handleArchive}
             loading={pending}
             icon={<Archive className="h-4 w-4 text-muted-foreground" />}
@@ -538,8 +543,8 @@ function CategoryActions({
         ) : null}
         {canRestore ? (
           <ActionRow
-            title="Arxivdan tiklash"
-            subtitle="Kategoriya yana faol bo‘ladi"
+            title={t('categories_page.action.unarchive')}
+            subtitle={t('categories_page.action.unarchive_subtitle')}
             onClick={handleRestore}
             loading={pending}
             icon={<RotateCcw className="h-4 w-4 text-muted-foreground" />}
@@ -553,8 +558,8 @@ function CategoryActions({
         ) : null}
         {canDelete ? (
           <ActionRow
-            title="O'chirish"
-            subtitle="Faqat ishlatilmagan maxsus kategoriyalar uchun"
+            title={t('categories_page.action.delete')}
+            subtitle={t('categories_page.action.delete_subtitle')}
             onClick={handleDelete}
             loading={pending}
             destructive
@@ -585,15 +590,11 @@ function ResetToDefaultRow({
   categoryId,
   onSuccess,
 }: ResetToDefaultRowProps): React.ReactElement {
+  const { t } = useTranslation();
   const remove = useDeleteCategory();
 
   function handleClick(): void {
-    if (
-      !confirm(
-        'Tashkilotning sozlamalari o‘chiriladi, tizim qiymatlari tiklanadi. Davom etamizmi?',
-      )
-    )
-      return;
+    if (!confirm(t('categories_page.reset_confirm'))) return;
     tgHapticImpact('medium');
     remove.mutate(categoryId, {
       onSuccess: () => {
@@ -606,8 +607,8 @@ function ResetToDefaultRow({
 
   return (
     <ActionRow
-      title="Tizim defaultiga qaytarish"
-      subtitle="Faqat ishlatilmagan kategoriya uchun"
+      title={t('categories_page.action.reset_default')}
+      subtitle={t('categories_page.action.reset_default_subtitle')}
       onClick={handleClick}
       loading={remove.isPending}
       icon={<RotateCcw className="h-4 w-4 text-muted-foreground" />}

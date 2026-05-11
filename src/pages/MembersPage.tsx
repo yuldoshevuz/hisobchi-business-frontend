@@ -290,6 +290,7 @@ function MemberActions({
   onClose,
   onEdit,
 }: MemberActionsProps): React.ReactElement {
+  const { t } = useTranslation();
   const updateStatus = useUpdateMemberStatus();
   const remove = useRemoveMember();
 
@@ -333,24 +334,30 @@ function MemberActions({
   const rolesSummary =
     member.roles.length > 0
       ? member.roles.map((r) => r.name).join(', ')
-      : 'Rol yo‘q';
+      : t('members.no_roles');
 
   return (
     <div className="-mx-4 divide-y divide-border bg-card">
       <ActionRow
-        title="Tahrirlash"
-        subtitle={`Oylik: ${salarySummary} · Foiz: ${commissionSummary} · Rollar: ${rolesSummary}`}
+        title={t('members.action.edit')}
+        subtitle={t('members.row_subtitle', {
+          salary: salarySummary,
+          commission: commissionSummary,
+          roles: rolesSummary,
+        })}
         onClick={onEdit}
         icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
       />
       <ActionRow
         title={
-          member.status === 'active' ? "Xodimni to'xtatish" : 'Faollashtirish'
+          member.status === 'active'
+            ? t('members.action.suspend')
+            : t('members.action.resume')
         }
         subtitle={
           member.status === 'active'
-            ? 'Xodim tashkilotga kira olmaydi'
-            : 'Xodimga kirish ruxsatini qaytaring'
+            ? t('members.action.suspend_subtitle')
+            : t('members.action.resume_subtitle')
         }
         onClick={toggleStatus}
         loading={updateStatus.isPending}
@@ -363,8 +370,8 @@ function MemberActions({
         }
       />
       <ActionRow
-        title="Xodimni o'chirish"
-        subtitle="Bu amal qaytarib bo'lmaydi"
+        title={t('members.action.remove')}
+        subtitle={t('members.action.remove_subtitle')}
         destructive
         onClick={handleRemove}
         loading={remove.isPending}

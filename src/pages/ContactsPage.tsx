@@ -339,6 +339,7 @@ function TypeFilterButton({
   value,
   onChange,
 }: TypeFilterButtonProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState<boolean>(false);
   const isFiltered = value !== 'all';
   const TriggerIcon =
@@ -358,7 +359,7 @@ function TypeFilterButton({
     <>
       <button
         type="button"
-        aria-label="Turi bo'yicha filter"
+        aria-label={t('contacts.filter_aria')}
         aria-pressed={isFiltered}
         onClick={() => {
           tgHapticImpact('light');
@@ -374,7 +375,7 @@ function TypeFilterButton({
         <TriggerIcon className="h-4 w-4" />
       </button>
 
-      <Modal open={open} onOpenChange={setOpen} title="Turi bo'yicha filter">
+      <Modal open={open} onOpenChange={setOpen} title={t('contacts.filter_aria')}>
         <div className="-mx-4 divide-y divide-border bg-card">
           {(
             ['all', ...CONTACT_TYPE_VALUES, CONTACT_TYPE_NONE] as TypeFilter[]
@@ -517,6 +518,7 @@ function ContactActions({
   onClose,
   onEdit,
 }: ContactActionsProps): React.ReactElement {
+  const { t } = useTranslation();
   const archive = useArchiveContact();
   const update = useUpdateContact();
   const remove = useDeleteContact();
@@ -582,32 +584,32 @@ function ContactActions({
         <div className="-mx-4 divide-y divide-border bg-card">
           {!isArchived ? (
             <ActionRow
-              title="Tahrirlash"
-              subtitle="Nom, turi, telefon, eslatma"
+              title={t('contacts.action.edit')}
+              subtitle={t('contacts.action.edit_subtitle')}
               onClick={onEdit}
               icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
             />
           ) : null}
           {!isArchived ? (
             <ActionRow
-              title="Arxivlash"
-              subtitle="Yangi yozuvlarda yashiradi, tarix saqlanadi"
+              title={t('contacts.action.archive')}
+              subtitle={t('contacts.action.archive_subtitle')}
               onClick={handleArchive}
               loading={pending}
               icon={<Archive className="h-4 w-4 text-muted-foreground" />}
             />
           ) : (
             <ActionRow
-              title="Arxivdan tiklash"
-              subtitle="Kontakt yana faol bo‘ladi"
+              title={t('contacts.action.unarchive')}
+              subtitle={t('contacts.action.unarchive_subtitle')}
               onClick={handleRestore}
               loading={pending}
               icon={<RotateCcw className="h-4 w-4 text-muted-foreground" />}
             />
           )}
           <ActionRow
-            title="O'chirish"
-            subtitle="Faqat tranzaksiyalarda ishlatilmagan kontakt uchun"
+            title={t('contacts.action.delete')}
+            subtitle={t('contacts.action.delete_subtitle')}
             destructive
             onClick={handleDelete}
             loading={pending}

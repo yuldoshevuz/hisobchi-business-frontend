@@ -76,6 +76,7 @@ function SaleCard({
   contactName,
   onTap,
 }: SaleCardProps): React.ReactElement {
+  const { t } = useTranslation();
   const isVoided = sale.status === 'voided';
   const items: SaleItem[] = sale.saleItems ?? [];
   const totalQty = items.reduce<number>((sum, item) => {
@@ -107,7 +108,7 @@ function SaleCard({
                 isVoided ? 'text-muted-foreground line-through' : 'text-foreground',
               )}
             >
-              {contactName ?? 'Sotuv'}
+              {contactName ?? t('sales_list.default_label')}
             </span>
             <span
               className={cn(
@@ -122,13 +123,18 @@ function SaleCard({
             <span className="truncate text-[13px] text-muted-foreground">
               {sale.description?.trim() ||
                 (items.length > 0
-                  ? `${items.length} ta tovar${totalQty > 0 ? ` · ${formatQuantity(String(totalQty))} dona` : ''}`
-                  : 'Sotuv')}
+                  ? totalQty > 0
+                    ? t('sales_list.items_summary_qty', {
+                        count: items.length,
+                        qty: formatQuantity(String(totalQty)),
+                      })
+                    : t('sales_list.items_summary', { count: items.length })
+                  : t('sales_list.default_label'))}
             </span>
             <div className="flex shrink-0 items-center gap-1">
               {isVoided ? (
                 <Badge variant="destructive" className="text-[10px]">
-                  Bekor qilingan
+                  {t('sales_list.voided_badge')}
                 </Badge>
               ) : (
                 <Badge
@@ -174,7 +180,7 @@ function SaleCard({
             })}
             {items.length > 4 ? (
               <li className="text-[11px] text-muted-foreground">
-                + yana {items.length - 4} ta tovar
+                {t('sales_list.more_items', { count: items.length - 4 })}
               </li>
             ) : null}
           </ul>
@@ -183,15 +189,15 @@ function SaleCard({
 
       {sale.cashFlows.length > 0 ? (
         <div className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
-          {sale.cashFlows.length === 1
-            ? `1 ta to'lov`
-            : `${sale.cashFlows.length} ta to'lov`}
+          {t('sales_list.payments_count', { count: sale.cashFlows.length })}
           {' · '}
-          {`To'langan: ${formatMoney(sale.paidAmount, sale.currency)}`}
+          {t('sales_list.paid_label', {
+            amount: formatMoney(sale.paidAmount, sale.currency),
+          })}
         </div>
       ) : (
         <div className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
-          To'lov yo'q (qarzga sotuv)
+          {t('sales_list.no_payments')}
         </div>
       )}
     </button>

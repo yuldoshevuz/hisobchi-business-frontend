@@ -283,6 +283,7 @@ function CreditToggle({
   value,
   onChange,
 }: CreditToggleProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-input bg-card px-3 py-2.5 active:bg-accent">
       <Checkbox
@@ -292,10 +293,10 @@ function CreditToggle({
       />
       <span className="flex-1">
         <span className="block text-[14px] font-medium leading-tight">
-          Qarzga sotdim
+          {t('sale_form.on_credit_title')}
         </span>
         <span className="mt-0.5 block text-[12px] text-muted-foreground">
-          To'lov hozir tushmaydi. Mijoz keyinroq to'lashi mumkin.
+          {t('sale_form.on_credit_description')}
         </span>
       </span>
     </label>
