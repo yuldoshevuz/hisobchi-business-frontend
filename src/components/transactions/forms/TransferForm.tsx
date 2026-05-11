@@ -17,6 +17,7 @@ import {
   getApiErrorMessage,
   isDuplicateDetected,
 } from '@/lib/api-error';
+import { formatMoney } from '@/lib/format';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import { AmountField, SelectField } from './form-primitives';
 import {
@@ -198,6 +199,7 @@ export function TransferForm({
         options={accountList.map((a) => ({
           value: a.id,
           label: `${a.name} · ${a.currency}`,
+          description: formatMoney(a.currentBalance, a.currency),
           icon: ACCOUNT_TYPE_ICON[a.type],
         }))}
       />
@@ -215,6 +217,7 @@ export function TransferForm({
           .map((a) => ({
             value: a.id,
             label: `${a.name} · ${a.currency}`,
+            description: formatMoney(a.currentBalance, a.currency),
             icon: ACCOUNT_TYPE_ICON[a.type],
           }))}
         disabled={!sourceAccountId}

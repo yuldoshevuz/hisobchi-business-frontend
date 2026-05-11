@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
 import { getApiErrorMessage } from '@/lib/api-error';
+import { formatMoney } from '@/lib/format';
 import { tgClose, tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 
 const CLEAR_KEY = 'clear';
@@ -179,7 +180,7 @@ export function EditTransactionCategoryPage(): React.ReactElement {
     <div className="pb-32">
       <PageHeader
         title="Kategoriya"
-        description={`#${tx.id} · ${tx.amount} ${tx.currency}`}
+        description={`#${tx.id} · ${formatMoney(tx.amount, tx.currency)}`}
         large
         showBack
       />

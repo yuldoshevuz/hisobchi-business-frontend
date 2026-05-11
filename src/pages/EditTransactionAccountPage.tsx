@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
 import { getApiErrorMessage } from '@/lib/api-error';
+import { formatMoney } from '@/lib/format';
 import { tgClose, tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 
 /**
@@ -56,7 +57,7 @@ export function EditTransactionAccountPage(): React.ReactElement {
       .map((a) => ({
         value: a.id,
         label: a.name,
-        description: `${a.currentBalance} ${a.currency}`,
+        description: formatMoney(a.currentBalance, a.currency),
         icon: ACCOUNT_TYPE_ICON[a.type],
       }));
   }, [accountsQuery.data, tx]);
@@ -122,7 +123,7 @@ export function EditTransactionAccountPage(): React.ReactElement {
     <div className="pb-32">
       <PageHeader
         title="Hisob"
-        description={`#${tx.id} · ${tx.amount} ${tx.currency}`}
+        description={`#${tx.id} · ${formatMoney(tx.amount, tx.currency)}`}
         large
         showBack
       />
