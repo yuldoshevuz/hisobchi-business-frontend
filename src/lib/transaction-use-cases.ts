@@ -47,8 +47,10 @@ export const TRANSACTION_USE_CASE_VALUES: readonly TransactionUseCase[] = [
 
 interface UseCaseDescriptor {
   slug: TransactionUseCase;
-  label: string;
-  description: string;
+  /** i18n key for the user-facing label. Resolved via t() at call sites. */
+  labelKey: string;
+  /** i18n key for the one-line description. */
+  descriptionKey: string;
   icon: LucideIcon;
   sign: TransactionSign;
 }
@@ -59,64 +61,64 @@ export const TRANSACTION_USE_CASES: Record<
 > = {
   sale: {
     slug: 'sale',
-    label: 'Sotuv',
-    description: 'Mahsulot sotildi',
+    labelKey: 'use_case.sale.label',
+    descriptionKey: 'use_case.sale.description',
     icon: ShoppingCart,
     sign: 'positive',
   },
   purchase: {
     slug: 'purchase',
-    label: 'Mahsulot olib kelish',
-    description: 'Tovar sotib olindi yoki qabul qilindi',
+    labelKey: 'use_case.purchase.label',
+    descriptionKey: 'use_case.purchase.description',
     icon: PackagePlus,
     sign: 'negative',
   },
   'credit-sale': {
     slug: 'credit-sale',
-    label: 'Qarzga sotuv',
-    description: 'Mahsulot qarzga sotildi',
+    labelKey: 'use_case.credit-sale.label',
+    descriptionKey: 'use_case.credit-sale.description',
     icon: Tag,
     sign: 'positive',
   },
   expense: {
     slug: 'expense',
-    label: 'Xarajat',
-    description: 'Oylik, ijara, kommunal va boshqa xarajatlar',
+    labelKey: 'use_case.expense.label',
+    descriptionKey: 'use_case.expense.description',
     icon: Receipt,
     sign: 'negative',
   },
   income: {
     slug: 'income',
-    label: 'Daromad',
-    description: 'Sotuvdan tashqari kirim (foiz, qaytarish, ...)',
+    labelKey: 'use_case.income.label',
+    descriptionKey: 'use_case.income.description',
     icon: ArrowUpRight,
     sign: 'positive',
   },
   lend: {
     slug: 'lend',
-    label: 'Qarz berish',
-    description: 'Birovga qarzga berildi',
+    labelKey: 'use_case.lend.label',
+    descriptionKey: 'use_case.lend.description',
     icon: HandCoins,
     sign: 'negative',
   },
   borrow: {
     slug: 'borrow',
-    label: 'Qarz olish',
-    description: 'Birovdan qarz olindi',
+    labelKey: 'use_case.borrow.label',
+    descriptionKey: 'use_case.borrow.description',
     icon: ArrowDownLeft,
     sign: 'positive',
   },
   transfer: {
     slug: 'transfer',
-    label: 'Balansdan balansga',
-    description: "Hisoblar orasida ko'chirma",
+    labelKey: 'use_case.transfer.label',
+    descriptionKey: 'use_case.transfer.description',
     icon: ArrowRightLeft,
     sign: 'neutral',
   },
   correction: {
     slug: 'correction',
-    label: "Balansni to'g'irlash",
-    description: "Qoldiqni qo'shish yoki ayirish orqali tuzatish",
+    labelKey: 'use_case.correction.label',
+    descriptionKey: 'use_case.correction.description',
     icon: Sliders,
     sign: 'neutral',
   },

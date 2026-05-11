@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -14,17 +15,18 @@ import { PermissionSlug } from '@/lib/permission-slugs';
 
 interface NavItem {
   to: string;
-  label: string;
+  /** i18n key for the tab label (resolved via t() inside the component). */
+  labelKey: string;
   icon: React.ComponentType<{ className?: string }>;
   /** Permission slugs required to show this tab. Empty = always shown. */
   requireAny?: PermissionSlug[];
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Asosiy', icon: LayoutDashboard },
+  { to: '/', labelKey: 'nav.main', icon: LayoutDashboard },
   {
     to: '/katalog',
-    label: 'Katalog',
+    labelKey: 'nav.catalog',
     icon: Library,
     requireAny: [
       PermissionSlug.PRODUCTS_READ,
@@ -33,17 +35,18 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     to: '/sozlamalar',
-    label: 'Sozlamalar',
+    labelKey: 'nav.settings',
     icon: Settings,
     requireAny: [
       PermissionSlug.MEMBERS_MANAGE,
       PermissionSlug.ROLES_MANAGE,
     ],
   },
-  { to: '/profile', label: 'Profil', icon: UserIcon },
+  { to: '/profile', labelKey: 'nav.profile', icon: UserIcon },
 ];
 
 export function AppShell(): React.ReactElement {
+  const { t } = useTranslation();
   const { isReady, hasAny } = usePermissions();
   useDeepLink();
 
@@ -89,7 +92,7 @@ export function AppShell(): React.ReactElement {
                 }
               >
                 <item.icon className="h-5 w-5" />
-                <span>{item.label}</span>
+                <span>{t(item.labelKey)}</span>
               </NavLink>
             </li>
           ))}

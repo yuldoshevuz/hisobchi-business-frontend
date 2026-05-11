@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Archive,
@@ -53,6 +54,7 @@ import type { Account } from '@/types/account.types';
 const HIDDEN_BALANCE_PLACEHOLDER = '••••••';
 
 export function DashboardPage(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const org = useCurrentOrganization();
   const me = useMe();
@@ -85,8 +87,12 @@ export function DashboardPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={org.data?.name ?? 'Asosiy'}
-        description={me.data ? `Salom, ${me.data.fullName}` : undefined}
+        title={org.data?.name ?? t('dashboard.default_title')}
+        description={
+          me.data
+            ? t('dashboard.greeting', { name: me.data.fullName })
+            : undefined
+        }
         large
         action={
           <Button variant="ghost" size="icon" onClick={handleSwitchOrg}>
@@ -134,7 +140,7 @@ export function DashboardPage(): React.ReactElement {
           <TransactionTypesGrid />
         </Can>
 
-        <Section title="Tezkor amallar">
+        <Section title={t('dashboard.quick_actions')}>
           <Can slug={PermissionSlug.TRANSACTIONS_READ}>
             <ListItem
               leading={
@@ -142,8 +148,8 @@ export function DashboardPage(): React.ReactElement {
                   <ShoppingCart className="h-4 w-4" />
                 </div>
               }
-              title="Sotuvlar"
-              subtitle="Oxirgi sotuvlar va tovarlari"
+              title={t('dashboard.sales')}
+              subtitle={t('dashboard.sales_subtitle')}
               showChevron
               onClick={() => navigate('/sales')}
             />
@@ -155,8 +161,8 @@ export function DashboardPage(): React.ReactElement {
                   <ListChecks className="h-4 w-4" />
                 </div>
               }
-              title="Tranzaktsiyalar"
-              subtitle="Barcha tranzaktsiyalar tarixi"
+              title={t('dashboard.transactions')}
+              subtitle={t('dashboard.transactions_subtitle')}
               showChevron
               onClick={() => navigate('/transactions')}
             />
@@ -168,8 +174,8 @@ export function DashboardPage(): React.ReactElement {
                   <Contact className="h-4 w-4" />
                 </div>
               }
-              title="Kontaktlar"
-              subtitle="Mijozlar, yetkazib beruvchilar va hamkorlar"
+              title={t('dashboard.contacts')}
+              subtitle={t('dashboard.contacts_subtitle')}
               showChevron
               onClick={() => navigate('/contacts')}
             />
@@ -181,8 +187,8 @@ export function DashboardPage(): React.ReactElement {
                   <Package className="h-4 w-4" />
                 </div>
               }
-              title="Katalog"
-              subtitle="Mahsulotlar va kategoriyalar"
+              title={t('dashboard.catalog')}
+              subtitle={t('dashboard.catalog_subtitle')}
               showChevron
               onClick={() => navigate('/katalog')}
             />
@@ -194,8 +200,8 @@ export function DashboardPage(): React.ReactElement {
                   <CalendarClock className="h-4 w-4" />
                 </div>
               }
-              title="Rejalashtirilgan"
-              subtitle="Takrorlanadigan to'lovlar va eslatmalar"
+              title={t('dashboard.scheduled')}
+              subtitle={t('dashboard.scheduled_subtitle')}
               showChevron
               onClick={() => navigate('/scheduled')}
             />
@@ -207,8 +213,8 @@ export function DashboardPage(): React.ReactElement {
                   <Coins className="h-4 w-4" />
                 </div>
               }
-              title="Komissiyalar"
-              subtitle="Sotuvdan xodimlarga keladigan ulush"
+              title={t('dashboard.commissions')}
+              subtitle={t('dashboard.commissions_subtitle')}
               showChevron
               onClick={() => navigate('/commissions')}
             />
@@ -220,8 +226,8 @@ export function DashboardPage(): React.ReactElement {
                   <BarChart3 className="h-4 w-4" />
                 </div>
               }
-              title="Hisobotlar"
-              subtitle="Pul harakati, foyda-zarar, balans"
+              title={t('dashboard.reports')}
+              subtitle={t('dashboard.reports_subtitle')}
               showChevron
               onClick={() => navigate('/reports')}
             />
@@ -233,8 +239,8 @@ export function DashboardPage(): React.ReactElement {
                   <Users className="h-4 w-4" />
                 </div>
               }
-              title="Sozlamalar"
-              subtitle="Xodimlar va rollar"
+              title={t('dashboard.settings')}
+              subtitle={t('dashboard.settings_subtitle')}
               showChevron
               onClick={() => navigate('/sozlamalar')}
             />
@@ -250,6 +256,7 @@ export function DashboardPage(): React.ReactElement {
  * tailored to that action — there is no generic "add transaction" surface.
  */
 function TransactionTypesGrid(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   function open(slug: TransactionUseCase): void {
@@ -260,7 +267,7 @@ function TransactionTypesGrid(): React.ReactElement {
   return (
     <section className="px-4">
       <div className="px-1 pb-1.5 pt-4 text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
-        Yangi tranzaktsiya
+        {t('dashboard.new_transaction')}
       </div>
       <div className="grid grid-cols-2 gap-3">
         {DASHBOARD_USE_CASES.map((slug) => {
@@ -287,10 +294,10 @@ function TransactionTypesGrid(): React.ReactElement {
               </div>
               <div className="min-w-0">
                 <div className="truncate text-[14px] font-medium leading-tight">
-                  {meta.label}
+                  {t(meta.labelKey)}
                 </div>
                 <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                  {meta.description}
+                  {t(meta.descriptionKey)}
                 </div>
               </div>
             </button>
@@ -302,6 +309,7 @@ function TransactionTypesGrid(): React.ReactElement {
 }
 
 function AccountsOverview(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const canManage = useCan(PermissionSlug.ACCOUNTS_MANAGE);
   const accounts = useAccounts({ includeArchived: true });
@@ -391,7 +399,11 @@ function AccountsOverview(): React.ReactElement {
             type="button"
             onClick={toggleHidden}
             className="press flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground"
-            aria-label={hidden ? "Balansni ko'rsatish" : 'Balansni yashirish'}
+            aria-label={
+              hidden
+                ? t('dashboard.show_balances')
+                : t('dashboard.hide_balances')
+            }
           >
             {hidden ? (
               <Eye className="h-5 w-5" />
@@ -408,13 +420,13 @@ function AccountsOverview(): React.ReactElement {
               onClick={openCreate}
               aria-label={
                 accountGuard.canCreate
-                  ? "Yangi hisob qo'shish"
-                  : "Tarif chegarasi tugadi"
+                  ? t('dashboard.add_account')
+                  : t('dashboard.plan_limit_reached')
               }
               title={
                 accountGuard.canCreate
-                  ? `Yangi hisob (${accountGuard.label})`
-                  : `Tarif chegarasi: ${accountGuard.label}. Tariflarni ko'rish.`
+                  ? `${t('dashboard.add_account')} (${accountGuard.label})`
+                  : `${t('dashboard.plan_limit_reached')}: ${accountGuard.label}`
               }
               className={cn(
                 'press flex h-[88px] w-14 shrink-0 items-center justify-center rounded-2xl',
@@ -451,7 +463,7 @@ function AccountsOverview(): React.ReactElement {
                 >
                   <div className="flex items-center gap-1.5 text-[12px]">
                     <Archive className="h-3.5 w-3.5 shrink-0" />
-                    <span>Arxiv</span>
+                    <span>{t('dashboard.archive_title')}</span>
                   </div>
                   <div className="text-[15px] font-semibold tabular-nums text-foreground">
                     {archived.length}
@@ -466,8 +478,8 @@ function AccountsOverview(): React.ReactElement {
       <Modal
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Yangi hisob"
-        description="Kassa, bank, hamyon yoki karta"
+        title={t('dashboard.new_account_title')}
+        description={t('dashboard.new_account_description')}
       >
         <CreateAccountForm onClose={() => setCreateOpen(false)} />
       </Modal>
@@ -504,7 +516,7 @@ function AccountsOverview(): React.ReactElement {
         onOpenChange={(o) => {
           if (!o) setEditing(null);
         }}
-        title="Hisobni tahrirlash"
+        title={t('dashboard.edit_account_title')}
         description={editing ? ACCOUNT_TYPE_LABEL[editing.type] : undefined}
       >
         {editing ? (
@@ -518,8 +530,8 @@ function AccountsOverview(): React.ReactElement {
       <Modal
         open={archiveOpen}
         onOpenChange={setArchiveOpen}
-        title="Arxiv"
-        description={`${archived.length} ta arxivlangan hisob`}
+        title={t('dashboard.archive_title')}
+        description={t('dashboard.archived_count', { count: archived.length })}
       >
         {archived.length > 0 ? (
           <div className="-mx-4 divide-y divide-border bg-card">

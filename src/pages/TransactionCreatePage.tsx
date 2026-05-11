@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { AdjustmentForm } from '@/components/transactions/forms/AdjustmentForm';
@@ -29,6 +30,7 @@ function normalizeUseCaseParam(
 }
 
 export function TransactionCreatePage(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { useCase } = useParams<{ useCase: string }>();
   const { isReady } = usePermissions();
@@ -37,9 +39,9 @@ export function TransactionCreatePage(): React.ReactElement {
   if (isReady && !canCreate) {
     return (
       <AccessDeniedView
-        title="Yangi tranzaktsiya"
-        description="Tranzaktsiya yaratish uchun ruxsat yo'q"
-        hint="'transactions.create' ruxsati kerak."
+        title={t('dashboard.new_transaction')}
+        description={t('errors.FORBIDDEN')}
+        hint="'transactions.create'"
       />
     );
   }
@@ -51,6 +53,8 @@ export function TransactionCreatePage(): React.ReactElement {
   }
 
   const meta = TRANSACTION_USE_CASES[resolved];
+  const title = t(meta.labelKey);
+  const description = t(meta.descriptionKey);
 
   // Adjustment ("Balansni to'g'irlash") is gated by ADVANCED_TRANSACTIONS;
   // wrap the form so users on basic plans see a lock screen instead of a
@@ -58,7 +62,7 @@ export function TransactionCreatePage(): React.ReactElement {
   if (resolved === 'correction') {
     return (
       <div className="pb-6">
-        <PageHeader title={meta.label} description={meta.description} showBack />
+        <PageHeader title={title} description={description} showBack />
         <FeatureGate feature="ADVANCED_TRANSACTIONS" variant="block">
           <FormForUseCase
             useCase={resolved}
@@ -73,7 +77,7 @@ export function TransactionCreatePage(): React.ReactElement {
 
   return (
     <div className="pb-6">
-      <PageHeader title={meta.label} description={meta.description} showBack />
+      <PageHeader title={title} description={description} showBack />
       <FormForUseCase
         useCase={resolved}
         onCreated={(id) =>
