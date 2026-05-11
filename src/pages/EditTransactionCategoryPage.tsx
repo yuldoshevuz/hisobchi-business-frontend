@@ -117,6 +117,15 @@ export function EditTransactionCategoryPage(): React.ReactElement {
       />
     );
   }
+  if (tx.status === 'voided') {
+    return (
+      <AccessDeniedView
+        title="O'zgartirib bo'lmaydi"
+        description="Bu yozuv bekor qilingan."
+        hint="Yangi yozuv qo'shing yoki tafsilotlarini ko'rib chiqing."
+      />
+    );
+  }
   if (tx.type === 'transfer' || tx.type === 'adjustment') {
     return (
       <AccessDeniedView

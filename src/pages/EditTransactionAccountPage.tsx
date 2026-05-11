@@ -77,6 +77,15 @@ export function EditTransactionAccountPage(): React.ReactElement {
       />
     );
   }
+  if (tx.status === 'voided') {
+    return (
+      <AccessDeniedView
+        title="O'zgartirib bo'lmaydi"
+        description="Bu yozuv bekor qilingan."
+        hint="Yangi yozuv qo'shing yoki tafsilotlarini ko'rib chiqing."
+      />
+    );
+  }
   if (!targetCashFlow) {
     return (
       <AccessDeniedView
