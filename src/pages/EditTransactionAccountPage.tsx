@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   useSwapCashFlowAccount,
@@ -24,6 +25,7 @@ import { tgClose, tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
  * uses to re-render the rich notification in place.
  */
 export function EditTransactionAccountPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const txId = Number(id);
@@ -72,27 +74,27 @@ export function EditTransactionAccountPage(): React.ReactElement {
   if (txQuery.isError || !tx) {
     return (
       <AccessDeniedView
-        title="Tranzaksiya topilmadi"
+        title={t('edit_tx_account.tx_not_found')}
         description={getApiErrorMessage(txQuery.error)}
-        hint="Yopib qaytadan oching."
+        hint={t('common.retry')}
       />
     );
   }
   if (tx.status === 'voided') {
     return (
       <AccessDeniedView
-        title="O'zgartirib bo'lmaydi"
-        description="Bu yozuv bekor qilingan."
-        hint="Yangi yozuv qo'shing yoki tafsilotlarini ko'rib chiqing."
+        title={t('edit_tx_account.voided_title')}
+        description={t('edit_tx_account.voided_description')}
+        hint={t('edit_tx_account.voided_hint')}
       />
     );
   }
   if (!targetCashFlow) {
     return (
       <AccessDeniedView
-        title="Hisob topilmadi"
-        description="Bu tranzaksiyada aktiv kassa harakati yo'q."
-        hint="Tranzaksiya batafsil sahifasidan tahrirlang."
+        title={t('edit_tx_account.no_cashflow_title')}
+        description={t('edit_tx_account.no_cashflow_description')}
+        hint={t('edit_tx_account.no_cashflow_hint')}
       />
     );
   }
@@ -122,15 +124,20 @@ export function EditTransactionAccountPage(): React.ReactElement {
   return (
     <div className="pb-32">
       <PageHeader
-        title="Hisob"
-        description={`#${tx.id} · ${formatMoney(tx.amount, tx.currency)}`}
+        title={t('edit_tx_account.title')}
+        description={t('edit_tx_account.subtitle', {
+          id: tx.id,
+          amount: formatMoney(tx.amount, tx.currency),
+        })}
         large
         showBack
       />
 
       <div className="space-y-3 px-4">
         <div className="rounded-2xl bg-muted/40 px-4 py-3">
-          <p className="text-[13px] text-muted-foreground">Summa</p>
+          <p className="text-[13px] text-muted-foreground">
+            {t('edit_tx_account.amount_label')}
+          </p>
           <p className="text-[17px] font-semibold">
             {formatMoney(tx.amount, tx.currency)}
           </p>
@@ -138,20 +145,26 @@ export function EditTransactionAccountPage(): React.ReactElement {
 
         <SelectField<number>
           id="edit-tx-account"
-          label="Hisob"
+          label={t('edit_tx_account.title')}
           value={selectedId}
           onChange={(v) => setSelectedId(v)}
           options={accountOptions}
           placeholder={
-            accountsQuery.isPending ? 'Yuklanmoqda…' : 'Hisob tanlang'
+            accountsQuery.isPending
+              ? t('common.loading')
+              : t('edit_tx_account.select_account')
           }
-          emptyText={`${tx.currency} valyutasidagi aktiv hisob yo'q`}
-          helperText={`Faqat ${tx.currency} valyutasidagi hisoblar ko'rsatilgan`}
+          emptyText={t('edit_tx_account.empty_for_currency', {
+            currency: tx.currency,
+          })}
+          helperText={t('edit_tx_account.filter_by_currency', {
+            currency: tx.currency,
+          })}
         />
 
         {swap.isError ? (
           <p className="text-[13px] text-destructive">
-            {getApiErrorMessage(swap.error, "Saqlab bo'lmadi")}
+            {getApiErrorMessage(swap.error, t('errors.fallback'))}
           </p>
         ) : null}
       </div>
@@ -165,7 +178,7 @@ export function EditTransactionAccountPage(): React.ReactElement {
           onClick={handleSave}
         >
           {swap.isPending ? <Spinner /> : null}
-          Saqlash
+          {t('common.save')}
         </Button>
       </ScreenAction>
     </div>

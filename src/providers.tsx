@@ -1,12 +1,29 @@
 import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { setUnauthorizedHandler } from '@/api/client';
+import { useMe } from '@/api/hooks/use-user';
+import { setLocale } from '@/i18n';
 import { bootAuth } from '@/lib/boot-auth';
 import { router } from '@/router';
 import { tokenStore } from '@/store/token-store';
 
 interface AppProvidersProps {
   children: React.ReactNode;
+}
+
+/**
+ * Mirrors `users.locale` from the backend into the i18next runtime so
+ * every component that calls `useTranslation()` renders in the user's
+ * chosen language. Lives inside the `QueryClientProvider` so it can use
+ * `useMe()`; intentionally renders no UI of its own.
+ */
+function I18nSync(): null {
+  const me = useMe();
+  const locale = me.data?.locale;
+  useEffect(() => {
+    if (locale) setLocale(locale);
+  }, [locale]);
+  return null;
 }
 
 export function AppProviders({ children }: AppProvidersProps): React.ReactElement {
@@ -52,5 +69,10 @@ export function AppProviders({ children }: AppProvidersProps): React.ReactElemen
     });
   }, [queryContact]);
 
-  return <QueryClientProvider client={queryContact}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryContact}>
+      <I18nSync />
+      {children}
+    </QueryClientProvider>
+  );
 }

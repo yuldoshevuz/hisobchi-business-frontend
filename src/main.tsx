@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import './index.css';
+import './i18n';
 import { bootAuth } from './lib/boot-auth';
 import { applyTelegramTheme, initTelegramWebApp } from './lib/telegram';
 import { AppProviders } from './providers';

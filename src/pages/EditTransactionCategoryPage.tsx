@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   useTransaction,
@@ -44,6 +45,7 @@ interface CategoryOption {
  * `customizeBySystem` when needed.
  */
 export function EditTransactionCategoryPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const txId = Number(id);
@@ -89,7 +91,7 @@ export function EditTransactionCategoryPage(): React.ReactElement {
     return [
       {
         value: CLEAR_KEY,
-        label: 'Kategoriyasiz',
+        label: t('edit_tx_category.none'),
         categoryId: null,
         systemCategoryId: null,
         iconNode: (
@@ -100,7 +102,7 @@ export function EditTransactionCategoryPage(): React.ReactElement {
       },
       ...items,
     ];
-  }, [categoriesQuery.data]);
+  }, [categoriesQuery.data, t]);
 
   if (txQuery.isPending) {
     return (
@@ -112,9 +114,9 @@ export function EditTransactionCategoryPage(): React.ReactElement {
   if (txQuery.isError || !tx) {
     return (
       <AccessDeniedView
-        title="Tranzaksiya topilmadi"
+        title={t('edit_tx_account.tx_not_found')}
         description={getApiErrorMessage(txQuery.error)}
-        hint="Yopib qaytadan oching."
+        hint={t('common.retry')}
       />
     );
   }
@@ -179,8 +181,11 @@ export function EditTransactionCategoryPage(): React.ReactElement {
   return (
     <div className="pb-32">
       <PageHeader
-        title="Kategoriya"
-        description={`#${tx.id} · ${formatMoney(tx.amount, tx.currency)}`}
+        title={t('edit_tx_category.title')}
+        description={t('edit_tx_category.subtitle', {
+          id: tx.id,
+          amount: formatMoney(tx.amount, tx.currency),
+        })}
         large
         showBack
       />
@@ -188,24 +193,24 @@ export function EditTransactionCategoryPage(): React.ReactElement {
       <div className="space-y-3 px-4">
         <SelectField<string>
           id="edit-tx-category"
-          label="Kategoriya"
+          label={t('edit_tx_category.title')}
           value={selectedKey}
           onChange={(v) => setSelectedKey(v ?? CLEAR_KEY)}
           options={options}
           placeholder={
             categoriesQuery.isPending
-              ? 'Yuklanmoqda…'
-              : 'Tanlang (yoki kategoriyasiz)'
+              ? t('common.loading')
+              : t('edit_tx_category.placeholder')
           }
-          emptyText="Bu turdagi kategoriyalar yo'q. Avval Katalog bo'limidan kategoriya qo'shing."
-          helperText="Kategoriyasiz qoldirish uchun ro'yxatdan «Kategoriyasiz» ni tanlang."
+          emptyText={t('edit_tx_category.empty')}
+          helperText={t('edit_tx_category.helper')}
         />
 
         {updateTx.isError || customizeSystem.isError ? (
           <p className="text-[13px] text-destructive">
             {getApiErrorMessage(
               updateTx.error ?? customizeSystem.error,
-              "Saqlab bo'lmadi",
+              t('errors.fallback'),
             )}
           </p>
         ) : null}
@@ -220,7 +225,7 @@ export function EditTransactionCategoryPage(): React.ReactElement {
           onClick={handleSave}
         >
           {saving ? <Spinner /> : null}
-          Saqlash
+          {t('common.save')}
         </Button>
       </ScreenAction>
     </div>
