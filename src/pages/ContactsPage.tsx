@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Archive,
@@ -56,6 +57,7 @@ import {
 type TypeFilter = ContactTypeFilter | 'all';
 
 export function ContactsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isReady } = usePermissions();
@@ -126,9 +128,9 @@ export function ContactsPage(): React.ReactElement {
   if (isReady && !canRead) {
     return (
       <AccessDeniedView
-        title="Kontaktlar"
-        description="Bu bo‘limga kirish uchun ruxsat yo‘q"
-        hint="Kontaktlarni ko‘rish uchun 'contacts.read' ruxsati kerak."
+        title={t('contacts.title')}
+        description={t('contacts.no_access')}
+        hint="contacts.read"
       />
     );
   }
@@ -138,8 +140,8 @@ export function ContactsPage(): React.ReactElement {
   return (
     <div className="pb-32">
       <PageHeader
-        title="Kontaktlar"
-        description="Mijozlar, yetkazib beruvchilar va hamkorlar"
+        title={t('contacts.title')}
+        description={t('contacts.subtitle')}
         large
         showBack
       />
@@ -151,7 +153,7 @@ export function ContactsPage(): React.ReactElement {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Nom yoki telefon"
+              placeholder={t('contacts.search_placeholder')}
               className="pl-9"
             />
           </div>
@@ -174,7 +176,7 @@ export function ContactsPage(): React.ReactElement {
             />
           </Section>
         ) : activeList.length > 0 ? (
-          <Section title="Faol kontaktlar">
+          <Section title={t('contacts.active_section')}>
             {activeList.map((c) => (
               <ContactRow
                 key={c.id}
@@ -191,10 +193,15 @@ export function ContactsPage(): React.ReactElement {
             <Users className="mx-auto h-10 w-10 text-muted-foreground" />
             <p className="mt-3 text-[14px] text-muted-foreground">
               {trimmedSearch
-                ? 'Hech narsa topilmadi'
+                ? t('contacts.no_results')
                 : typeFilter !== 'all'
-                  ? `${typeFilter === CONTACT_TYPE_NONE ? CONTACT_TYPE_NONE_LABEL : CONTACT_TYPE_LABEL[typeFilter]} toifasida kontakt yo'q`
-                  : 'Kontaktlar mavjud emas'}
+                  ? t('contacts.no_contacts_for_type', {
+                      type:
+                        typeFilter === CONTACT_TYPE_NONE
+                          ? CONTACT_TYPE_NONE_LABEL
+                          : CONTACT_TYPE_LABEL[typeFilter],
+                    })
+                  : t('contacts.no_contacts')}
             </p>
           </div>
         )}
@@ -211,8 +218,8 @@ export function ContactsPage(): React.ReactElement {
                 <Archive className="h-4 w-4" />
               </div>
             }
-            title="Arxiv"
-            subtitle="Arxivlangan kontaktlar"
+            title={t('contacts.archive_title')}
+            subtitle={t('contacts.archive_subtitle')}
           />
         </Section>
       </div>
@@ -227,7 +234,7 @@ export function ContactsPage(): React.ReactElement {
             }}
           >
             <Plus className="h-5 w-5" />
-            Yangi kontakt qo‘shish
+            {t('contacts.add')}
           </Button>
         </ScreenAction>
       ) : null}
@@ -238,8 +245,8 @@ export function ContactsPage(): React.ReactElement {
           setCreateOpen(open);
           if (!open) setPrefill(null);
         }}
-        title="Yangi kontakt"
-        description="Mijoz, yetkazib beruvchi yoki hamkor"
+        title={t('contacts.new_title')}
+        description={t('contacts.new_description')}
       >
         <CreateContactForm
           onClose={() => {
@@ -278,7 +285,7 @@ export function ContactsPage(): React.ReactElement {
         onOpenChange={(o) => {
           if (!o) setEditing(null);
         }}
-        title="Kontaktni tahrirlash"
+        title={t('contacts.edit_title')}
         description={editing ? getContactTypeLabel(editing.type) : undefined}
       >
         {editing ? (
@@ -292,10 +299,12 @@ export function ContactsPage(): React.ReactElement {
       <Modal
         open={archiveOpen}
         onOpenChange={setArchiveOpen}
-        title="Arxiv"
+        title={t('contacts.archive_title')}
         description={
           archivedContacts.data?.meta
-            ? `${archivedContacts.data.meta.total} ta arxivlangan kontakt`
+            ? t('contacts.archive_count', {
+                count: archivedContacts.data.meta.total,
+              })
             : undefined
         }
       >

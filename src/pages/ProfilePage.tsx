@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Phone, Send, ShieldCheck, Sparkles } from 'lucide-react';
 import { useMe, useUpdateMe } from '@/api/hooks/use-user';
@@ -21,6 +22,7 @@ import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import type { SupportedLocale, User } from '@/types/user.types';
 
 export function ProfilePage(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const me = useMe();
   const logout = useLogout();
@@ -37,7 +39,7 @@ export function ProfilePage(): React.ReactElement {
 
   return (
     <div className="pb-8">
-      <PageHeader title="Profil" large />
+      <PageHeader title={t('profile.title')} large />
 
       {me.isPending ? (
         <div className="flex justify-center py-16">
@@ -58,31 +60,35 @@ export function ProfilePage(): React.ReactElement {
         <>
           <UserHero user={me.data} />
 
-          <Section title="Hisob">
+          <Section title={t('profile.section.account')}>
             <ListItem
               showChevron
               onClick={() => {
                 tgHapticImpact('light');
                 setEditOpen(true);
               }}
-              title="Profilni tahrirlash"
-              subtitle="Ism, email, til"
+              title={t('profile.edit')}
+              subtitle={t('profile.edit_subtitle')}
             />
             <ListItem
               asStatic
               leading={<Phone className="h-4 w-4 text-muted-foreground" />}
               title={me.data.phoneNumber ?? '—'}
-              subtitle="Telefon"
+              subtitle={t('profile.phone')}
             />
             <ListItem
               asStatic
               leading={<Send className="h-4 w-4 text-muted-foreground" />}
-              title={me.data.telegramConnected ? 'Ulangan' : 'Ulanmagan'}
-              subtitle="Telegram"
+              title={
+                me.data.telegramConnected
+                  ? t('profile.telegram.connected')
+                  : t('profile.telegram.disconnected')
+              }
+              subtitle={t('profile.telegram')}
             />
           </Section>
 
-          <Section title="Obuna">
+          <Section title={t('profile.section.subscription')}>
             <ListItem
               showChevron
               onClick={() => {
@@ -90,23 +96,25 @@ export function ProfilePage(): React.ReactElement {
                 navigate('/plans');
               }}
               leading={<Sparkles className="h-4 w-4 text-amber-500" />}
-              title="Tariflar"
+              title={t('profile.plans')}
               subtitle={
                 subscription.isPending
-                  ? 'Yuklanmoqda...'
+                  ? t('common.loading')
                   : subscription.data?.plan
-                    ? `Joriy: ${subscription.data.plan.name}${
-                        subscription.data.subscription?.status === 'expired'
-                          ? ' (muddati tugagan)'
-                          : ''
-                      }`
-                    : "Tarif tayinlanmagan"
+                    ? subscription.data.subscription?.status === 'expired'
+                      ? t('profile.plan_expired', {
+                          name: subscription.data.plan.name,
+                        })
+                      : t('profile.current_plan', {
+                          name: subscription.data.plan.name,
+                        })
+                    : t('profile.no_plan')
               }
             />
           </Section>
 
           {viewerPerms.isReady && viewerPerms.roleNames.length > 0 ? (
-            <Section title="Tashkilotdagi rolingiz">
+            <Section title={t('profile.section.role')}>
               <ListItem
                 asStatic
                 leading={<ShieldCheck className="h-4 w-4 text-muted-foreground" />}
@@ -119,7 +127,9 @@ export function ProfilePage(): React.ReactElement {
                     ))}
                   </span>
                 }
-                subtitle={`${viewerPerms.slugs.size} ta ruxsat`}
+                subtitle={t('profile.permissions_count', {
+                  count: viewerPerms.slugs.size,
+                })}
               />
             </Section>
           ) : null}
@@ -133,15 +143,15 @@ export function ProfilePage(): React.ReactElement {
               disabled={logout.isPending}
             >
               <LogOut className="h-4 w-4" />
-              Chiqish
+              {t('profile.logout')}
             </Button>
           </div>
 
           <Modal
             open={editOpen}
             onOpenChange={setEditOpen}
-            title="Profilni tahrirlash"
-            description="Ism, email va tilni o'zgartiring"
+            title={t('profile.edit')}
+            description={t('profile.edit_description')}
           >
             <ProfileForm
               key={me.data.id}

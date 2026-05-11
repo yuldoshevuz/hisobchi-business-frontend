@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Archive,
   FolderTree,
@@ -53,6 +54,7 @@ interface CategoriesPageProps {
 export function CategoriesPage({
   embedded = false,
 }: CategoriesPageProps = {}): React.ReactElement {
+  const { t } = useTranslation();
   const { isReady } = usePermissions();
   const canManage = useCan(PermissionSlug.CATEGORIES_MANAGE);
   const [activeType, setActiveType] = useState<CategoryType>('expense');
@@ -104,9 +106,9 @@ export function CategoriesPage({
   if (isReady && !canManage) {
     return (
       <AccessDeniedView
-        title="Kategoriyalar"
-        description="Bu bo‘limga kirish uchun ruxsat yo‘q"
-        hint="Kategoriyalarni boshqarish uchun 'categories.manage' ruxsati kerak."
+        title={t('categories_page.title')}
+        description={t('categories_page.no_access')}
+        hint="categories.manage"
       />
     );
   }
@@ -151,8 +153,8 @@ export function CategoriesPage({
     <div className="pb-32">
       {embedded ? null : (
         <PageHeader
-          title="Kategoriyalar"
-          description="Chiqim, kirim va mahsulot turlari"
+          title={t('categories_page.title')}
+          description={t('categories_page.subtitle')}
           large
         />
       )}
@@ -160,16 +162,16 @@ export function CategoriesPage({
       <div className="space-y-3">
         <div className="px-4">
           <div className="grid grid-cols-3 gap-2">
-            {CATEGORY_TYPE_VALUES.map((t) => {
-              const Icon = CATEGORY_TYPE_ICON[t];
-              const selected = activeType === t;
+            {CATEGORY_TYPE_VALUES.map((type) => {
+              const Icon = CATEGORY_TYPE_ICON[type];
+              const selected = activeType === type;
               return (
                 <button
-                  key={t}
+                  key={type}
                   type="button"
                   onClick={() => {
                     tgHapticImpact('light');
-                    setActiveType(t);
+                    setActiveType(type);
                   }}
                   className={`press flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-[13px] ${
                     selected
@@ -178,7 +180,7 @@ export function CategoriesPage({
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  <span>{CATEGORY_TYPE_LABEL[t]}</span>
+                  <span>{CATEGORY_TYPE_LABEL[type]}</span>
                 </button>
               );
             })}
@@ -229,7 +231,9 @@ export function CategoriesPage({
           <div className="px-6 py-12 text-center">
             <FolderTree className="mx-auto h-10 w-10 text-muted-foreground" />
             <p className="mt-3 text-[14px] text-muted-foreground">
-              {CATEGORY_TYPE_LABEL[activeType]} kategoriyalari yo‘q
+              {t('categories_page.empty_for_type', {
+                type: CATEGORY_TYPE_LABEL[activeType],
+              })}
             </p>
           </div>
         )}
@@ -246,8 +250,8 @@ export function CategoriesPage({
                 <Archive className="h-4 w-4" />
               </div>
             }
-            title="Arxiv"
-            subtitle="Arxivlangan kategoriyalar"
+            title={t('categories_page.archive_title')}
+            subtitle={t('categories_page.archive_subtitle')}
           />
         </Section>
       </div>
@@ -255,7 +259,7 @@ export function CategoriesPage({
       <ScreenAction>
         <Button size="xl" onClick={openCreate}>
           <Plus className="h-5 w-5" />
-          Yangi maxsus kategoriya
+          {t('categories_page.add')}
         </Button>
       </ScreenAction>
 
@@ -289,10 +293,10 @@ export function CategoriesPage({
         }}
         title={
           editorMode?.kind === 'create'
-            ? 'Yangi kategoriya'
+            ? t('categories_page.new_title')
             : editorMode?.kind === 'customize'
-              ? 'Tizim kategoriyasini sozlash'
-              : 'Kategoriyani tahrirlash'
+              ? t('categories_page.customize_title')
+              : t('categories_page.edit_title')
         }
         description={
           editorMode && editorMode.kind !== 'create'
@@ -311,11 +315,11 @@ export function CategoriesPage({
       <Modal
         open={archiveOpen}
         onOpenChange={setArchiveOpen}
-        title="Arxiv"
+        title={t('categories_page.archive_title')}
         description={
           archivedQuery.isPending
             ? undefined
-            : `${archived.length} ta arxivlangan kategoriya`
+            : t('contacts.archive_count', { count: archived.length })
         }
       >
         {archivedQuery.isPending ? (

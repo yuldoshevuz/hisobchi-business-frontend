@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Receipt, ShoppingCart } from 'lucide-react';
 import { useSalesInfinite } from '@/api/hooks/use-sales';
@@ -198,6 +199,7 @@ function SaleCard({
 }
 
 export function SalesListPage(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isReady } = usePermissions();
   const canRead = useCan(PermissionSlug.TRANSACTIONS_READ);
@@ -228,9 +230,9 @@ export function SalesListPage(): React.ReactElement {
   if (isReady && !canRead) {
     return (
       <AccessDeniedView
-        title="Sotuvlar"
-        description="Bu bo'limga kirish uchun ruxsat yo'q"
-        hint="Sotuvlarni ko'rish uchun 'transactions.read' ruxsati kerak."
+        title={t('dashboard.sales')}
+        description={t('tx_list.no_access_description')}
+        hint="transactions.read"
       />
     );
   }
@@ -241,8 +243,8 @@ export function SalesListPage(): React.ReactElement {
   return (
     <div className="pb-32">
       <PageHeader
-        title="Sotuvlar"
-        description="Oxirgi sotuvlar va ularning tarkibi"
+        title={t('dashboard.sales')}
+        description={t('sales_list.subtitle')}
         large
         showBack
       />
@@ -259,7 +261,7 @@ export function SalesListPage(): React.ReactElement {
         <div className="px-6 py-16 text-center">
           <Receipt className="mx-auto h-10 w-10 text-muted-foreground" />
           <p className="mt-3 text-[14px] text-muted-foreground">
-            Hali sotuvlar yo'q
+            {t('sales_list.empty')}
           </p>
         </div>
       ) : (

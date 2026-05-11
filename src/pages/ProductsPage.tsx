@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Archive,
   Boxes,
@@ -50,6 +51,7 @@ interface ProductsPageProps {
 export function ProductsPage({
   embedded = false,
 }: ProductsPageProps = {}): React.ReactElement {
+  const { t } = useTranslation();
   const { isReady } = usePermissions();
   const canRead = useCan(PermissionSlug.PRODUCTS_READ);
   const canManage = useCan(PermissionSlug.PRODUCTS_MANAGE);
@@ -120,9 +122,9 @@ export function ProductsPage({
   if (isReady && !canRead) {
     return (
       <AccessDeniedView
-        title="Mahsulotlar"
-        description="Bu bo‘limga kirish uchun ruxsat yo‘q"
-        hint="Mahsulotlarni ko‘rish uchun 'products.read' ruxsati kerak."
+        title={t('products.title')}
+        description={t('products.no_access')}
+        hint="products.read"
       />
     );
   }
@@ -131,8 +133,8 @@ export function ProductsPage({
     <div className="pb-32">
       {embedded ? null : (
         <PageHeader
-          title="Mahsulotlar"
-          description="Tovar va xizmatlar katalogi"
+          title={t('products.title')}
+          description={t('products.subtitle')}
           large
         />
       )}
@@ -144,7 +146,7 @@ export function ProductsPage({
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Nom bo‘yicha qidirish"
+              placeholder={t('products.search_placeholder')}
               className="pl-9"
             />
           </div>
@@ -186,7 +188,7 @@ export function ProductsPage({
           </Section>
         ) : activeList.length > 0 ? (
           <>
-            <Section title="Faol mahsulotlar">
+            <Section title={t('products.active_section')}>
               {activeList.map((p) => (
                 <ProductRow
                   key={p.id}
@@ -218,8 +220,8 @@ export function ProductsPage({
             <Package className="mx-auto h-10 w-10 text-muted-foreground" />
             <p className="mt-3 text-[14px] text-muted-foreground">
               {trimmedSearch
-                ? 'Hech narsa topilmadi'
-                : 'Mahsulotlar mavjud emas'}
+                ? t('contacts.no_results')
+                : t('products.archive_subtitle')}
             </p>
           </div>
         )}
@@ -236,8 +238,8 @@ export function ProductsPage({
                 <Archive className="h-4 w-4" />
               </div>
             }
-            title="Arxiv"
-            subtitle="Arxivlangan mahsulotlar"
+            title={t('products.archive_title')}
+            subtitle={t('products.archive_subtitle')}
           />
         </Section>
       </div>
@@ -252,7 +254,7 @@ export function ProductsPage({
             }}
           >
             <Plus className="h-5 w-5" />
-            Yangi mahsulot
+            {t('products.add')}
           </Button>
         </ScreenAction>
       ) : null}
@@ -260,8 +262,8 @@ export function ProductsPage({
       <Modal
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Yangi mahsulot"
-        description="Tovar yoki xizmat"
+        title={t('products.new_title')}
+        description={t('products.new_description')}
       >
         <CreateProductForm onClose={() => setCreateOpen(false)} />
       </Modal>
@@ -304,7 +306,7 @@ export function ProductsPage({
         onOpenChange={(o) => {
           if (!o) setEditing(null);
         }}
-        title="Mahsulotni tahrirlash"
+        title={t('products.edit_title')}
         description={editing ? editing.currency : undefined}
       >
         {editing ? (
@@ -320,7 +322,7 @@ export function ProductsPage({
         onOpenChange={(o) => {
           if (!o) setAdjusting(null);
         }}
-        title="Qoldiqni tuzatish"
+        title={t('products.adjust_stock_title')}
         description={adjusting?.name}
       >
         {adjusting ? (
@@ -334,8 +336,8 @@ export function ProductsPage({
       <Modal
         open={filterOpen}
         onOpenChange={setFilterOpen}
-        title="Kategoriya bo‘yicha filter"
-        description="Mahsulotlarni bitta kategoriya bo‘yicha cheklang"
+        title={t('products.filter_title')}
+        description={t('products.filter_description')}
       >
         <div className="space-y-2">
           <button
@@ -351,7 +353,7 @@ export function ProductsPage({
                 : 'border-border bg-card text-foreground'
             }`}
           >
-            <span>Hammasi</span>
+            <span>{t('products.filter_all')}</span>
             {filterCategoryId === null ? (
               <span className="text-[12px] font-medium">tanlangan</span>
             ) : null}
@@ -386,10 +388,12 @@ export function ProductsPage({
       <Modal
         open={archiveOpen}
         onOpenChange={setArchiveOpen}
-        title="Arxiv"
+        title={t('products.archive_title')}
         description={
           archivedProducts.data?.meta
-            ? `${archivedProducts.data.meta.total} ta arxivlangan mahsulot`
+            ? t('contacts.archive_count', {
+                count: archivedProducts.data.meta.total,
+              })
             : undefined
         }
       >

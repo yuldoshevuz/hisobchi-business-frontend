@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Lock, Plus, Star } from 'lucide-react';
 import {
@@ -25,6 +26,7 @@ import { getApiErrorMessage } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 
 export function OrganizationsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const me = useMe();
   const orgs = useMyOrganizations();
@@ -75,8 +77,8 @@ export function OrganizationsPage(): React.ReactElement {
   return (
     <div className="min-h-screen pb-32">
       <PageHeader
-        title="Tashkilotni tanlang"
-        description="Davom etish uchun tashkilotni tanlang"
+        title={t('organizations.title')}
+        description={t('organizations.subtitle')}
         large
         action={
           <Button
@@ -88,7 +90,7 @@ export function OrganizationsPage(): React.ReactElement {
               })
             }
           >
-            Chiqish
+            {t('organizations.logout')}
           </Button>
         }
       />
@@ -110,7 +112,7 @@ export function OrganizationsPage(): React.ReactElement {
             />
           </Section>
         ) : orgs.data && orgs.data.length > 0 ? (
-          <Section title="Tashkilotlar">
+          <Section title={t('organizations.section')}>
             {orgs.data.map((org) => {
               const isPrimary = org.id === primaryOrgId;
               const isSelectPending =
@@ -133,7 +135,7 @@ export function OrganizationsPage(): React.ReactElement {
                       <span>{org.name}</span>
                       {isPrimary ? (
                         <Badge variant="secondary" className="text-[10px]">
-                          Asosiy
+                          {t('organizations.primary_badge')}
                         </Badge>
                       ) : null}
                     </span>
@@ -160,8 +162,8 @@ export function OrganizationsPage(): React.ReactElement {
                         type="button"
                         aria-label={
                           isPrimary
-                            ? 'Asosiy tashkilot'
-                            : 'Asosiy qilib belgilash'
+                            ? t('organizations.primary_aria_set')
+                            : t('organizations.primary_aria_unset')
                         }
                         onClick={(e) => {
                           e.stopPropagation();
@@ -193,7 +195,7 @@ export function OrganizationsPage(): React.ReactElement {
           <div className="px-6 py-12 text-center">
             <Building2 className="mx-auto h-10 w-10 text-muted-foreground" />
             <p className="mt-3 text-[14px] text-muted-foreground">
-              Sizda hali tashkilot yo'q
+              {t('organizations.empty')}
             </p>
           </div>
         )}
@@ -206,11 +208,10 @@ export function OrganizationsPage(): React.ReactElement {
           </div>
           <div className="flex-1 space-y-1">
             <div className="text-[13px] font-medium text-amber-900">
-              Tashkilot soni chegarasiga yetdingiz
+              {t('organizations.limit_title')}
             </div>
             <p className="text-[12px] text-amber-800">
-              Joriy tarif: {orgGuard.label}. Yangi tashkilot yaratish uchun
-              tarifni yangilang.
+              {t('organizations.limit_description', { plan: orgGuard.label })}
             </p>
           </div>
           <Button
@@ -219,7 +220,7 @@ export function OrganizationsPage(): React.ReactElement {
             className="border-amber-300 bg-white"
             onClick={() => navigate('/plans')}
           >
-            Tariflar
+            {t('organizations.plans_button')}
           </Button>
         </div>
       ) : null}
@@ -272,6 +273,7 @@ function CreateOrgSheet({
   open,
   onOpenChange,
 }: CreateOrgSheetProps): React.ReactElement {
+  const { t } = useTranslation();
   const create = useCreateOrganization();
   const [name, setName] = useState<string>('');
   const [currency, setCurrency] = useState<string>('UZS');
@@ -296,8 +298,8 @@ function CreateOrgSheet({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Yangi tashkilot"
-      description="Tashkilot nomi va asosiy valyutani kiriting"
+      title={t('organizations.new_org_title')}
+      description={t('organizations.new_org_description')}
     >
       <form
         onSubmit={(e) => {
@@ -307,7 +309,7 @@ function CreateOrgSheet({
         className="space-y-4"
       >
         <div className="space-y-1.5">
-          <Label htmlFor="org-name">Nomi</Label>
+          <Label htmlFor="org-name">{t('organizations.field.name')}</Label>
           <Input
             id="org-name"
             value={name}
@@ -320,7 +322,7 @@ function CreateOrgSheet({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="org-currency">Valyuta</Label>
+          <Label htmlFor="org-currency">{t('organizations.field.currency')}</Label>
           <Input
             id="org-currency"
             value={currency}
@@ -341,7 +343,7 @@ function CreateOrgSheet({
           disabled={create.isPending || name.trim().length < 2}
         >
           {create.isPending ? <Spinner /> : null}
-          Yaratish
+          {t('organizations.create')}
         </Button>
       </form>
     </Modal>

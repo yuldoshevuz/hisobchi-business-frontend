@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Filter, Receipt, Search } from 'lucide-react';
 import { useTransactionsInfinite } from '@/api/hooks/use-transactions';
@@ -77,6 +78,7 @@ function groupByDate(items: Transaction[]): Array<{
 }
 
 export function TransactionsListPage(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isReady } = usePermissions();
@@ -160,9 +162,9 @@ export function TransactionsListPage(): React.ReactElement {
   if (isReady && !canRead) {
     return (
       <AccessDeniedView
-        title="Tranzaktsiyalar"
-        description="Bu bo'limga kirish uchun ruxsat yo'q"
-        hint="Tranzaktsiyalarni ko'rish uchun 'transactions.read' ruxsati kerak."
+        title={t('dashboard.transactions')}
+        description={t('tx_list.no_access_description')}
+        hint="transactions.read"
       />
     );
   }
@@ -184,13 +186,13 @@ export function TransactionsListPage(): React.ReactElement {
   const headerTitle =
     urlType.length === 1
       ? TRANSACTION_TYPE_LABEL[urlType[0]]
-      : 'Tranzaktsiyalar';
+      : t('dashboard.transactions');
 
   return (
     <div className="pb-32">
       <PageHeader
         title={headerTitle}
-        description="Pul harakati tarixi"
+        description={t('tx_list.subtitle')}
         large
         showBack
       />
@@ -202,7 +204,7 @@ export function TransactionsListPage(): React.ReactElement {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Izoh bo'yicha qidirish"
+              placeholder={t('tx_list.search_placeholder')}
               className="pl-9"
             />
           </div>
@@ -237,10 +239,10 @@ export function TransactionsListPage(): React.ReactElement {
           <div className="px-6 py-16 text-center">
             <Receipt className="mx-auto h-10 w-10 text-muted-foreground" />
             <p className="mt-3 text-[14px] text-muted-foreground">
-              Hali yozuvlar yo'q
+              {t('tx_list.empty_title')}
             </p>
             <p className="mt-1 text-[12px] text-muted-foreground">
-              Yozuvlar bot orqali qo'shiladi
+              {t('tx_list.empty_hint')}
             </p>
           </div>
         ) : (

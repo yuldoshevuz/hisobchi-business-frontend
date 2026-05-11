@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useTelegramWebAppLogin } from '@/api/hooks/use-auth';
 import { getTelegramInitData, tgHapticNotify } from '@/lib/telegram';
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 
 export function LoginPage(): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const login = useTelegramWebAppLogin();
   const initData = useMemo(() => getTelegramInitData(), []);
@@ -37,14 +39,14 @@ export function LoginPage(): React.ReactElement {
       </div>
       <h1 className="text-[24px] font-bold leading-tight">Hisobchi Business</h1>
       <p className="mt-2 max-w-xs text-[14px] text-muted-foreground">
-        Tashkilot moliyasini Telegram orqali boshqaring
+        {t('login.tagline')}
       </p>
 
       <div className="mt-8 w-full max-w-sm space-y-3">
         {!initData ? (
           <>
             <p className="text-[13px] text-muted-foreground">
-              Iltimos, ushbu ilovani Telegram bot orqali oching.
+              {t('login.not_in_telegram')}
             </p>
             <pre className="mt-3 max-h-72 overflow-auto rounded bg-muted p-2 text-left text-[10px] leading-tight">
               {(() => {
@@ -74,7 +76,7 @@ export function LoginPage(): React.ReactElement {
           </>
         ) : login.isPending ? (
           <div className="flex items-center justify-center gap-2 text-[14px] text-muted-foreground">
-            <Spinner /> Telegram orqali kirilmoqda…
+            <Spinner /> {t('login.signing_in')}
           </div>
         ) : login.isError ? (
           <>
@@ -82,12 +84,12 @@ export function LoginPage(): React.ReactElement {
               {getApiErrorMessage(login.error)}
             </p>
             <Button size="lg" className="w-full" onClick={submit}>
-              Qayta urinish
+              {t('login.retry')}
             </Button>
           </>
         ) : (
           <Button size="lg" className="w-full" onClick={submit}>
-            Telegram orqali kirish
+            {t('login.sign_in')}
           </Button>
         )}
       </div>
