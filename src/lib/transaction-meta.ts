@@ -11,24 +11,38 @@ import {
   TrendingUp,
   type LucideIcon,
 } from 'lucide-react';
+import i18n from '@/i18n';
 import type {
   CashFlowDirection,
   PaymentStatus,
   TransactionType,
 } from '@/types/transaction.types';
 
-export const TRANSACTION_TYPE_LABEL: Record<TransactionType, string> = {
-  sale: 'Sotuv',
-  purchase: 'Xarid',
-  expense: 'Xarajat',
-  income: 'Daromad',
-  debt_out: 'Qarz berdim',
-  debt_in: 'Qarz oldim',
-  transfer: "O'tkazma",
-  adjustment: 'Tuzatish',
-  opening_balance: "Boshlang'ich qoldiq",
-  suspense: 'Tasniflanmagan',
+export const TRANSACTION_TYPE_LABEL_KEY: Record<TransactionType, string> = {
+  sale: 'tx.type.sale',
+  purchase: 'tx.type.purchase',
+  expense: 'tx.type.expense',
+  income: 'tx.type.income',
+  debt_out: 'tx.type.debt_out',
+  debt_in: 'tx.type.debt_in',
+  transfer: 'tx.type.transfer',
+  adjustment: 'tx.type.adjustment',
+  opening_balance: 'tx.type.opening_balance',
+  suspense: 'tx.type.suspense',
 };
+
+/** Locale-aware label record. Reading any property runs the key through
+ *  the live i18n instance, so the value follows the active language.
+ *  See account-meta.ts for the same pattern. */
+export const TRANSACTION_TYPE_LABEL: Record<TransactionType, string> = new Proxy(
+  TRANSACTION_TYPE_LABEL_KEY,
+  {
+    get(target, prop: string) {
+      const key = target[prop as TransactionType];
+      return key ? i18n.t(key) : (prop as string);
+    },
+  },
+) as Record<TransactionType, string>;
 
 export const TRANSACTION_TYPE_ICON: Record<TransactionType, LucideIcon> = {
   sale: ShoppingCart,
@@ -59,12 +73,22 @@ export const TRANSACTION_TYPE_SIGN: Record<TransactionType, TransactionSign> = {
   suspense: 'neutral',
 };
 
-export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
-  unpaid: "To'lanmagan",
-  partial: 'Qisman',
-  paid: "To'liq",
-  overpaid: 'Ortiqcha',
+export const PAYMENT_STATUS_LABEL_KEY: Record<PaymentStatus, string> = {
+  unpaid: 'payment_status.unpaid',
+  partial: 'payment_status.partial',
+  paid: 'payment_status.paid',
+  overpaid: 'payment_status.overpaid',
 };
+
+export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = new Proxy(
+  PAYMENT_STATUS_LABEL_KEY,
+  {
+    get(target, prop: string) {
+      const key = target[prop as PaymentStatus];
+      return key ? i18n.t(key) : (prop as string);
+    },
+  },
+) as Record<PaymentStatus, string>;
 
 /** Maps Badge variants used in the project. */
 export const PAYMENT_STATUS_VARIANT: Record<

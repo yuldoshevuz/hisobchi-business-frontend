@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScreenAction } from '@/components/layout/ScreenAction';
@@ -40,6 +41,7 @@ interface RolesPageProps {
 export function RolesPage({
   embedded = false,
 }: RolesPageProps = {}): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const viewerPerms = useViewerPermissions();
   const canManage = viewerPerms.has(PermissionSlug.ROLES_MANAGE);
@@ -55,9 +57,9 @@ export function RolesPage({
   if (isReady && !canManage) {
     return (
       <AccessDeniedView
-        title="Rollar"
-        description="Bu bo'limga kirish uchun ruxsat yo'q"
-        hint="Rollarni boshqarish uchun 'roles.manage' ruxsati kerak. Tashkilot egasidan so'rang."
+        title={t('roles_page.title')}
+        description={t('roles_page.no_access')}
+        hint="roles.manage"
       />
     );
   }
@@ -66,8 +68,8 @@ export function RolesPage({
     <div className="pb-32">
       {embedded ? null : (
         <PageHeader
-          title="Rollar"
-          description="Tashkilot rollari va ruxsatlari"
+          title={t('roles_page.title')}
+          description={t('roles_page.subtitle')}
           large
         />
       )}
@@ -89,7 +91,7 @@ export function RolesPage({
             />
           </Section>
         ) : (
-          <Section title="Rollar">
+          <Section title={t('roles_page.section')}>
             {(roles.data ?? []).map((role) => (
               <ListItem
                 key={role.id}
@@ -103,7 +105,7 @@ export function RolesPage({
                     <span className="truncate">{role.name}</span>
                     {role.isSystem ? (
                       <Badge variant="outline" className="text-[10px]">
-                        tizim
+                        {t('roles_page.system_badge')}
                       </Badge>
                     ) : null}
                   </span>
@@ -162,15 +164,17 @@ export function RolesPage({
           ) : (
             <Lock className="h-5 w-5" />
           )}
-          {canCreateCustomRole ? 'Yangi rol' : 'Yangi rol (tarif kerak)'}
+          {canCreateCustomRole
+            ? t('roles_page.add')
+            : `${t('roles_page.add')} (${t('transfer.plan_needed')})`}
         </Button>
       </ScreenAction>
 
       <Modal
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Yangi rol"
-        description="Rol nomi va ruxsatlarni tanlang"
+        title={t('roles_page.new_title')}
+        description={t('roles_page.field.permissions')}
       >
         <RoleForm mode="create" onClose={() => setCreateOpen(false)} />
       </Modal>
@@ -205,9 +209,11 @@ export function RolesPage({
         onOpenChange={(o) => {
           if (!o) setDeleting(null);
         }}
-        title="Rolni o'chirish"
+        title={t('roles_page.delete.title')}
         description={
-          deleting ? `"${deleting.name}" — bu amal qaytarib bo'lmaydi` : undefined
+          deleting
+            ? `"${deleting.name}" — ${t('roles_page.delete.subtitle')}`
+            : undefined
         }
       >
         {deleting ? (

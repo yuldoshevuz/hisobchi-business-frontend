@@ -70,12 +70,24 @@
   "account": {
     "label": "Счёт",
     "balance": "Баланс",
-    "type.cash": "Наличные",
-    "type.bank": "Банк",
-    "type.card": "Карта",
+    "type.cash": "Касса (наличные)",
+    "type.bank": "Банковский счёт",
+    "type.e_wallet": "Электронный кошелёк",
+    "type.card": "Пластиковая карта",
     "type.other": "Другое",
     "archived": "В архиве",
     "create": "Добавить счёт"
+  },
+  "category_type": {
+    "expense": "Расход",
+    "income": "Доход",
+    "product": "Товар"
+  },
+  "payment_status": {
+    "unpaid": "Не оплачено",
+    "partial": "Частично",
+    "paid": "Оплачено",
+    "overpaid": "Переплата"
   },
   "edit_tx_account": {
     "title": "Счёт",
@@ -272,6 +284,102 @@
     "members": "Сотрудники",
     "roles": "Роли",
     "organization": "Организация"
+  },
+  "members": {
+    "title": "Сотрудники",
+    "subtitle": "Управляйте сотрудниками организации",
+    "section.active": "Активные и приостановленные",
+    "invite.title": "Пригласить сотрудника",
+    "invite.description": "Отправьте приглашение по номеру телефона",
+    "edit.title": "Изменить сотрудника",
+    "action.edit": "Изменить",
+    "delete.title": "Удалить сотрудника",
+    "delete.subtitle": "Это действие нельзя отменить",
+    "field.phone": "Телефон",
+    "field.name": "Имя",
+    "field.salary": "Зарплата",
+    "field.commission": "Комиссия (%)",
+    "field.roles": "Роли",
+    "field.currency": "Валюта",
+    "no_access": "Нет прав на просмотр этого раздела"
+  },
+  "roles_page": {
+    "title": "Роли",
+    "subtitle": "Права и группы",
+    "section": "Роли",
+    "system_badge": "Системная",
+    "add": "Новая роль",
+    "new_title": "Новая роль",
+    "edit_title": "Изменить роль",
+    "field.name": "Название",
+    "field.description": "Описание",
+    "field.permissions": "Права",
+    "delete.title": "Удалить роль",
+    "delete.subtitle": "Это действие нельзя отменить",
+    "empty": "Пока нет ролей",
+    "no_access": "Нет прав на просмотр этого раздела"
+  },
+  "org_settings": {
+    "title": "Настройки организации",
+    "subtitle": "Название и основная валюта",
+    "load_error": "Не удалось загрузить данные организации",
+    "field.name": "Название организации",
+    "field.currency": "Основная валюта",
+    "field.language": "Язык",
+    "currency_change_warning": "⚠️ Новая валюта применится только к будущим транзакциям. Существующие записи останутся в своих валютах.",
+    "edit_permission_required": "Для редактирования нужно право «управлять организацией».",
+    "delete.title": "Удалить организацию",
+    "delete.subtitle": "Удалит все данные организации",
+    "delete.confirm": "Подтверждаю: удалить всё"
+  },
+  "scheduled_page": {
+    "title": "Запланированное",
+    "subtitle": "Повторяющиеся платежи и напоминания",
+    "new_title": "Новый план",
+    "new_description": "Повторяющийся платёж или доход",
+    "edit_title": "Изменить план",
+    "filter_title": "Фильтр по статусу",
+    "action.edit": "Изменить",
+    "action.edit_subtitle": "Описание, сумма, дата окончания",
+    "action.pause": "Приостановить",
+    "action.pause_subtitle": "Напоминания не создаются",
+    "action.resume": "Возобновить",
+    "action.resume_subtitle": "Напоминания снова создаются",
+    "action.cancel": "Отменить",
+    "action.cancel_subtitle": "План будет полностью остановлен",
+    "no_access": "Нет прав на просмотр этого раздела"
+  },
+  "reports": {
+    "title": "Отчёты",
+    "subtitle": "Движение денег, прибыль-убыток, баланс",
+    "tab.cash_flow": "Касса",
+    "tab.pnl": "P&L",
+    "tab.financial_state": "Баланс",
+    "tab.contacts": "Контакты",
+    "no_access": "Нет прав на просмотр этого раздела"
+  },
+  "commissions_page": {
+    "title": "Комиссии",
+    "subtitle": "Доля сотрудников от продаж",
+    "no_access": "Нет прав на просмотр этого раздела"
+  },
+  "plans_page": {
+    "title": "Тарифы",
+    "subtitle": "Возможности и лимиты",
+    "current": "Текущий тариф",
+    "switch": "Выбрать",
+    "active": "Активен"
+  },
+  "tx_detail": {
+    "delete": "Удалить",
+    "void": "Отменить",
+    "edit": "Изменить",
+    "voided_at": "Отменено",
+    "items_section": "Позиции",
+    "cash_flows_section": "Движение денег",
+    "history_section": "История",
+    "repayment_section": "Платежи",
+    "add_payment": "Добавить платёж"
   },
   "use_case": {
     "sale.label": "Продажа",

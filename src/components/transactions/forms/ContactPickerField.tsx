@@ -4,7 +4,7 @@ import {
   CONTACT_TYPE_ICON,
   CONTACT_TYPE_LABEL,
   CONTACT_TYPE_NONE_ICON,
-  CONTACT_TYPE_NONE_LABEL,
+  getContactTypeNoneLabel,
   getContactTypeIcon,
   getContactTypeLabel,
 } from '@/components/contacts/contact-meta';
@@ -77,7 +77,7 @@ export function ContactPickerField({
     emptyText ??
     (typeFilter === 'all'
       ? "Kontakt yo'q"
-      : `${typeFilter === CONTACT_TYPE_NONE ? CONTACT_TYPE_NONE_LABEL : CONTACT_TYPE_LABEL[typeFilter]} toifasida kontakt yo'q`);
+      : `${typeFilter === CONTACT_TYPE_NONE ? getContactTypeNoneLabel() : CONTACT_TYPE_LABEL[typeFilter]} toifasida kontakt yo'q`);
 
   return (
     <SelectField
@@ -166,7 +166,7 @@ function TypeFilterButton({
               key === 'all'
                 ? 'Hammasi'
                 : key === CONTACT_TYPE_NONE
-                  ? CONTACT_TYPE_NONE_LABEL
+                  ? getContactTypeNoneLabel()
                   : CONTACT_TYPE_LABEL[key];
             return (
               <button

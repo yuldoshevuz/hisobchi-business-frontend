@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
 import { FeatureGate } from '@/components/FeatureGate';
@@ -13,11 +14,11 @@ import { tgHapticSelection } from '@/lib/telegram';
 
 type ReportTab = 'cash-flow' | 'pnl' | 'financial-state' | 'contacts';
 
-const TABS: ReadonlyArray<{ id: ReportTab; label: string }> = [
-  { id: 'cash-flow', label: 'Kassa' },
-  { id: 'pnl', label: 'P&L' },
-  { id: 'financial-state', label: 'Balans' },
-  { id: 'contacts', label: 'Kontaktlar' },
+const TABS: ReadonlyArray<{ id: ReportTab; labelKey: string }> = [
+  { id: 'cash-flow', labelKey: 'reports.tab.cash_flow' },
+  { id: 'pnl', labelKey: 'reports.tab.pnl' },
+  { id: 'financial-state', labelKey: 'reports.tab.financial_state' },
+  { id: 'contacts', labelKey: 'reports.tab.contacts' },
 ];
 
 function readTab(value: string | null): ReportTab {
@@ -32,6 +33,7 @@ function readTab(value: string | null): ReportTab {
 }
 
 export function ReportsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { isReady } = usePermissions();
   const canRead = useCan(PermissionSlug.REPORTS_READ);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,9 +51,9 @@ export function ReportsPage(): React.ReactElement {
   if (isReady && !canRead) {
     return (
       <AccessDeniedView
-        title="Hisobotlar"
-        description="Bu bo'limga kirish uchun ruxsat yo'q"
-        hint="'reports.read' ruxsati kerak."
+        title={t('reports.title')}
+        description={t('reports.no_access')}
+        hint="reports.read"
       />
     );
   }
@@ -59,21 +61,21 @@ export function ReportsPage(): React.ReactElement {
   return (
     <div className="pb-8">
       <PageHeader
-        title="Hisobotlar"
-        description="Pul harakati, foyda-zarar, balans"
+        title={t('reports.title')}
+        description={t('reports.subtitle')}
         large
         showBack
       />
 
       <div className="px-4 pb-3">
         <div className="flex gap-1 rounded-xl bg-muted p-1">
-          {TABS.map((t) => {
-            const active = t.id === tab;
+          {TABS.map((tab_) => {
+            const active = tab_.id === tab;
             return (
               <button
-                key={t.id}
+                key={tab_.id}
                 type="button"
-                onClick={() => selectTab(t.id)}
+                onClick={() => selectTab(tab_.id)}
                 className={cn(
                   'press flex-1 rounded-lg px-3 py-2 text-[14px] font-medium transition-colors',
                   active
@@ -81,7 +83,7 @@ export function ReportsPage(): React.ReactElement {
                     : 'text-muted-foreground',
                 )}
               >
-                {t.label}
+                {t(tab_.labelKey)}
               </button>
             );
           })}

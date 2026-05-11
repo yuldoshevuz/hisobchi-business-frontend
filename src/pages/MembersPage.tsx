@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronRight,
   Pause,
@@ -50,6 +51,7 @@ interface MembersPageProps {
 export function MembersPage({
   embedded = false,
 }: MembersPageProps = {}): React.ReactElement {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isReady } = usePermissions();
   const canManage = useCan(PermissionSlug.MEMBERS_MANAGE);
@@ -66,9 +68,9 @@ export function MembersPage({
   if (isReady && !canManage) {
     return (
       <AccessDeniedView
-        title="Xodimlar"
-        description="Bu bo'limga kirish uchun ruxsat yo'q"
-        hint="Xodimlarni boshqarish uchun 'members.manage' ruxsati kerak. Tashkilot egasidan so'rang."
+        title={t('members.title')}
+        description={t('members.no_access')}
+        hint="members.manage"
       />
     );
   }
@@ -77,8 +79,8 @@ export function MembersPage({
     <div className="pb-32">
       {embedded ? null : (
         <PageHeader
-          title="Xodimlar"
-          description="Tashkilot xodimlarini boshqarish"
+          title={t('members.title')}
+          description={t('members.subtitle')}
           large
         />
       )}
@@ -100,7 +102,7 @@ export function MembersPage({
             />
           </Section>
         ) : members.data && members.data.data.length > 0 ? (
-          <Section title="Faol va to'xtatilgan xodimlar">
+          <Section title={t('members.section.active')}>
             {members.data.data.map((m) => (
               <MemberRow
                 key={m.id}
@@ -184,8 +186,8 @@ export function MembersPage({
       <Modal
         open={inviteOpen}
         onOpenChange={setInviteOpen}
-        title="Xodim taklif qilish"
-        description="Telefon raqami bo'yicha taklif yuboring"
+        title={t('members.invite.title')}
+        description={t('members.invite.description')}
       >
         <InviteMemberForm onClose={() => setInviteOpen(false)} />
       </Modal>
@@ -215,7 +217,7 @@ export function MembersPage({
         onOpenChange={(o) => {
           if (!o) setEditing(null);
         }}
-        title="Xodimni tahrirlash"
+        title={t('members.edit.title')}
         description={editing?.user.fullName}
       >
         {editing ? (

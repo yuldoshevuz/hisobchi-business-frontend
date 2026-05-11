@@ -17,7 +17,7 @@ import {
   CONTACT_TYPE_ICON,
   CONTACT_TYPE_LABEL,
   CONTACT_TYPE_NONE_ICON,
-  CONTACT_TYPE_NONE_LABEL,
+  getContactTypeNoneLabel,
 } from './contact-meta';
 
 interface CreateContactFormProps {
@@ -135,7 +135,7 @@ export function CreateContactForm({
             }`}
           >
             <CONTACT_TYPE_NONE_ICON className="h-4 w-4" />
-            <span className="truncate">{CONTACT_TYPE_NONE_LABEL}</span>
+            <span className="truncate">{getContactTypeNoneLabel()}</span>
           </button>
         </div>
       </div>

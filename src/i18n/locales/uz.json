@@ -70,12 +70,24 @@
   "account": {
     "label": "Hisob",
     "balance": "Balans",
-    "type.cash": "Naqd",
-    "type.bank": "Bank",
-    "type.card": "Karta",
+    "type.cash": "Naqd kassa",
+    "type.bank": "Bank hisobi",
+    "type.e_wallet": "Elektron hamyon",
+    "type.card": "Plastik karta",
     "type.other": "Boshqa",
     "archived": "Arxivlangan",
     "create": "Yangi hisob qo'shish"
+  },
+  "category_type": {
+    "expense": "Chiqim",
+    "income": "Kirim",
+    "product": "Mahsulot"
+  },
+  "payment_status": {
+    "unpaid": "To'lanmagan",
+    "partial": "Qisman",
+    "paid": "To'liq",
+    "overpaid": "Ortiqcha"
   },
   "edit_tx_account": {
     "title": "Hisob",
@@ -272,6 +284,102 @@
     "members": "Xodimlar",
     "roles": "Rollar",
     "organization": "Tashkilot"
+  },
+  "members": {
+    "title": "Xodimlar",
+    "subtitle": "Tashkilot xodimlarini boshqarish",
+    "section.active": "Faol va to'xtatilgan xodimlar",
+    "invite.title": "Xodim taklif qilish",
+    "invite.description": "Telefon raqami bo'yicha taklif yuboring",
+    "edit.title": "Xodimni tahrirlash",
+    "action.edit": "Tahrirlash",
+    "delete.title": "Xodimni o'chirish",
+    "delete.subtitle": "Bu amal qaytarib bo'lmaydi",
+    "field.phone": "Telefon",
+    "field.name": "Ism",
+    "field.salary": "Maosh",
+    "field.commission": "Komissiya (%)",
+    "field.roles": "Rollar",
+    "field.currency": "Valyuta",
+    "no_access": "Bu bo'limga kirish uchun ruxsat yo'q"
+  },
+  "roles_page": {
+    "title": "Rollar",
+    "subtitle": "Ruxsatlar va guruhlar",
+    "section": "Rollar",
+    "system_badge": "Tizim",
+    "add": "Yangi rol",
+    "new_title": "Yangi rol",
+    "edit_title": "Rolni tahrirlash",
+    "field.name": "Nomi",
+    "field.description": "Tavsif",
+    "field.permissions": "Ruxsatlar",
+    "delete.title": "Rolni o'chirish",
+    "delete.subtitle": "Bu amal qaytarib bo'lmaydi",
+    "empty": "Hali rol yo'q",
+    "no_access": "Bu bo'limga kirish uchun ruxsat yo'q"
+  },
+  "org_settings": {
+    "title": "Tashkilot sozlamalari",
+    "subtitle": "Nom va asosiy valyuta",
+    "load_error": "Tashkilot ma'lumotlari yuklanmadi",
+    "field.name": "Tashkilot nomi",
+    "field.currency": "Asosiy valyuta",
+    "field.language": "Til",
+    "currency_change_warning": "⚠️ Yangi valyuta faqat keyingi tranzaksiyalarga ta'sir qiladi. Mavjud yozuvlar o'z valyutalarida qoladi.",
+    "edit_permission_required": "Tahrirlash uchun «tashkilot boshqarish» ruxsati kerak.",
+    "delete.title": "Tashkilotni o'chirish",
+    "delete.subtitle": "Bu amal barcha ma'lumotlarni o'chiradi",
+    "delete.confirm": "Tasdiqlayman: hammasini o'chir"
+  },
+  "scheduled_page": {
+    "title": "Rejalashtirilgan",
+    "subtitle": "Takrorlanadigan to'lovlar va eslatmalar",
+    "new_title": "Yangi reja",
+    "new_description": "Takrorlanadigan to'lov yoki kirim",
+    "edit_title": "Rejani tahrirlash",
+    "filter_title": "Holati bo'yicha filter",
+    "action.edit": "Tahrirlash",
+    "action.edit_subtitle": "Tavsif, summa, tugash sanasi",
+    "action.pause": "To'xtatish",
+    "action.pause_subtitle": "Eslatmalar yaratilmaydi",
+    "action.resume": "Davom ettirish",
+    "action.resume_subtitle": "Eslatmalar yana yaratiladi",
+    "action.cancel": "Bekor qilish",
+    "action.cancel_subtitle": "Reja butunlay to'xtatiladi",
+    "no_access": "Bu bo'limga kirish uchun ruxsat yo'q"
+  },
+  "reports": {
+    "title": "Hisobotlar",
+    "subtitle": "Pul harakati, foyda-zarar, balans",
+    "tab.cash_flow": "Kassa",
+    "tab.pnl": "P&L",
+    "tab.financial_state": "Balans",
+    "tab.contacts": "Kontaktlar",
+    "no_access": "Bu bo'limga kirish uchun ruxsat yo'q"
+  },
+  "commissions_page": {
+    "title": "Komissiyalar",
+    "subtitle": "Sotuvdan xodimlarga keladigan ulush",
+    "no_access": "Bu bo'limga kirish uchun ruxsat yo'q"
+  },
+  "plans_page": {
+    "title": "Tariflar",
+    "subtitle": "Imkoniyatlar va chegaralar",
+    "current": "Joriy tarif",
+    "switch": "Tanlash",
+    "active": "Faol"
+  },
+  "tx_detail": {
+    "delete": "O'chirish",
+    "void": "Bekor qilish",
+    "edit": "Tahrirlash",
+    "voided_at": "Bekor qilingan",
+    "items_section": "Mahsulotlar",
+    "cash_flows_section": "Pul harakati",
+    "history_section": "Tarix",
+    "repayment_section": "To'lovlar",
+    "add_payment": "To'lov qo'shish"
   },
   "use_case": {
     "sale.label": "Sotuv",

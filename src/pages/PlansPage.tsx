@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CalendarClock,
   Check,
@@ -32,14 +33,15 @@ const SUBSCRIPTION_STATUS_LABEL: Record<string, string> = {
 };
 
 export function PlansPage(): React.ReactElement {
+  const { t } = useTranslation();
   const current = useCurrentSubscription();
   const plans = usePlans();
 
   return (
     <div className="pb-8">
       <PageHeader
-        title="Tariflar"
-        description="Sizning obunangiz va mavjud paketlar"
+        title={t('plans_page.title')}
+        description={t('plans_page.subtitle')}
         large
         showBack
       />

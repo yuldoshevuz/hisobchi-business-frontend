@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Coins,
   ListChecks,
@@ -56,6 +57,7 @@ const TABS: ReadonlyArray<{ id: Tab; label: string; icon: typeof ListChecks }> =
 ];
 
 export function CommissionsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { isReady } = usePermissions();
   const canRead = useCan(PermissionSlug.COMMISSIONS_READ);
   const canManage = useCan(PermissionSlug.COMMISSIONS_MANAGE);
@@ -84,8 +86,8 @@ export function CommissionsPage(): React.ReactElement {
   if (isReady && !canRead) {
     return (
       <AccessDeniedView
-        title="Komissiyalar"
-        description="Bu bo'limga kirish uchun ruxsat yo'q"
+        title={t('commissions_page.title')}
+        description={t('commissions_page.no_access')}
         hint="'commissions.read' ruxsati kerak."
       />
     );
@@ -123,8 +125,8 @@ export function CommissionsPage(): React.ReactElement {
     <FeatureGate feature="SALES_COMMISSION">
     <div className="pb-32">
       <PageHeader
-        title="Komissiyalar"
-        description="Sotuvdan xodimlarga keladigan ulush"
+        title={t('commissions_page.title')}
+        description={t('commissions_page.subtitle')}
         large
         showBack
       />

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CalendarClock,
   Check,
@@ -68,6 +69,7 @@ const TABS: ReadonlyArray<{ id: 'plans' | 'reminders'; label: string }> = [
 const REMINDER_CRON_HINT = "Eslatmalar har kuni 00:15 (Toshkent) da yuboriladi";
 
 export function ScheduledPage(): React.ReactElement {
+  const { t } = useTranslation();
   const { isReady } = usePermissions();
   const canRead = useCan(PermissionSlug.SCHEDULED_READ);
   const canManage = useCan(PermissionSlug.SCHEDULED_MANAGE);
@@ -94,8 +96,8 @@ export function ScheduledPage(): React.ReactElement {
   if (isReady && !canRead) {
     return (
       <AccessDeniedView
-        title="Rejalashtirilgan"
-        description="Bu bo'limga kirish uchun ruxsat yo'q"
+        title={t('scheduled_page.title')}
+        description={t('scheduled_page.no_access')}
         hint="'scheduled.read' ruxsati kerak."
       />
     );
@@ -107,8 +109,8 @@ export function ScheduledPage(): React.ReactElement {
     <FeatureGate feature="SCHEDULED_TRANSACTIONS">
     <div className="pb-32">
       <PageHeader
-        title="Rejalashtirilgan"
-        description="Takrorlanadigan to'lovlar va eslatmalar"
+        title={t('scheduled_page.title')}
+        description={t('scheduled_page.subtitle')}
         large
         showBack
       />
@@ -217,8 +219,8 @@ export function ScheduledPage(): React.ReactElement {
       <Modal
         open={createOpen}
         onOpenChange={setCreateOpen}
-        title="Yangi reja"
-        description="Takrorlanadigan to'lov yoki kirim"
+        title={t('scheduled_page.new_title')}
+        description={t('scheduled_page.new_description')}
       >
         <CreateScheduledForm onClose={() => setCreateOpen(false)} />
       </Modal>
@@ -251,7 +253,7 @@ export function ScheduledPage(): React.ReactElement {
         onOpenChange={(o) => {
           if (!o) setEditing(null);
         }}
-        title="Rejani tahrirlash"
+        title={t('scheduled_page.edit_title')}
         description={editing ? TRANSACTION_TYPE_LABEL[editing.type] : undefined}
       >
         {editing ? (

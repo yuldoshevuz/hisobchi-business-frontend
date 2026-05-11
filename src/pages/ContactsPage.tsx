@@ -34,7 +34,7 @@ import {
   CONTACT_TYPE_ICON,
   CONTACT_TYPE_LABEL,
   CONTACT_TYPE_NONE_ICON,
-  CONTACT_TYPE_NONE_LABEL,
+  getContactTypeNoneLabel,
   getContactTypeIcon,
   getContactTypeLabel,
 } from '@/components/contacts/contact-meta';
@@ -198,7 +198,7 @@ export function ContactsPage(): React.ReactElement {
                   ? t('contacts.no_contacts_for_type', {
                       type:
                         typeFilter === CONTACT_TYPE_NONE
-                          ? CONTACT_TYPE_NONE_LABEL
+                          ? getContactTypeNoneLabel()
                           : CONTACT_TYPE_LABEL[typeFilter],
                     })
                   : t('contacts.no_contacts')}
@@ -390,7 +390,7 @@ function TypeFilterButton({
               key === 'all'
                 ? 'Hammasi'
                 : key === CONTACT_TYPE_NONE
-                  ? CONTACT_TYPE_NONE_LABEL
+                  ? getContactTypeNoneLabel()
                   : CONTACT_TYPE_LABEL[key];
             return (
               <button

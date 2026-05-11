@@ -70,12 +70,24 @@
   "account": {
     "label": "Account",
     "balance": "Balance",
-    "type.cash": "Cash",
-    "type.bank": "Bank",
+    "type.cash": "Cash register",
+    "type.bank": "Bank account",
+    "type.e_wallet": "E-wallet",
     "type.card": "Card",
     "type.other": "Other",
     "archived": "Archived",
     "create": "Add account"
+  },
+  "category_type": {
+    "expense": "Expense",
+    "income": "Income",
+    "product": "Product"
+  },
+  "payment_status": {
+    "unpaid": "Unpaid",
+    "partial": "Partial",
+    "paid": "Paid",
+    "overpaid": "Overpaid"
   },
   "edit_tx_account": {
     "title": "Account",
@@ -272,6 +284,102 @@
     "members": "Team",
     "roles": "Roles",
     "organization": "Organisation"
+  },
+  "members": {
+    "title": "Team",
+    "subtitle": "Manage your organisation's team",
+    "section.active": "Active and suspended",
+    "invite.title": "Invite member",
+    "invite.description": "Send an invite by phone number",
+    "edit.title": "Edit member",
+    "action.edit": "Edit",
+    "delete.title": "Delete member",
+    "delete.subtitle": "This action cannot be undone",
+    "field.phone": "Phone",
+    "field.name": "Name",
+    "field.salary": "Salary",
+    "field.commission": "Commission (%)",
+    "field.roles": "Roles",
+    "field.currency": "Currency",
+    "no_access": "You don't have access to this section"
+  },
+  "roles_page": {
+    "title": "Roles",
+    "subtitle": "Permissions and groups",
+    "section": "Roles",
+    "system_badge": "System",
+    "add": "New role",
+    "new_title": "New role",
+    "edit_title": "Edit role",
+    "field.name": "Name",
+    "field.description": "Description",
+    "field.permissions": "Permissions",
+    "delete.title": "Delete role",
+    "delete.subtitle": "This action cannot be undone",
+    "empty": "No roles yet",
+    "no_access": "You don't have access to this section"
+  },
+  "org_settings": {
+    "title": "Organisation settings",
+    "subtitle": "Name and base currency",
+    "load_error": "Couldn't load organisation data",
+    "field.name": "Organisation name",
+    "field.currency": "Base currency",
+    "field.language": "Language",
+    "currency_change_warning": "⚠️ The new currency only applies to future transactions. Existing records keep their original currency.",
+    "edit_permission_required": "You need the \"manage organisation\" permission to edit this.",
+    "delete.title": "Delete organisation",
+    "delete.subtitle": "This removes all data permanently",
+    "delete.confirm": "Confirm: delete everything"
+  },
+  "scheduled_page": {
+    "title": "Scheduled",
+    "subtitle": "Recurring payments and reminders",
+    "new_title": "New schedule",
+    "new_description": "Recurring payment or income",
+    "edit_title": "Edit schedule",
+    "filter_title": "Filter by status",
+    "action.edit": "Edit",
+    "action.edit_subtitle": "Description, amount, end date",
+    "action.pause": "Pause",
+    "action.pause_subtitle": "Reminders won't be created",
+    "action.resume": "Resume",
+    "action.resume_subtitle": "Reminders will be created again",
+    "action.cancel": "Cancel",
+    "action.cancel_subtitle": "The schedule stops completely",
+    "no_access": "You don't have access to this section"
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Cash flow, P&L, balance",
+    "tab.cash_flow": "Cash flow",
+    "tab.pnl": "P&L",
+    "tab.financial_state": "Balance",
+    "tab.contacts": "Contacts",
+    "no_access": "You don't have access to this section"
+  },
+  "commissions_page": {
+    "title": "Commissions",
+    "subtitle": "Staff share of sales",
+    "no_access": "You don't have access to this section"
+  },
+  "plans_page": {
+    "title": "Plans",
+    "subtitle": "Features and limits",
+    "current": "Current plan",
+    "switch": "Choose",
+    "active": "Active"
+  },
+  "tx_detail": {
+    "delete": "Delete",
+    "void": "Cancel",
+    "edit": "Edit",
+    "voided_at": "Cancelled",
+    "items_section": "Items",
+    "cash_flows_section": "Cash flow",
+    "history_section": "History",
+    "repayment_section": "Payments",
+    "add_payment": "Add payment"
   },
   "use_case": {
     "sale.label": "Sale",

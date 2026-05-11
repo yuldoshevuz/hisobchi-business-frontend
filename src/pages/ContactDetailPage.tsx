@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Archive,
@@ -91,6 +92,7 @@ interface TypeAggregate {
 }
 
 export function ContactDetailPage(): React.ReactElement {
+  const { t } = useTranslation();
   const params = useParams<{ id: string }>();
   const navigate = useNavigate();
   const idNum = Number(params.id);
@@ -157,7 +159,7 @@ export function ContactDetailPage(): React.ReactElement {
   return (
     <div className="pb-8">
       <PageHeader
-        title={contactData?.name ?? 'Kontakt'}
+        title={contactData?.name ?? t('contacts.title')}
         description={
           contactData ? getContactTypeLabel(contactData.type) : undefined
         }

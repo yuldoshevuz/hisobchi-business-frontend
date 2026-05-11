@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   useCurrentOrganization,
   useUpdateCurrentOrganization,
@@ -31,6 +32,7 @@ const CURRENCY_OPTIONS = ['UZS', 'USD', 'EUR', 'RUB'] as const;
  * the currency they were posted in (call-out shown in the form).
  */
 export function OrganizationSettingsPage(): React.ReactElement {
+  const { t } = useTranslation();
   const currentOrgQuery = useCurrentOrganization();
   const updateMutation = useUpdateCurrentOrganization();
   const canManage = useCan(PermissionSlug.ORGANIZATIONS_MANAGE);
@@ -58,10 +60,7 @@ export function OrganizationSettingsPage(): React.ReactElement {
   if (currentOrgQuery.isError || !currentOrgQuery.data) {
     return (
       <p className="px-4 py-6 text-[13px] text-destructive">
-        {getApiErrorMessage(
-          currentOrgQuery.error,
-          "Tashkilot ma'lumotlari yuklanmadi",
-        )}
+        {getApiErrorMessage(currentOrgQuery.error, t('org_settings.load_error'))}
       </p>
     );
   }
@@ -94,7 +93,7 @@ export function OrganizationSettingsPage(): React.ReactElement {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 px-4 pb-8 pt-2">
       <div className="space-y-1.5">
-        <Label htmlFor="org-name">Tashkilot nomi</Label>
+        <Label htmlFor="org-name">{t('org_settings.field.name')}</Label>
         <Input
           id="org-name"
           value={name}
@@ -105,7 +104,7 @@ export function OrganizationSettingsPage(): React.ReactElement {
       </div>
 
       <div className="space-y-1.5">
-        <Label>Asosiy valyuta</Label>
+        <Label>{t('org_settings.field.currency')}</Label>
         <div className="grid grid-cols-4 gap-2">
           {CURRENCY_OPTIONS.map((code) => {
             const active = baseCurrency === code;
@@ -128,14 +127,13 @@ export function OrganizationSettingsPage(): React.ReactElement {
         </div>
         {baseCurrency !== org.baseCurrency ? (
           <p className="text-[11px] text-muted-foreground">
-            ⚠️ Yangi valyuta faqat keyingi tranzaksiyalarga ta'sir qiladi.
-            Mavjud yozuvlar o'z valyutalarida qoladi.
+            {t('org_settings.currency_change_warning')}
           </p>
         ) : null}
       </div>
 
       <div className="space-y-1.5">
-        <Label>Til</Label>
+        <Label>{t('org_settings.field.language')}</Label>
         <div className="grid grid-cols-3 gap-2">
           {LOCALE_OPTIONS.map((opt) => {
             const active = locale === opt.value;
@@ -160,13 +158,13 @@ export function OrganizationSettingsPage(): React.ReactElement {
 
       {!canManage ? (
         <p className="text-[12px] text-muted-foreground">
-          Tahrirlash uchun "tashkilot boshqarish" ruxsati kerak.
+          {t('org_settings.edit_permission_required')}
         </p>
       ) : null}
 
       {updateMutation.isError ? (
         <p className="text-[13px] text-destructive">
-          {getApiErrorMessage(updateMutation.error, "Saqlab bo'lmadi")}
+          {getApiErrorMessage(updateMutation.error, t('errors.fallback'))}
         </p>
       ) : null}
 
@@ -182,7 +180,7 @@ export function OrganizationSettingsPage(): React.ReactElement {
         }
       >
         {updateMutation.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );
