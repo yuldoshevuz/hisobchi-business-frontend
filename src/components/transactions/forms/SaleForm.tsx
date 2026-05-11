@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { useContacts } from '@/api/hooks/use-contacts';
@@ -39,6 +40,7 @@ interface SaleFormProps {
 export function SaleForm({
   onCreated,
 }: SaleFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const accounts = useAccounts({ status: 'active' });
   const contacts = useContacts({ all: true, status: 'active' });
   const products = useProducts({ status: 'active', all: true });
@@ -148,7 +150,7 @@ export function SaleForm({
     >
       <SelectField
         id="sotuv-product"
-        label="Mahsulot *"
+        label={`${t('sale_form.product')} *`}
         value={productId ?? ''}
         onChange={setProductId}
         options={productList.map((p) => ({
@@ -157,14 +159,14 @@ export function SaleForm({
         }))}
         helperText={
           productList.length === 0 && !products.isPending
-            ? "Mahsulotlar mavjud emas. Avval mahsulot qo'shing."
+            ? t('sale_form.no_products')
             : undefined
         }
       />
 
       <SelectField
         id="sotuv-account"
-        label={isCredit ? 'Balans (valyuta uchun) *' : 'Balans *'}
+        label={`${isCredit ? t('sale_form.account_label_credit') : t('sale_form.account_label_normal')} *`}
         value={accountId ?? ''}
         onChange={setAccountId}
         options={accountList
@@ -176,29 +178,31 @@ export function SaleForm({
           }))}
         helperText={
           isCredit
-            ? "Pul tushmaydi — faqat tranzaktsiya valyutasi uchun ishlatiladi"
+            ? t('sale_form.account_helper_credit')
             : product
-              ? `${product.currency} valyutasidagi hisob tanlang`
+              ? t('sale_form.account_helper_currency', {
+                  currency: product.currency,
+                })
               : undefined
         }
       />
 
       <ContactPickerField
         id="sotuv-contact"
-        label={isCredit ? 'Mijoz *' : 'Mijoz'}
+        label={isCredit ? `${t('sale_form.contact_required')} *` : t('sale_form.contact_optional')}
         value={contactId ?? ''}
         onChange={setContactId}
         contacts={contactList}
         helperText={
           isCredit
-            ? "Qarzga sotuvda mijoz tanlash majburiy"
-            : 'Ixtiyoriy. Mijozsiz savdo ham qabul qilinadi'
+            ? t('sale_form.contact_helper_credit')
+            : t('sale_form.contact_helper_normal')
         }
       />
 
       {tracksStock ? (
         <div className="space-y-1.5">
-          <Label htmlFor="sotuv-qty">Soni *</Label>
+          <Label htmlFor="sotuv-qty">{`${t('sale_form.quantity')} *`}</Label>
           <Input
             id="sotuv-qty"
             inputMode="decimal"
@@ -208,7 +212,7 @@ export function SaleForm({
           />
           {product && product.currentStock !== null ? (
             <p className="text-[12px] text-muted-foreground">
-              Ombordagi qoldiq: {product.currentStock}
+              {t('sale_form.stock_remaining', { n: product.currentStock })}
             </p>
           ) : null}
         </div>
@@ -216,7 +220,7 @@ export function SaleForm({
 
       <AmountField
         id="sotuv-price"
-        label="Narxi (1 dona uchun) *"
+        label={`${t('sale_form.unit_price')} *`}
         value={unitPrice}
         onChange={setUnitPrice}
         currencyDisplay={currency}
@@ -226,7 +230,7 @@ export function SaleForm({
         <div className="rounded-xl bg-muted/40 px-3 py-2 text-[13px]">
           <div className="flex justify-between">
             <span className="text-muted-foreground">
-              {isCredit ? 'Jami qarz' : 'Jami summa'}
+              {isCredit ? t('sale_form.total_debt') : t('sale_form.total_sum')}
             </span>
             <span className="font-semibold tabular-nums text-foreground">
               {formatAmountDisplay(totalAmount)} {currency}
@@ -239,13 +243,14 @@ export function SaleForm({
 
       {isCredit ? (
         <div className="space-y-1.5">
-          <Label htmlFor="sotuv-due">Qaytarish sanasi</Label>
+          <Label htmlFor="sotuv-due">{t('sale_form.due_date')}</Label>
           <DatePicker
-            id="sotuv-due" value={dueDate}
+            id="sotuv-due"
+            value={dueDate}
             onChange={setDueDate}
           />
           <p className="text-[12px] text-muted-foreground">
-            Ixtiyoriy. Eslatmalar uchun ishlatiladi
+            {t('sale_form.due_date_helper')}
           </p>
         </div>
       ) : null}
@@ -263,7 +268,7 @@ export function SaleForm({
         disabled={!isFormValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

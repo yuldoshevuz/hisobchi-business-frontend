@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown, type LucideIcon } from 'lucide-react';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
@@ -77,15 +78,16 @@ export function SelectField<T extends string | number>({
   value,
   onChange,
   options,
-  placeholder = 'Tanlang...',
+  placeholder,
   disabled,
   helperText,
   errorText,
   modalTitle,
   searchThreshold = 8,
-  emptyText = "Tanlash uchun variant yo'q",
+  emptyText,
   searchSlot,
 }: SelectFieldProps<T>): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>('');
 
@@ -153,7 +155,7 @@ export function SelectField<T extends string | number>({
               selected ? 'text-foreground' : 'text-muted-foreground',
             )}
           >
-            {selected ? selected.label : placeholder}
+            {selected ? selected.label : (placeholder ?? t('form.select'))}
           </span>
         </div>
         <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -177,7 +179,7 @@ export function SelectField<T extends string | number>({
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Qidiruv"
+                placeholder={t('form.search')}
               />
             </div>
             {searchSlot}
@@ -186,11 +188,11 @@ export function SelectField<T extends string | number>({
 
         {options.length === 0 ? (
           <div className="py-8 text-center text-[14px] text-muted-foreground">
-            {emptyText}
+            {emptyText ?? t('form.no_options')}
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-8 text-center text-[14px] text-muted-foreground">
-            Mos variant topilmadi
+            {t('common.no_results')}
           </div>
         ) : (
           <div className="-mx-4 divide-y divide-border bg-card">
@@ -249,17 +251,18 @@ interface AmountFieldProps {
 
 export function AmountField({
   id,
-  label = 'Summa',
+  label,
   value,
   onChange,
   currencyDisplay,
   placeholder = '0',
   autoFocus,
 }: AmountFieldProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <div className="grid grid-cols-3 gap-2">
       <div className="col-span-2 space-y-1.5">
-        <Label htmlFor={id}>{label}</Label>
+        <Label htmlFor={id}>{label ?? t('form.amount')}</Label>
         <Input
           id={id}
           inputMode="decimal"
@@ -270,7 +273,7 @@ export function AmountField({
         />
       </div>
       <div className="space-y-1.5">
-        <Label>Valyuta</Label>
+        <Label>{t('form.currency')}</Label>
         <div className="flex h-10 items-center justify-center rounded-md border border-input bg-muted/40 px-2 text-base text-muted-foreground">
           {currencyDisplay || '—'}
         </div>
@@ -289,14 +292,15 @@ interface DateFieldProps {
 
 export function DateField({
   id,
-  label = 'Sana',
+  label,
   value,
   onChange,
-  helperText = "Tanlanmasa, hozirgi vaqt qo'yiladi",
+  helperText,
 }: DateFieldProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id}>{label ?? t('form.date')}</Label>
       <DatePicker id={id} value={value} onChange={onChange} clearable />
       {helperText ? (
         <p className="text-[12px] text-muted-foreground">{helperText}</p>
@@ -321,17 +325,18 @@ export function DescriptionField({
   id,
   value,
   onChange,
-  label = 'Izoh',
+  label,
   required,
-  placeholder = 'Ixtiyoriy',
+  placeholder,
   rows = 2,
   maxLength = 500,
   helperText,
 }: DescriptionFieldProps): React.ReactElement {
+  const { t } = useTranslation();
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>
-        {label}
+        {label ?? t('form.note')}
         {required ? ' *' : ''}
       </Label>
       <textarea
@@ -340,7 +345,7 @@ export function DescriptionField({
         onChange={(e) => onChange(e.target.value)}
         maxLength={maxLength}
         rows={rows}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('form.note_placeholder')}
         className="flex min-h-[60px] w-full rounded-xl border border-input bg-card px-3 py-2 text-[15px] text-foreground placeholder:text-muted-foreground transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
       {helperText ? (

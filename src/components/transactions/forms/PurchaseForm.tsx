@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
@@ -33,6 +34,7 @@ interface PurchaseFormProps {
 export function PurchaseForm({
   onCreated,
 }: PurchaseFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const accounts = useAccounts({ status: 'active' });
   const products = useProducts({ status: 'active', all: true });
   // Used in "Yangi mahsulot" mode to pick where the freshly-created product
@@ -166,8 +168,8 @@ export function PurchaseForm({
       <div className="flex gap-1 rounded-xl bg-muted p-1">
         {(
           [
-            ['existing', 'Mavjud mahsulot'],
-            ['new', 'Yangi mahsulot'],
+            ['existing', t('purchase_form.mode_existing')],
+            ['new', t('purchase_form.mode_new')],
           ] as const
         ).map(([m, label]) => (
           <button
@@ -189,7 +191,7 @@ export function PurchaseForm({
       {mode === 'existing' ? (
         <SelectField
           id="purchase-product"
-          label="Mahsulot *"
+          label={`${t('sale_form.product')} *`}
           value={productId ?? ''}
           onChange={setProductId}
           options={productList.map((p) => ({
@@ -200,21 +202,21 @@ export function PurchaseForm({
       ) : (
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label htmlFor="purchase-new-name">Mahsulot nomi *</Label>
+            <Label htmlFor="purchase-new-name">{`${t('purchase_form.new_product_name')} *`}</Label>
             <Input
               id="purchase-new-name"
               value={newProductName}
               onChange={(e) => setNewProductName(e.target.value)}
-              placeholder="Masalan: Coca-Cola 1L"
+              placeholder={t('purchase_form.new_product_placeholder')}
             />
             <p className="text-[12px] text-muted-foreground">
-              Yangi mahsulot avtomatik ravishda katalogga qo'shiladi
+              {t('purchase_form.new_product_hint')}
             </p>
           </div>
 
           <SelectField<string>
             id="purchase-new-category"
-            label="Kategoriya *"
+            label={`${t('purchase_form.category')} *`}
             value={newProductCategoryRef === '' ? null : newProductCategoryRef}
             onChange={(next) => setNewProductCategoryRef(next ?? '')}
             options={productCategoryList.flatMap((c) => {
@@ -245,7 +247,7 @@ export function PurchaseForm({
 
       <SelectField
         id="purchase-account"
-        label="Balans *"
+        label={`${t('purchase_form.account')} *`}
         value={accountId ?? ''}
         onChange={setAccountId}
         options={accountList
@@ -258,7 +260,7 @@ export function PurchaseForm({
       />
 
       <div className="space-y-1.5">
-        <Label htmlFor="purchase-qty">Soni *</Label>
+        <Label htmlFor="purchase-qty">{`${t('purchase_form.quantity')} *`}</Label>
         <Input
           id="purchase-qty"
           inputMode="decimal"
@@ -270,7 +272,7 @@ export function PurchaseForm({
 
       <AmountField
         id="purchase-cost"
-        label="Tannarx (1 dona uchun) *"
+        label={`${t('purchase_form.unit_cost')} *`}
         value={unitCost}
         onChange={setUnitCost}
         currencyDisplay={currency}
@@ -279,7 +281,7 @@ export function PurchaseForm({
       {Number(quantity) > 1 ? (
         <div className="rounded-xl bg-muted/40 px-3 py-2 text-[13px]">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Jami summa</span>
+            <span className="text-muted-foreground">{t('purchase_form.total_sum')}</span>
             <span className="font-semibold tabular-nums text-foreground">
               {formatAmountDisplay(totalAmount)} {currency}
             </span>
@@ -302,7 +304,7 @@ export function PurchaseForm({
         }
       >
         {create.isPending || createProduct.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

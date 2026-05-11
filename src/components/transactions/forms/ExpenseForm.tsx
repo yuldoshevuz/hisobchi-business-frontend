@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
@@ -66,6 +67,7 @@ const KIND_OPTIONS: readonly KindOption[] = [
 export function ExpenseForm({
   onCreated,
 }: ExpenseFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const accounts = useAccounts({ status: 'active' });
   const contacts = useContacts({ all: true, status: 'active' });
   const categories = useCategories({ all: true, type: 'expense' });
@@ -185,7 +187,7 @@ export function ExpenseForm({
 
       <SelectField
         id="expense-account"
-        label="Balans (qayerdan ketdi) *"
+        label={`${t('expense_form.account')} *`}
         value={accountId ?? ''}
         onChange={setAccountId}
         options={accountList.map((a) => ({
@@ -206,7 +208,7 @@ export function ExpenseForm({
       {kind === 'salary' ? (
         <SelectField
           id="expense-employee"
-          label="Xodim *"
+          label={`${t('expense_form.employee')} *`}
           value={employeeMemberId ?? ''}
           onChange={setEmployeeMemberId}
           options={memberList.map((m) => ({
@@ -215,8 +217,8 @@ export function ExpenseForm({
           }))}
           helperText={
             memberList.length === 0 && !members.isPending
-              ? "Faol xodim yo'q. Avval Sozlamalardan xodim qo'shing."
-              : "Oylik kim uchun berilayotganini tanlang"
+              ? t('expense_form.no_employees')
+              : t('expense_form.salary_helper')
           }
         />
       ) : (
@@ -246,17 +248,17 @@ export function ExpenseForm({
                 };
               })
               .filter((o): o is NonNullable<typeof o> => o !== null)}
-            label="Kategoriya"
-            helperText="Ixtiyoriy. Hisobotlarda kategoriyalar bo'yicha bo'lib ko'rsatiladi"
+            label={t('expense_form.category')}
+            helperText={t('expense_form.category_helper')}
           />
 
           <ContactPickerField
             id="expense-contact"
-            label="Kimga"
+            label={t('expense_form.contact')}
             value={contactId ?? ''}
             onChange={setContactId}
             contacts={contactList}
-            helperText="Ixtiyoriy. Yetkazib beruvchi yoki boshqa kontakt"
+            helperText={t('expense_form.contact_helper')}
           />
         </>
       )}
@@ -267,8 +269,8 @@ export function ExpenseForm({
         onChange={setDescription}
         placeholder={
           kind === 'salary'
-            ? 'Masalan: Sentyabr oyligi'
-            : 'Masalan: Ofis ijarasi'
+            ? t('expense_form.description_salary_placeholder')
+            : t('expense_form.description_general_placeholder')
         }
       />
 
@@ -285,7 +287,7 @@ export function ExpenseForm({
         disabled={!isFormValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

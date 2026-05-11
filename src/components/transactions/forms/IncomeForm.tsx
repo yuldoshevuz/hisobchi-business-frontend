@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
@@ -33,6 +34,7 @@ interface IncomeFormProps {
 export function IncomeForm({
   onCreated,
 }: IncomeFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const accounts = useAccounts({ status: 'active' });
   const contacts = useContacts({ all: true, status: 'active' });
   const categories = useCategories({ all: true, type: 'income' });
@@ -109,7 +111,7 @@ export function IncomeForm({
     >
       <SelectField
         id="income-account"
-        label="Balans (qayerga keldi) *"
+        label={`${t('income_form.account')} *`}
         value={accountId ?? ''}
         onChange={setAccountId}
         options={accountList.map((a) => ({
@@ -129,7 +131,7 @@ export function IncomeForm({
 
       <SelectField<string>
         id="income-category"
-        label="Kategoriya"
+        label={t('income_form.category')}
         value={categoryRef === '' ? null : categoryRef}
         onChange={(next) => setCategoryRef(next ?? '')}
         options={categoryList.flatMap((c) => {
@@ -153,24 +155,24 @@ export function IncomeForm({
             },
           ];
         })}
-        placeholder="Tanlang (ixtiyoriy)"
-        helperText="Ixtiyoriy. Hisobotlar uchun foydali"
+        placeholder={t('edit_tx_category.placeholder')}
+        helperText={t('expense_form.category_helper')}
       />
 
       <ContactPickerField
         id="income-contact"
-        label="Kimdan"
+        label={t('income_form.contact')}
         value={contactId ?? ''}
         onChange={setContactId}
         contacts={contactList}
-        helperText="Ixtiyoriy. Tushum manbai"
+        helperText={t('income_form.contact_helper')}
       />
 
       <DescriptionField
         id="income-description"
         value={description}
         onChange={setDescription}
-        placeholder="Masalan: Bank foizi"
+        placeholder={t('expense_form.description_general_placeholder')}
       />
 
       {create.isError ? (
@@ -186,7 +188,7 @@ export function IncomeForm({
         disabled={!isFormValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

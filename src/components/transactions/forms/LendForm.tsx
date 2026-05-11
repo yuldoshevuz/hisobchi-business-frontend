@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { useContacts } from '@/api/hooks/use-contacts';
@@ -29,6 +30,7 @@ interface LendFormProps {
 export function LendForm({
   onCreated,
 }: LendFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const accounts = useAccounts({ status: 'active' });
   const contacts = useContacts({ all: true, status: 'active' });
 
@@ -94,7 +96,7 @@ export function LendForm({
     >
       <SelectField
         id="lend-account"
-        label="Balans (qayerdan ketdi) *"
+        label={`${t('lend_form.from_account')} *`}
         value={accountId ?? ''}
         onChange={setAccountId}
         options={accountList.map((a) => ({
@@ -114,21 +116,22 @@ export function LendForm({
 
       <ContactPickerField
         id="lend-contact"
-        label="Kimga *"
+        label={`${t('lend_form.borrower')} *`}
         value={contactId ?? ''}
         onChange={setContactId}
         contacts={contactList}
-        helperText="Qarz oluvchini tanlash majburiy"
+        helperText={t('lend_form.borrower')}
       />
 
       <div className="space-y-1.5">
-        <Label htmlFor="lend-due">Qaytarish sanasi</Label>
+        <Label htmlFor="lend-due">{t('lend_form.due_date')}</Label>
         <DatePicker
-          id="lend-due" value={dueDate}
+          id="lend-due"
+          value={dueDate}
           onChange={setDueDate}
         />
         <p className="text-[12px] text-muted-foreground">
-          Ixtiyoriy. Eslatmalar uchun ishlatiladi
+          {t('sale_form.due_date_helper')}
         </p>
       </div>
 
@@ -145,7 +148,7 @@ export function LendForm({
         disabled={!isFormValid || create.isPending}
       >
         {create.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );
