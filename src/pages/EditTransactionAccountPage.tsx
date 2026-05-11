@@ -129,6 +129,13 @@ export function EditTransactionAccountPage(): React.ReactElement {
       />
 
       <div className="space-y-3 px-4">
+        <div className="rounded-2xl bg-muted/40 px-4 py-3">
+          <p className="text-[13px] text-muted-foreground">Summa</p>
+          <p className="text-[17px] font-semibold">
+            {formatMoney(tx.amount, tx.currency)}
+          </p>
+        </div>
+
         <SelectField<number>
           id="edit-tx-account"
           label="Hisob"
