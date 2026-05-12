@@ -279,7 +279,11 @@ function ContactRow({ row, tFn }: ContactRowProps): React.ReactElement {
         <span className="flex items-center gap-2">
           <span className="truncate">{row.name}</span>
           <Badge variant="secondary" className="text-[10px]">
-            {tFn(`report.contacts.badge.${row.type}`)}
+            {tFn(
+              row.type
+                ? `report.contacts.badge.${row.type}`
+                : 'report.contacts.badge.unset',
+            )}
           </Badge>
         </span>
       }

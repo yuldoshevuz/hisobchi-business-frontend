@@ -245,10 +245,10 @@ export function OrganizationsPage(): React.ReactElement {
             <Lock className="h-5 w-5" />
           )}
           {orgGuard.canCreate
-            ? `Yangi tashkilot${
+            ? `${t('organizations.new_org_title')}${
                 typeof orgGuard.limit === 'number' ? ` (${orgGuard.label})` : ''
               }`
-            : 'Tarif chegarasi tugadi'}
+            : t('organizations.limit_reached_caption')}
         </Button>
       </ScreenAction>
 

@@ -13,12 +13,6 @@ import { getApiErrorMessage } from '@/lib/api-error';
 import { PermissionSlug } from '@/lib/permission-slugs';
 import { tgHapticNotify } from '@/lib/telegram';
 
-const LOCALE_OPTIONS = [
-  { value: 'uz', label: "O'zbekcha" },
-  { value: 'ru', label: 'Русский' },
-  { value: 'en', label: 'English' },
-] as const;
-
 const CURRENCY_OPTIONS = ['UZS', 'USD', 'EUR', 'RUB'] as const;
 
 /**
@@ -39,7 +33,6 @@ export function OrganizationSettingsPage(): React.ReactElement {
 
   const [name, setName] = useState<string>('');
   const [baseCurrency, setBaseCurrency] = useState<string>('UZS');
-  const [locale, setLocale] = useState<string>('uz');
 
   // Sync form when the query result first lands (or refreshes after save).
   useEffect(() => {
@@ -47,7 +40,6 @@ export function OrganizationSettingsPage(): React.ReactElement {
     if (!data) return;
     setName(data.name);
     setBaseCurrency(data.baseCurrency);
-    setLocale(data.locale);
   }, [currentOrgQuery.data]);
 
   if (currentOrgQuery.isPending) {
@@ -70,8 +62,7 @@ export function OrganizationSettingsPage(): React.ReactElement {
   const isValid = trimmedName.length >= 1 && trimmedName.length <= 255;
   const hasChanges =
     trimmedName !== org.name ||
-    baseCurrency !== org.baseCurrency ||
-    locale !== org.locale;
+    baseCurrency !== org.baseCurrency;
 
   function handleSubmit(e: React.FormEvent): void {
     e.preventDefault();
@@ -79,11 +70,9 @@ export function OrganizationSettingsPage(): React.ReactElement {
     const body: {
       name?: string;
       baseCurrency?: string;
-      locale?: string;
     } = {};
     if (trimmedName !== org.name) body.name = trimmedName;
     if (baseCurrency !== org.baseCurrency) body.baseCurrency = baseCurrency;
-    if (locale !== org.locale) body.locale = locale;
     updateMutation.mutate(body, {
       onSuccess: () => tgHapticNotify('success'),
       onError: () => tgHapticNotify('error'),
@@ -130,30 +119,6 @@ export function OrganizationSettingsPage(): React.ReactElement {
             {t('org_settings.currency_change_warning')}
           </p>
         ) : null}
-      </div>
-
-      <div className="space-y-1.5">
-        <Label>{t('org_settings.field.language')}</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {LOCALE_OPTIONS.map((opt) => {
-            const active = locale === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => canManage && setLocale(opt.value)}
-                disabled={!canManage}
-                className={`press rounded-xl border px-2 py-3 text-[12px] font-medium disabled:opacity-50 ${
-                  active
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-card text-foreground'
-                }`}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       {!canManage ? (

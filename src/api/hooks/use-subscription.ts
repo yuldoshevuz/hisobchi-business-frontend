@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { subscriptionApi } from '@/api/subscription.api';
 import { queryKeys } from '@/api/query-keys';
+import i18n from '@/i18n';
 import type {
   CurrentSubscription,
   FeatureCode,
@@ -101,8 +102,8 @@ export function useLimitGuard(
   const canCreate = !isLocked && !isAtLimit;
   let label: string;
   if (!snap.isReady) label = '...';
-  else if (isLocked) label = "Tarifda yo'q";
-  else if (limit === null) label = 'Cheksiz';
+  else if (isLocked) label = i18n.t('limit_guard.not_in_plan');
+  else if (limit === null) label = i18n.t('limit_guard.unlimited');
   else if (typeof limit === 'number') label = `${current} / ${limit}`;
   else label = '—';
 

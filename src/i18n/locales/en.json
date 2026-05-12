@@ -146,7 +146,10 @@
     "edit_account_title": "Edit account",
     "archive_title": "Archive",
     "archived_count": "{count} archived account(s)",
-    "archive_empty": "No archived accounts"
+    "archive_empty": "No archived accounts",
+    "primary_badge": "Primary",
+    "total_balance": "Total balance",
+    "your_roles": "Your roles"
   },
   "katalog": {
     "products": "Products",
@@ -306,7 +309,8 @@
     "field.name": "Name",
     "field.currency": "Currency",
     "create": "Create",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "limit_reached_caption": "Plan limit reached"
   },
   "access_denied": {
     "title": "Access denied",
@@ -411,6 +415,68 @@
     "delete.title": "Delete organisation",
     "delete.subtitle": "This removes all data permanently",
     "delete.confirm": "Confirm: delete everything"
+  },
+  "date_picker": {
+    "placeholder": "Pick a date",
+    "modal_title": "Pick a date",
+    "today": "Today",
+    "clear": "Clear",
+    "clear_aria": "Clear date",
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  },
+  "calendar": {
+    "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "months_long": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "prev_month_aria": "Previous month",
+    "next_month_aria": "Next month"
+  },
+  "commissions_meta": {
+    "status": {
+      "active": "Active",
+      "voided": "Voided"
+    }
+  },
+  "scheduled_meta": {
+    "recurrence": {
+      "once": "Once",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "status": {
+      "active": "Active",
+      "paused": "Paused",
+      "ended": "Ended",
+      "cancelled": "Cancelled"
+    },
+    "reminder_status": {
+      "pending": "Pending",
+      "notified": "Notified",
+      "confirmed": "Confirmed",
+      "skipped": "Skipped"
+    }
+  },
+  "layout": {
+    "back_aria": "Back"
+  },
+  "period_presets": {
+    "last_30_days": "30 days",
+    "start_label": "Start",
+    "end_label": "End"
+  },
+  "limit_guard": {
+    "not_in_plan": "Not in plan",
+    "unlimited": "Unlimited"
+  },
+  "edit_scheduled": {
+    "description": "Description",
+    "amount_label": "Amount ({currency})",
+    "ask_on_confirm_title": "Ask for the amount each time",
+    "ask_on_confirm_description": "When the reminder fires, the bot will ask for the amount",
+    "end_date": "End date",
+    "end_date_invalid": "End date can't be before the next occurrence",
+    "end_date_empty": "Empty — runs indefinitely"
   },
   "scheduled_page": {
     "title": "Scheduled",
@@ -546,7 +612,7 @@
     "restore_subtitle": "Account becomes active again",
     "delete_title": "Delete account",
     "delete_subtitle": "Cannot be undone",
-    "delete_confirm": "Delete account {{name}}?"
+    "delete_confirm": "Delete account {name}?"
   },
   "adjust_stock": {
     "current_stock": "Current stock",
@@ -571,7 +637,7 @@
     "name_placeholder": "Main cash",
     "type": "Type",
     "currency": "Currency",
-    "base_currency_only": "Only the base currency ({{currency}}) is available. To open an account in another currency, ",
+    "base_currency_only": "Only the base currency ({currency}) is available. To open an account in another currency, ",
     "upgrade_plan": "upgrade your plan",
     "opening_balance": "Opening balance",
     "opening_balance_placeholder": "0",
@@ -615,7 +681,7 @@
     "correction": "Correction",
     "correction_add": "Will be added to the balance",
     "correction_subtract": "Will be subtracted from the balance",
-    "adjustment_description": "Balance correction ({{old}} → {{new}})"
+    "adjustment_description": "Balance correction ({old} → {new})"
   },
   "edit_contact": {
     "name": "Name",
@@ -634,7 +700,7 @@
     "price_placeholder": "12 000",
     "cost": "Cost",
     "cost_placeholder": "8 000",
-    "currency_locked": "Currency cannot be changed ({{currency}}). To change it, archive the product and create it again."
+    "currency_locked": "Currency cannot be changed ({currency}). To change it, archive the product and create it again."
   },
   "expense_form": {
     "kind_label": "Expense type",
@@ -716,7 +782,7 @@
   },
   "contact_picker": {
     "empty": "No contacts",
-    "empty_for_type": "No contacts in the {{type}} category",
+    "empty_for_type": "No contacts in the {type} category",
     "filter_by_type": "Filter by type",
     "all": "All"
   },
@@ -847,10 +913,10 @@
     "edit_form.new_product_option": "+ New product…",
     "edit_form.new_product_placeholder": "New product name",
     "edit_form.item_quantity": "Quantity",
-    "edit_form.item_price": "Price ({{currency}})",
+    "edit_form.item_price": "Price ({currency})",
     "edit_form.line_total": "Total:",
     "edit_form.grand_total": "Grand total",
-    "edit_form.amount_label": "Amount ({{currency}})",
+    "edit_form.amount_label": "Amount ({currency})",
     "edit_form.no_accounts_hint": "No account (cash / bank) found. Create one in the Accounts section first.",
     "edit_form.no_cash_flow_hint": "No payments — the record will be saved as debt. If a payment was made, tap \"Add\".",
     "edit_form.contact_customer": "Customer (optional)",
@@ -935,7 +1001,7 @@
     "title": "Debt reminders",
     "direction_in": "Borrowed",
     "direction_out": "Lent",
-    "tx_placeholder": "Transaction #{{id}}",
+    "tx_placeholder": "Transaction #{id}",
     "overdue": "Overdue",
     "approaching": "Due soon",
     "partial_paid": "Partially paid",
@@ -967,7 +1033,7 @@
     "reminder_time_hint": "ℹ️ Reminders fire daily at 00:15 (Tashkent). If you pick today, the first reminder will arrive tomorrow."
   },
   "reminder_detail": {
-    "plan_placeholder": "Plan #{{id}}",
+    "plan_placeholder": "Plan #{id}",
     "fallback_description": "Reminder",
     "date": "Date",
     "amount": "Amount",
@@ -992,7 +1058,7 @@
   },
   "reminder_highlights": {
     "title": "Reminders",
-    "plan_placeholder": "Plan #{{id}}",
+    "plan_placeholder": "Plan #{id}",
     "amount_on_confirm": "Amount entered on confirm",
     "month": {
       "jan": "Jan", "feb": "Feb", "mar": "Mar", "apr": "Apr",
@@ -1013,7 +1079,7 @@
     "commission_hint": "Used as the default when creating a commission.",
     "roles": "Roles",
     "no_roles": "No roles defined in this organization yet",
-    "permissions_count": "{{count}} permissions",
+    "permissions_count": "{count} permissions",
     "system_badge": "system"
   },
   "role_form": {
@@ -1031,7 +1097,7 @@
     "no_members": "No active employees",
     "amount": "Amount",
     "percentage": "Percentage (optional)",
-    "currency_label": "Currency: {{currency}}"
+    "currency_label": "Currency: {currency}"
   },
   "report": {
     "cash_flow": {
@@ -1044,7 +1110,7 @@
       "plus_others": "+ others",
       "others": "Others",
       "daily_chart": "Daily chart",
-      "no_data_for_direction": "No {{direction}} in the selected period",
+      "no_data_for_direction": "No {direction} in the selected period",
       "no_data_for_period": "No data for the selected period"
     },
     "pnl": {
@@ -1065,7 +1131,7 @@
       "equity": "Equity",
       "assets": "Assets",
       "cash_and_accounts": "Cash and accounts",
-      "accounts_count": "{{count}} account(s)",
+      "accounts_count": "{count} account(s)",
       "receivables": "Receivables (owed to me)",
       "inventory": "Inventory",
       "inventory_subtitle": "Goods at cost",
@@ -1073,7 +1139,7 @@
       "liabilities": "Liabilities",
       "payables": "Payables (I owe)",
       "total_liabilities": "Total liabilities",
-      "contacts_count": "{{count}} contact(s)",
+      "contacts_count": "{count} contact(s)",
       "plus_other_contacts": "+ others (more than 50 contacts)",
       "no_data_for_date": "No data for the selected date"
     },
@@ -1087,15 +1153,16 @@
       "badge": {
         "customer": "customer",
         "supplier": "supplier",
-        "partner": "partner"
+        "partner": "partner",
+        "unset": "contact"
       },
       "search_placeholder": "Contact name or phone",
       "clear": "Clear",
-      "count": "{{count}} contact(s)",
+      "count": "{count} contact(s)",
       "no_match": "No contacts match the filter",
       "no_activity": "No activity in the selected period",
       "totals_empty": "No records in the selected period",
-      "totals_label": "Total {{currency}}",
+      "totals_label": "Total {currency}",
       "totals": {
         "sales": "Sales",
         "purchases": "Purchases",
@@ -1108,8 +1175,8 @@
         "receivable": "Receivable",
         "payable": "Payable"
       },
-      "records_count": "{{count}} records",
-      "last_activity": "last: {{date}}",
+      "records_count": "{count} records",
+      "last_activity": "last: {date}",
       "month": {
         "jan": "Jan", "feb": "Feb", "mar": "Mar", "apr": "Apr",
         "may": "May", "jun": "Jun", "jul": "Jul", "aug": "Aug",
@@ -1140,5 +1207,230 @@
     "FEATURE_LIMIT_REACHED": "Plan limit reached.",
     "SUBSCRIPTION_REQUIRED": "A subscription is required. Update your plan in the app.",
     "VALIDATION_ERROR": "Submitted data is invalid."
+  },
+  "api_error": {
+    "fallback": "Something went wrong",
+    "MISSING_PERMISSION": "You don't have permission for this action",
+    "NOT_ORGANIZATION_MEMBER": "You're not a member of this organisation",
+    "FORBIDDEN": "Forbidden",
+    "UNAUTHORIZED": "Please sign in first",
+    "ACCOUNT_NOT_FOUND": "Account not found",
+    "ACCOUNT_NAME_EXISTS": "An account with this name already exists",
+    "ACCOUNT_BALANCE_NOT_ZERO": "Account balance is not zero. Archive instead of deleting",
+    "ACCOUNT_HAS_CASH_FLOWS": "Account has active cash flows. Cannot be deleted",
+    "ACCOUNT_CURRENCY_CHANGE_FORBIDDEN": "Account currency cannot be changed",
+    "ACCOUNT_OPENING_BALANCE_NOT_SUPPORTED": "At this stage opening balance can only be 0",
+    "ACCOUNT_INVALID_STATUS": "Invalid account status",
+    "INVALID_CURRENCY_CODE": "Invalid currency code",
+    "CATEGORY_NOT_FOUND": "Category not found",
+    "CATEGORY_IN_USE": "This category is in use by transactions or products. Cannot be deleted",
+    "CATEGORY_TYPE_MISMATCH": "Category type doesn't match the system category",
+    "CATEGORY_DUPLICATE_SYSTEM_LINK": "This system category is already linked",
+    "CATEGORY_INVALID_TYPE": "Invalid category type",
+    "CATEGORY_ARCHIVED": "Category is archived. Restore it first",
+    "CATEGORY_NOT_ARCHIVED": "Category is not archived",
+    "CATEGORY_RESTORE_CONFLICT": "An active category with this name already exists. Rename it first",
+    "UNKNOWN_SYSTEM_CATEGORY": "No such system category exists",
+    "SYSTEM_CATEGORY_IN_USE": "System category is in use",
+    "SYSTEM_CATEGORY_CODE_EXISTS": "A system category with this code already exists",
+    "SYSTEM_CATEGORY_NOT_FOUND": "System category not found",
+    "TRANSLATION_LOCALE_UNSUPPORTED": "This language is not supported",
+    "CONTACT_NOT_FOUND": "Contact not found",
+    "CONTACT_PHONE_EXISTS": "A contact with this phone already exists",
+    "CONTACT_IN_USE": "Contact is in use by active transactions. Archive instead of deleting",
+    "CONTACT_INVALID_TYPE": "Invalid contact type",
+    "CONTACT_INVALID_STATUS": "Invalid contact status",
+    "CONTACT_CREDIT_LIMIT_NEGATIVE": "Credit limit cannot be negative",
+    "PRODUCT_NOT_FOUND": "Product not found",
+    "PRODUCT_IN_USE": "Product is in use by transactions. Archive instead of deleting",
+    "PRODUCT_NAME_EXISTS": "A product with this name already exists",
+    "PRODUCT_INVALID_STATUS": "Invalid product status",
+    "PRODUCT_CATEGORY_TYPE_MISMATCH": "Selected category is not for products",
+    "PRODUCT_DEFAULT_PRICE_NEGATIVE": "Price cannot be negative",
+    "PRODUCT_DEFAULT_COST_NEGATIVE": "Cost cannot be negative",
+    "STOCK_NOT_TRACKED": "Stock tracking is not enabled for this product",
+    "STOCK_TRACKING_TOGGLE_FORBIDDEN": "Stock tracking cannot be toggled. Re-create the product",
+    "NEGATIVE_STOCK": "This stock level is not allowed (would become negative)",
+    "STOCK_ADJUSTMENT_ZERO": "Adjustment amount cannot be 0",
+    "CATEGORY_ONE_OF_REQUIRED": "A category must be selected",
+    "OVERPAYMENT_REJECTED": "Amount exceeds remaining balance. Confirm with the \"Accept overpayment\" button",
+    "OVERPAYMENT_REQUIRES_FLAG": "Overpayment confirmation required",
+    "CURRENCY_MISMATCH": "Account currency doesn't match transaction currency",
+    "TRANSFER_AMOUNT_MISMATCH": "Transfer amounts don't match",
+    "TRANSFER_INVALID_LEGS": "A transfer requires exactly 1 outflow and 1 inflow",
+    "TRANSACTION_VOIDED": "A voided transaction cannot be modified",
+    "CASH_FLOW_DIRECTION_MISMATCH": "Payment direction doesn't match transaction type",
+    "DUPLICATE_DETECTED": "This transaction looks like a recent duplicate. Opened the existing one",
+    "OPENING_BALANCE_HAS_CASH_FLOWS": "Cannot add payments to an opening balance",
+    "DEBT_CREATE_REQUIRES_CASH_FLOW": "Creating a debt transaction requires 1 payment",
+    "IMMUTABLE_FIELD": "This field cannot be changed. Void the record and re-enter",
+    "TRANSACTION_NOT_FOUND": "Transaction not found",
+    "CASH_FLOW_NOT_FOUND": "Payment not found",
+    "CASH_FLOW_VOID_FORBIDDEN": "This payment cannot be voided separately",
+    "FEATURE_DISABLED": "This feature is not enabled on your plan. Contact your administrator to upgrade",
+    "FEATURE_LIMIT_REACHED": "Plan limit reached. Upgrade the plan to add more",
+    "SUBSCRIPTION_REQUIRED": "An active subscription is required for this action",
+    "SUBSCRIPTION_NOT_FOUND": "Subscription not found",
+    "PLAN_NOT_FOUND": "Plan not found",
+    "PLAN_INACTIVE": "Plan is inactive",
+    "DEFAULT_PLAN_NOT_CONFIGURED": "Default plan is not configured. Please contact your administrator"
+  },
+  "feature_meta": {
+    "EMPLOYEES_LIMIT": {
+      "name": "Number of employees",
+      "description": "Total number of employees in the organisation (including the owner). The limit is checked when inviting a new employee."
+    },
+    "ACCOUNT_LIMIT": {
+      "name": "Number of accounts (cash registers)",
+      "description": "Number of cash registers, bank accounts and e-wallets in one organisation."
+    },
+    "ORGANIZATION_LIMIT": {
+      "name": "Number of organisations",
+      "description": "Number of organisations a single user can create (owned by them)."
+    },
+    "ADVANCED_REPORTS": {
+      "name": "Advanced reports",
+      "description": "Profit & loss (P&L) and financial position (balance sheet) reports. Cash flow report is available on all plans."
+    },
+    "MULTI_CURRENCY_SUPPORT": {
+      "name": "Multi-currency support",
+      "description": "Run accounts and transactions in currencies other than the organisation's base currency."
+    },
+    "DEBT_TRACKING": {
+      "name": "Debt reports",
+      "description": "Customer and supplier debt reports and per-contact balances. Creating debt transactions is available on all plans."
+    },
+    "ADVANCED_TRANSACTIONS": {
+      "name": "Advanced transactions",
+      "description": "Manual balance adjustments (inventory variance, shrinkage) and cross-currency transfers."
+    },
+    "SCHEDULED_TRANSACTIONS": {
+      "name": "Scheduled payments",
+      "description": "Recurring monthly/weekly transactions and automatic reminders via Telegram."
+    },
+    "INVENTORY_MANAGEMENT": {
+      "name": "Inventory management",
+      "description": "Track product stock levels, warehouse movements and inventory adjustments."
+    },
+    "ADVANCED_RBAC": {
+      "name": "Custom roles",
+      "description": "Create your own roles in the organisation and assign sets of permissions to them."
+    },
+    "SALES_COMMISSION": {
+      "name": "Sales commissions",
+      "description": "Calculate, report and void commissions for sales employees."
+    }
+  },
+  "permission_meta": {
+    "module": {
+      "organizations": "Organisation",
+      "members": "Employees",
+      "roles": "Roles",
+      "accounts": "Accounts",
+      "categories": "Categories",
+      "contacts": "Contacts",
+      "products": "Products",
+      "transactions": "Transactions",
+      "cash_flows": "Cash flow",
+      "reports": "Reports",
+      "scheduled": "Scheduled actions",
+      "commissions": "Commissions",
+      "ai": "AI",
+      "plans": "Plans"
+    },
+    "permission": {
+      "organizations.manage": {
+        "title": "Manage organisation",
+        "description": "Change organisation name, plan, language and base currency"
+      },
+      "members.manage": {
+        "title": "Manage employees",
+        "description": "Invite, suspend, archive employees and assign their roles"
+      },
+      "roles.manage": {
+        "title": "Manage roles",
+        "description": "Create, edit and delete custom roles"
+      },
+      "accounts.manage": {
+        "title": "Manage accounts",
+        "description": "Create, edit and archive accounts"
+      },
+      "accounts.read": {
+        "title": "View accounts",
+        "description": "View accounts and balances"
+      },
+      "categories.manage": {
+        "title": "Manage categories",
+        "description": "Manage the organisation's categories"
+      },
+      "contacts.manage": {
+        "title": "Manage contacts",
+        "description": "Create, edit and archive contacts"
+      },
+      "contacts.read": {
+        "title": "View contacts",
+        "description": "View contacts and their history"
+      },
+      "products.manage": {
+        "title": "Manage products",
+        "description": "Create, edit and archive products"
+      },
+      "products.read": {
+        "title": "View products",
+        "description": "View the product catalogue"
+      },
+      "transactions.create": {
+        "title": "Create transactions",
+        "description": "Record sales, expenses, transfers and other transactions"
+      },
+      "transactions.update": {
+        "title": "Edit transactions",
+        "description": "Change fields on existing transactions and confirm AI suggestions"
+      },
+      "transactions.void": {
+        "title": "Void transactions",
+        "description": "Void existing transactions"
+      },
+      "transactions.read": {
+        "title": "View transactions",
+        "description": "View transactions and their details"
+      },
+      "cash_flows.create": {
+        "title": "Add payments",
+        "description": "Record income or expense payments against a transaction"
+      },
+      "cash_flows.read": {
+        "title": "View cash flow",
+        "description": "View cash flow history"
+      },
+      "reports.read": {
+        "title": "View reports",
+        "description": "Financial reports: cash flow, profit/loss, financial position"
+      },
+      "scheduled.manage": {
+        "title": "Manage scheduled actions",
+        "description": "Manage recurring transactions and reminders"
+      },
+      "scheduled.read": {
+        "title": "View scheduled actions",
+        "description": "View recurring transactions and reminders"
+      },
+      "commissions.read": {
+        "title": "View commissions",
+        "description": "View earned commissions"
+      },
+      "commissions.manage": {
+        "title": "Manage commissions",
+        "description": "Record and void commissions on sales"
+      },
+      "ai.manage": {
+        "title": "AI features",
+        "description": "Input data via AI and review AI suggestions"
+      },
+      "plans.manage": {
+        "title": "Manage plans",
+        "description": "Manage platform plans (platform admin only)"
+      }
+    }
   }
 }

@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { setUnauthorizedHandler } from '@/api/client';
 import { useMe } from '@/api/hooks/use-user';
-import { setLocale } from '@/i18n';
+import i18n, { setLocale } from '@/i18n';
 import { bootAuth } from '@/lib/boot-auth';
 import { router } from '@/router';
 import { tokenStore } from '@/store/token-store';
@@ -19,10 +23,25 @@ interface AppProvidersProps {
  */
 function I18nSync(): null {
   const me = useMe();
+  const queryContact = useQueryClient();
   const locale = me.data?.locale;
   useEffect(() => {
     if (locale) setLocale(locale);
   }, [locale]);
+
+  // Server responses include locale-resolved fields (category names, report
+  // labels) keyed off the Accept-Language header. When the user switches
+  // language, invalidate every cached query so they refetch in the new
+  // locale — otherwise stale Uzbek labels would persist until staleTime.
+  useEffect(() => {
+    const handler = (): void => {
+      void queryContact.invalidateQueries();
+    };
+    i18n.on('languageChanged', handler);
+    return () => {
+      i18n.off('languageChanged', handler);
+    };
+  }, [queryContact]);
   return null;
 }
 

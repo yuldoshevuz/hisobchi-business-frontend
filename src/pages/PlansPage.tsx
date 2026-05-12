@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import {
   CalendarClock,
   Check,
@@ -424,14 +425,13 @@ function UpgradeNoteCard(): React.ReactElement {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
-const MONTHS_UZ_SHORT = [
-  'Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn',
-  'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek',
-] as const;
+function getMonthsShort(): readonly string[] {
+  return i18n.t('date_picker.months', { returnObjects: true }) as string[];
+}
 
 function formatDateUz(iso: string): string {
   const [datePart] = iso.split('T');
   const [y, m, d] = (datePart ?? '').split('-').map((p) => Number(p));
   if (!y || !m || !d) return iso;
-  return `${d.toString().padStart(2, '0')} ${MONTHS_UZ_SHORT[m - 1]} ${y}`;
+  return `${d.toString().padStart(2, '0')} ${getMonthsShort()[m - 1]} ${y}`;
 }

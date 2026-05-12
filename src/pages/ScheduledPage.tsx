@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import {
   CalendarClock,
   Check,
@@ -707,26 +708,12 @@ function Row({ label, value }: RowProps): React.ReactElement {
   );
 }
 
-const MONTHS_UZ_SHORT = [
-  'Yan',
-  'Fev',
-  'Mar',
-  'Apr',
-  'May',
-  'Iyn',
-  'Iyl',
-  'Avg',
-  'Sen',
-  'Okt',
-  'Noy',
-  'Dek',
-] as const;
-
 function formatDateUz(iso: string): string {
   // Accept both YYYY-MM-DD and full ISO timestamps; we only need calendar
   // parts for the row subtitle / detail rows.
   const [datePart] = iso.split('T');
   const [y, m, d] = (datePart ?? '').split('-').map((p) => Number(p));
   if (!y || !m || !d) return iso;
-  return `${d.toString().padStart(2, '0')} ${MONTHS_UZ_SHORT[m - 1]} ${y}`;
+  const months = i18n.t('date_picker.months', { returnObjects: true }) as string[];
+  return `${d.toString().padStart(2, '0')} ${months[m - 1]} ${y}`;
 }

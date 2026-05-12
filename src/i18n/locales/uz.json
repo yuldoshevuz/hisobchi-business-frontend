@@ -146,7 +146,10 @@
     "edit_account_title": "Hisobni tahrirlash",
     "archive_title": "Arxiv",
     "archived_count": "{count} ta arxivlangan hisob",
-    "archive_empty": "Arxivlangan hisoblar yo'q"
+    "archive_empty": "Arxivlangan hisoblar yo'q",
+    "primary_badge": "Asosiy",
+    "total_balance": "Umumiy balans",
+    "your_roles": "Sizning rollaringiz"
   },
   "katalog": {
     "products": "Mahsulotlar",
@@ -306,7 +309,8 @@
     "field.name": "Nomi",
     "field.currency": "Valyuta",
     "create": "Yaratish",
-    "logout": "Chiqish"
+    "logout": "Chiqish",
+    "limit_reached_caption": "Tarif chegarasi tugadi"
   },
   "access_denied": {
     "title": "Ruxsat yo'q",
@@ -411,6 +415,68 @@
     "delete.title": "Tashkilotni o'chirish",
     "delete.subtitle": "Bu amal barcha ma'lumotlarni o'chiradi",
     "delete.confirm": "Tasdiqlayman: hammasini o'chir"
+  },
+  "date_picker": {
+    "placeholder": "Sana tanlang",
+    "modal_title": "Sana tanlash",
+    "today": "Bugun",
+    "clear": "Tozalash",
+    "clear_aria": "Sanani tozalash",
+    "months": ["Yan", "Fev", "Mar", "Apr", "May", "Iyn", "Iyl", "Avg", "Sen", "Okt", "Noy", "Dek"]
+  },
+  "calendar": {
+    "weekdays": ["Du", "Se", "Cho", "Pa", "Ju", "Sha", "Ya"],
+    "months_long": ["Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun", "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"],
+    "prev_month_aria": "Avvalgi oy",
+    "next_month_aria": "Keyingi oy"
+  },
+  "layout": {
+    "back_aria": "Orqaga"
+  },
+  "period_presets": {
+    "last_30_days": "30 kun",
+    "start_label": "Boshlanish",
+    "end_label": "Tugash"
+  },
+  "limit_guard": {
+    "not_in_plan": "Tarifda yo'q",
+    "unlimited": "Cheksiz"
+  },
+  "commissions_meta": {
+    "status": {
+      "active": "Faol",
+      "voided": "Bekor qilingan"
+    }
+  },
+  "scheduled_meta": {
+    "recurrence": {
+      "once": "Bir marta",
+      "daily": "Har kuni",
+      "weekly": "Har hafta",
+      "monthly": "Har oy",
+      "yearly": "Har yil"
+    },
+    "status": {
+      "active": "Faol",
+      "paused": "To'xtatilgan",
+      "ended": "Tugagan",
+      "cancelled": "Bekor qilingan"
+    },
+    "reminder_status": {
+      "pending": "Kutilmoqda",
+      "notified": "Yuborildi",
+      "confirmed": "Tasdiqlandi",
+      "skipped": "O'tkazildi"
+    }
+  },
+  "edit_scheduled": {
+    "description": "Tavsif",
+    "amount_label": "Summa ({currency})",
+    "ask_on_confirm_title": "Summa har safar so'ralsin",
+    "ask_on_confirm_description": "Eslatma kelganda bot summani aniqlaydi",
+    "end_date": "Tugash sanasi",
+    "end_date_invalid": "Tugash sanasi keyingi sanadan oldin bo'la olmaydi",
+    "end_date_empty": "Bo'sh — cheksiz davom etadi"
   },
   "scheduled_page": {
     "title": "Rejalashtirilgan",
@@ -546,7 +612,7 @@
     "restore_subtitle": "Hisob yana faol bo'ladi",
     "delete_title": "Balansni o'chirish",
     "delete_subtitle": "Qaytarib bo'lmaydi",
-    "delete_confirm": "{{name}} hisobini o'chirishni tasdiqlaysizmi?"
+    "delete_confirm": "{name} hisobini o'chirishni tasdiqlaysizmi?"
   },
   "adjust_stock": {
     "current_stock": "Joriy qoldiq",
@@ -571,7 +637,7 @@
     "name_placeholder": "Asosiy kassa",
     "type": "Turi",
     "currency": "Valyuta",
-    "base_currency_only": "Faqat asosiy valyuta ({{currency}}) mavjud. Boshqa valyutada hisob ochish uchun ",
+    "base_currency_only": "Faqat asosiy valyuta ({currency}) mavjud. Boshqa valyutada hisob ochish uchun ",
     "upgrade_plan": "tarifni yangilang",
     "opening_balance": "Boshlang'ich qoldiq",
     "opening_balance_placeholder": "0",
@@ -615,7 +681,7 @@
     "correction": "Tuzatish",
     "correction_add": "Balansga qo'shiladi",
     "correction_subtract": "Balansdan ayriladi",
-    "adjustment_description": "Balansni tahrirlash ({{old}} → {{new}})"
+    "adjustment_description": "Balansni tahrirlash ({old} → {new})"
   },
   "edit_contact": {
     "name": "Nom",
@@ -634,7 +700,7 @@
     "price_placeholder": "12 000",
     "cost": "Tannarx",
     "cost_placeholder": "8 000",
-    "currency_locked": "Valyuta o'zgartirilmaydi ({{currency}}). Buning uchun mahsulotni arxivlab, qaytadan yarating."
+    "currency_locked": "Valyuta o'zgartirilmaydi ({currency}). Buning uchun mahsulotni arxivlab, qaytadan yarating."
   },
   "expense_form": {
     "kind_label": "Xarajat turi",
@@ -716,7 +782,7 @@
   },
   "contact_picker": {
     "empty": "Kontakt yo'q",
-    "empty_for_type": "{{type}} toifasida kontakt yo'q",
+    "empty_for_type": "{type} toifasida kontakt yo'q",
     "filter_by_type": "Turi bo'yicha filter",
     "all": "Hammasi"
   },
@@ -847,10 +913,10 @@
     "edit_form.new_product_option": "+ Yangi mahsulot…",
     "edit_form.new_product_placeholder": "Yangi mahsulot nomi",
     "edit_form.item_quantity": "Soni",
-    "edit_form.item_price": "Narx ({{currency}})",
+    "edit_form.item_price": "Narx ({currency})",
     "edit_form.line_total": "Jami:",
     "edit_form.grand_total": "Umumiy summa",
-    "edit_form.amount_label": "Summa ({{currency}})",
+    "edit_form.amount_label": "Summa ({currency})",
     "edit_form.no_accounts_hint": "Hisob (Kassa / Bank) topilmadi. Avval Hisoblar bo'limidan biror hisob yarating.",
     "edit_form.no_cash_flow_hint": "To'lov yo'q — qarz sifatida saqlanadi. To'lov bo'lgan bo'lsa, \"Qo'shish\"ni bosing.",
     "edit_form.contact_customer": "Mijoz (ixtiyoriy)",
@@ -935,7 +1001,7 @@
     "title": "Qarz eslatmalari",
     "direction_in": "Qarz olingan",
     "direction_out": "Qarz berilgan",
-    "tx_placeholder": "Tranzaktsiya #{{id}}",
+    "tx_placeholder": "Tranzaktsiya #{id}",
     "overdue": "Muddati o'tgan",
     "approaching": "Yaqinlashmoqda",
     "partial_paid": "Qisman to'langan",
@@ -967,7 +1033,7 @@
     "reminder_time_hint": "ℹ️ Eslatma har kuni 00:15 (Toshkent) da yuboriladi. Bugungi sana tanlasangiz, birinchi eslatma ertaga keladi."
   },
   "reminder_detail": {
-    "plan_placeholder": "Reja #{{id}}",
+    "plan_placeholder": "Reja #{id}",
     "fallback_description": "Eslatma",
     "date": "Sana",
     "amount": "Summa",
@@ -992,7 +1058,7 @@
   },
   "reminder_highlights": {
     "title": "Eslatmalar",
-    "plan_placeholder": "Reja #{{id}}",
+    "plan_placeholder": "Reja #{id}",
     "amount_on_confirm": "Summa tasdiqlashda kiritiladi",
     "month": {
       "jan": "Yan", "feb": "Fev", "mar": "Mar", "apr": "Apr",
@@ -1013,7 +1079,7 @@
     "commission_hint": "Komissiya yaratishda asosiy qiymat sifatida ishlatiladi.",
     "roles": "Rollar",
     "no_roles": "Tashkilotda hali rol mavjud emas",
-    "permissions_count": "{{count}} ruxsat",
+    "permissions_count": "{count} ruxsat",
     "system_badge": "tizim"
   },
   "role_form": {
@@ -1031,7 +1097,7 @@
     "no_members": "Faol xodimlar yo'q",
     "amount": "Summa",
     "percentage": "Foiz (ixtiyoriy)",
-    "currency_label": "Valyuta: {{currency}}"
+    "currency_label": "Valyuta: {currency}"
   },
   "report": {
     "cash_flow": {
@@ -1044,7 +1110,7 @@
       "plus_others": "+ boshqalar",
       "others": "Boshqalar",
       "daily_chart": "Kunlik grafik",
-      "no_data_for_direction": "Tanlangan davrda {{direction}} yo'q",
+      "no_data_for_direction": "Tanlangan davrda {direction} yo'q",
       "no_data_for_period": "Tanlangan davr uchun ma'lumot yo'q"
     },
     "pnl": {
@@ -1065,7 +1131,7 @@
       "equity": "Kapital",
       "assets": "Aktivlar",
       "cash_and_accounts": "Naqd va hisoblar",
-      "accounts_count": "{{count}} ta hisob",
+      "accounts_count": "{count} ta hisob",
       "receivables": "Qarzdorlik (oldim olishim kerak)",
       "inventory": "Tovar zaxirasi",
       "inventory_subtitle": "Mahsulotlar tannarxi",
@@ -1073,7 +1139,7 @@
       "liabilities": "Passivlar",
       "payables": "Qarz (to'lashim kerak)",
       "total_liabilities": "Jami passivlar",
-      "contacts_count": "{{count}} ta kontakt",
+      "contacts_count": "{count} ta kontakt",
       "plus_other_contacts": "+ boshqalar (50 dan ortiq kontakt)",
       "no_data_for_date": "Tanlangan sana uchun ma'lumot yo'q"
     },
@@ -1087,15 +1153,16 @@
       "badge": {
         "customer": "mijoz",
         "supplier": "ta'minotchi",
-        "partner": "hamkor"
+        "partner": "hamkor",
+        "unset": "kontakt"
       },
       "search_placeholder": "Kontakt nomi yoki telefoni",
       "clear": "Tozalash",
-      "count": "{{count}} ta kontakt",
+      "count": "{count} ta kontakt",
       "no_match": "Filtrga mos kontakt yo'q",
       "no_activity": "Tanlangan davrda faollik yo'q",
       "totals_empty": "Tanlangan davrda yozuv topilmadi",
-      "totals_label": "Jami {{currency}}",
+      "totals_label": "Jami {currency}",
       "totals": {
         "sales": "Sotuvlar",
         "purchases": "Xaridlar",
@@ -1108,8 +1175,8 @@
         "receivable": "Olinadigan",
         "payable": "Beriladigan"
       },
-      "records_count": "{{count}} yozuv",
-      "last_activity": "oxirgi: {{date}}",
+      "records_count": "{count} yozuv",
+      "last_activity": "oxirgi: {date}",
       "month": {
         "jan": "Yan", "feb": "Fev", "mar": "Mar", "apr": "Apr",
         "may": "May", "jun": "Iyn", "jul": "Iyl", "aug": "Avg",
@@ -1140,5 +1207,230 @@
     "FEATURE_LIMIT_REACHED": "Tarif chegarangizga yetdingiz.",
     "SUBSCRIPTION_REQUIRED": "Obuna kerak. Ilovada tarifni yangilang.",
     "VALIDATION_ERROR": "Kiritilgan ma'lumot noto'g'ri."
+  },
+  "api_error": {
+    "fallback": "Xatolik yuz berdi",
+    "MISSING_PERMISSION": "Sizda ushbu amal uchun ruxsat yo'q",
+    "NOT_ORGANIZATION_MEMBER": "Siz bu tashkilot a'zosi emassiz",
+    "FORBIDDEN": "Ruxsat berilmagan",
+    "UNAUTHORIZED": "Avval tizimga kiring",
+    "ACCOUNT_NOT_FOUND": "Hisob topilmadi",
+    "ACCOUNT_NAME_EXISTS": "Bu nomli hisob allaqachon mavjud",
+    "ACCOUNT_BALANCE_NOT_ZERO": "Hisob qoldig'i nolga teng emas. O'chirish o'rniga arxivlang",
+    "ACCOUNT_HAS_CASH_FLOWS": "Hisobda faol pul harakatlari mavjud. O'chirib bo'lmaydi",
+    "ACCOUNT_CURRENCY_CHANGE_FORBIDDEN": "Hisob valyutasini o'zgartirib bo'lmaydi",
+    "ACCOUNT_OPENING_BALANCE_NOT_SUPPORTED": "Bu bosqichda boshlang'ich qoldiq faqat 0 bo'lishi mumkin",
+    "ACCOUNT_INVALID_STATUS": "Hisob statusi noto'g'ri",
+    "INVALID_CURRENCY_CODE": "Valyuta kodi noto'g'ri",
+    "CATEGORY_NOT_FOUND": "Kategoriya topilmadi",
+    "CATEGORY_IN_USE": "Bu kategoriya tranzaksiya yoki mahsulotda ishlatilmoqda. O'chirib bo'lmaydi",
+    "CATEGORY_TYPE_MISMATCH": "Kategoriya turi tizim kategoriyasiga mos kelmaydi",
+    "CATEGORY_DUPLICATE_SYSTEM_LINK": "Bu tizim kategoriyasi allaqachon qo'shilgan",
+    "CATEGORY_INVALID_TYPE": "Kategoriya turi noto'g'ri",
+    "CATEGORY_ARCHIVED": "Kategoriya arxivlangan. Avval arxivdan tiklang",
+    "CATEGORY_NOT_ARCHIVED": "Kategoriya arxivlanmagan",
+    "CATEGORY_RESTORE_CONFLICT": "Bu nomli faol kategoriya allaqachon mavjud. Avval uni o'zgartiring",
+    "UNKNOWN_SYSTEM_CATEGORY": "Bunday tizim kategoriyasi mavjud emas",
+    "SYSTEM_CATEGORY_IN_USE": "Tizim kategoriyasi ishlatilmoqda",
+    "SYSTEM_CATEGORY_CODE_EXISTS": "Bu kod bilan tizim kategoriyasi mavjud",
+    "SYSTEM_CATEGORY_NOT_FOUND": "Tizim kategoriyasi topilmadi",
+    "TRANSLATION_LOCALE_UNSUPPORTED": "Bu til qo'llab-quvvatlanmaydi",
+    "CONTACT_NOT_FOUND": "Kontakt topilmadi",
+    "CONTACT_PHONE_EXISTS": "Bu telefon raqamli kontakt allaqachon mavjud",
+    "CONTACT_IN_USE": "Bu kontakt faol tranzaksiyalarda ishlatilmoqda. O'chirish o'rniga arxivlang",
+    "CONTACT_INVALID_TYPE": "Kontakt turi noto'g'ri",
+    "CONTACT_INVALID_STATUS": "Kontakt statusi noto'g'ri",
+    "CONTACT_CREDIT_LIMIT_NEGATIVE": "Kredit limiti manfiy bo'lishi mumkin emas",
+    "PRODUCT_NOT_FOUND": "Mahsulot topilmadi",
+    "PRODUCT_IN_USE": "Bu mahsulot tranzaksiyalarda ishlatilmoqda. O'chirish o'rniga arxivlang",
+    "PRODUCT_NAME_EXISTS": "Bu nomli mahsulot allaqachon mavjud",
+    "PRODUCT_INVALID_STATUS": "Mahsulot statusi noto'g'ri",
+    "PRODUCT_CATEGORY_TYPE_MISMATCH": "Tanlangan kategoriya mahsulotlar uchun emas",
+    "PRODUCT_DEFAULT_PRICE_NEGATIVE": "Narx manfiy bo'lishi mumkin emas",
+    "PRODUCT_DEFAULT_COST_NEGATIVE": "Tannarx manfiy bo'lishi mumkin emas",
+    "STOCK_NOT_TRACKED": "Bu mahsulot uchun ombor hisobi yuritilmaydi",
+    "STOCK_TRACKING_TOGGLE_FORBIDDEN": "Ombor hisobini yoqib/o'chirib bo'lmaydi. Mahsulotni qayta yarating",
+    "NEGATIVE_STOCK": "Bunday qoldiqqa ruxsat berilmagan (manfiy bo'ladi)",
+    "STOCK_ADJUSTMENT_ZERO": "Tuzatish miqdori 0 bo'lishi mumkin emas",
+    "CATEGORY_ONE_OF_REQUIRED": "Kategoriya tanlash majburiy",
+    "OVERPAYMENT_REJECTED": "Summa qoldiqdan ortiq. \"Ortiqcha qabul qilish\" tugmasi bilan tasdiqlang",
+    "OVERPAYMENT_REQUIRES_FLAG": "Ortiqcha to'lovni tasdiqlash kerak",
+    "CURRENCY_MISMATCH": "Hisob valyutasi tranzaksiya valyutasiga mos kelmadi",
+    "TRANSFER_AMOUNT_MISMATCH": "O'tkazma summalari mos kelmadi",
+    "TRANSFER_INVALID_LEGS": "O'tkazma uchun aniq 1 ta chiqim va 1 ta kirim kerak",
+    "TRANSACTION_VOIDED": "Bekor qilingan tranzaksiyani o'zgartirib bo'lmaydi",
+    "CASH_FLOW_DIRECTION_MISMATCH": "To'lov yo'nalishi tranzaksiya turiga mos emas",
+    "DUPLICATE_DETECTED": "Bu tranzaksiya yaqinda kiritilgan ko'rinadi. Mavjud tranzaksiyaga o'tdik",
+    "OPENING_BALANCE_HAS_CASH_FLOWS": "Boshlang'ich qoldiq uchun to'lov qo'shib bo'lmaydi",
+    "DEBT_CREATE_REQUIRES_CASH_FLOW": "Qarz tranzaksiyasi yaratishda 1 ta to'lov kerak",
+    "IMMUTABLE_FIELD": "Bu maydonni o'zgartirib bo'lmaydi. Yozuvni bekor qilib qaytadan kiriting",
+    "TRANSACTION_NOT_FOUND": "Tranzaksiya topilmadi",
+    "CASH_FLOW_NOT_FOUND": "To'lov topilmadi",
+    "CASH_FLOW_VOID_FORBIDDEN": "Bu to'lovni alohida bekor qilib bo'lmaydi",
+    "FEATURE_DISABLED": "Bu imkoniyat sizning tarifingizda yoqilmagan. Tarifni yangilash uchun administrator bilan bog'laning",
+    "FEATURE_LIMIT_REACHED": "Tarif chegarasiga yetdingiz. Yangi qator qo'shish uchun tarifni yangilang",
+    "SUBSCRIPTION_REQUIRED": "Bu amalni bajarish uchun aktiv obuna kerak",
+    "SUBSCRIPTION_NOT_FOUND": "Obuna topilmadi",
+    "PLAN_NOT_FOUND": "Tarif topilmadi",
+    "PLAN_INACTIVE": "Tarif faol emas",
+    "DEFAULT_PLAN_NOT_CONFIGURED": "Tizimda default tarif sozlanmagan. Iltimos, administrator bilan bog'laning"
+  },
+  "feature_meta": {
+    "EMPLOYEES_LIMIT": {
+      "name": "Xodimlar soni",
+      "description": "Tashkilotda jami xodimlar soni (egasi ham hisoblanadi). Yangi xodim taklif qilganda chegara tekshiriladi."
+    },
+    "ACCOUNT_LIMIT": {
+      "name": "Hisoblar (kassalar) soni",
+      "description": "Bitta tashkilotdagi kassa, bank va e-hamyon hisoblari soni."
+    },
+    "ORGANIZATION_LIMIT": {
+      "name": "Tashkilotlar soni",
+      "description": "Bir foydalanuvchi yarata oladigan tashkilotlar soni (egalik qiladigan)."
+    },
+    "ADVANCED_REPORTS": {
+      "name": "Kengaytirilgan hisobotlar",
+      "description": "Foyda-zarar (P&L) va Moliyaviy holat (balans) hisobotlari. Kassa hisoboti barcha tariflarda mavjud."
+    },
+    "MULTI_CURRENCY_SUPPORT": {
+      "name": "Ko'p valyutali ishlash",
+      "description": "Tashkilotning bazaviy valyutasidan tashqari valyutalarda hisob va tranzaksiyalar yuritish."
+    },
+    "DEBT_TRACKING": {
+      "name": "Qarzlar hisoboti",
+      "description": "Mijoz va yetkazib beruvchilar bo'yicha qarzdorlik hisobotlari va per-kontakt balanslar. Qarz tranzaksiyalarini yaratish — barcha tariflarda mavjud."
+    },
+    "ADVANCED_TRANSACTIONS": {
+      "name": "Murakkab tranzaksiyalar",
+      "description": "Balansni qo'lda to'g'irlash (sanoq farqi, shrinkage) va valyutalararo o'tkazma."
+    },
+    "SCHEDULED_TRANSACTIONS": {
+      "name": "Rejalashtirilgan to'lovlar",
+      "description": "Takrorlanadigan oylik/haftalik tranzaksiyalar va Telegram orqali avtomatik eslatmalar."
+    },
+    "INVENTORY_MANAGEMENT": {
+      "name": "Ombor boshqaruvi",
+      "description": "Mahsulot qoldiqlarini kuzatish, ombor harakatlari va sanoq farqlarini hisobga olish."
+    },
+    "ADVANCED_RBAC": {
+      "name": "Maxsus rollar",
+      "description": "Tashkilotda o'z rollaringizni yaratish va ularga ruxsatlar to'plamini biriktirish."
+    },
+    "SALES_COMMISSION": {
+      "name": "Sotuv komissiyalari",
+      "description": "Sotuvlar uchun xodimlarga komissiya hisoblash, hisobot va bekor qilish."
+    }
+  },
+  "permission_meta": {
+    "module": {
+      "organizations": "Tashkilot",
+      "members": "Xodimlar",
+      "roles": "Rollar",
+      "accounts": "Hisoblar",
+      "categories": "Kategoriyalar",
+      "contacts": "Kontaktlar",
+      "products": "Mahsulotlar",
+      "transactions": "Tranzaksiyalar",
+      "cash_flows": "Pul oqimi",
+      "reports": "Hisobotlar",
+      "scheduled": "Rejalashtirilgan amallar",
+      "commissions": "Komissiyalar",
+      "ai": "AI",
+      "plans": "Tariflar"
+    },
+    "permission": {
+      "organizations.manage": {
+        "title": "Tashkilotni boshqarish",
+        "description": "Tashkilot nomi, tarif, til va asosiy valyutani o'zgartirish"
+      },
+      "members.manage": {
+        "title": "Xodimlarni boshqarish",
+        "description": "Xodimlarni taklif qilish, to'xtatib turish, arxivlash va rollarini belgilash"
+      },
+      "roles.manage": {
+        "title": "Rollarni boshqarish",
+        "description": "Maxsus rollar yaratish, tahrirlash va o'chirish"
+      },
+      "accounts.manage": {
+        "title": "Hisoblarni boshqarish",
+        "description": "Hisoblar yaratish, tahrirlash va arxivlash"
+      },
+      "accounts.read": {
+        "title": "Hisoblarni ko'rish",
+        "description": "Hisoblar va qoldiqlarni ko'rish"
+      },
+      "categories.manage": {
+        "title": "Kategoriyalarni boshqarish",
+        "description": "Tashkilot kategoriyalarini boshqarish"
+      },
+      "contacts.manage": {
+        "title": "Kontaktlarni boshqarish",
+        "description": "Kontakt yaratish, tahrirlash va arxivlash"
+      },
+      "contacts.read": {
+        "title": "Kontaktlarni ko'rish",
+        "description": "Kontaktlar va ularning tarixini ko'rish"
+      },
+      "products.manage": {
+        "title": "Mahsulotlarni boshqarish",
+        "description": "Mahsulot yaratish, tahrirlash va arxivlash"
+      },
+      "products.read": {
+        "title": "Mahsulotlarni ko'rish",
+        "description": "Mahsulot katalogini ko'rish"
+      },
+      "transactions.create": {
+        "title": "Tranzaksiya yaratish",
+        "description": "Sotuv, xarajat, o'tkazma va boshqa tranzaksiyalarni yozish"
+      },
+      "transactions.update": {
+        "title": "Tranzaksiyani tahrirlash",
+        "description": "Mavjud tranzaksiya maydonlarini o'zgartirish va AI takliflarini tasdiqlash"
+      },
+      "transactions.void": {
+        "title": "Tranzaksiyani bekor qilish",
+        "description": "Mavjud tranzaksiyani bekor qilish"
+      },
+      "transactions.read": {
+        "title": "Tranzaksiyalarni ko'rish",
+        "description": "Tranzaksiyalar va ularning tafsilotlarini ko'rish"
+      },
+      "cash_flows.create": {
+        "title": "To'lov qo'shish",
+        "description": "Tranzaksiyaga tushum yoki chiqim yozish"
+      },
+      "cash_flows.read": {
+        "title": "Pul oqimini ko'rish",
+        "description": "Pul oqimi tarixini ko'rish"
+      },
+      "reports.read": {
+        "title": "Hisobotlarni ko'rish",
+        "description": "Moliyaviy hisobotlar: pul oqimi, foyda/zarar, moliyaviy holat"
+      },
+      "scheduled.manage": {
+        "title": "Rejalashtirilgan amallarni boshqarish",
+        "description": "Takrorlanuvchi tranzaksiya va eslatmalarni boshqarish"
+      },
+      "scheduled.read": {
+        "title": "Rejalashtirilgan amallarni ko'rish",
+        "description": "Takrorlanuvchi tranzaksiya va eslatmalarni ko'rish"
+      },
+      "commissions.read": {
+        "title": "Komissiyalarni ko'rish",
+        "description": "Topilgan komissiyalarni ko'rish"
+      },
+      "commissions.manage": {
+        "title": "Komissiyalarni boshqarish",
+        "description": "Sotuvlardagi komissiyalarni yozish va bekor qilish"
+      },
+      "ai.manage": {
+        "title": "AI imkoniyatlari",
+        "description": "AI orqali ma'lumot kiritish va AI takliflarini ko'rib chiqish"
+      },
+      "plans.manage": {
+        "title": "Tariflarni boshqarish",
+        "description": "Platforma tariflarini boshqarish (faqat platforma admini)"
+      }
+    }
   }
 }

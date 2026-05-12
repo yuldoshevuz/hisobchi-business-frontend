@@ -45,7 +45,7 @@ export function DevImpersonatePage(): React.ReactElement {
       await queryClient.invalidateQueries();
       navigate('/');
     } catch (err) {
-      setError(getApiErrorMessage(err, "Login bo'lmadi"));
+      setError(getApiErrorMessage(err));
     } finally {
       setSubmitting(false);
     }

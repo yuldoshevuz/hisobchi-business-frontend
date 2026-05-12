@@ -195,11 +195,12 @@ function ProfileForm({
   user,
   onClose,
 }: ProfileFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const update = useUpdateMe();
   const [fullName, setFullName] = useState<string>(user.fullName);
   const [email, setEmail] = useState<string>(user.email ?? '');
   const [locale, setLocale] = useState<SupportedLocale>(
-    user.locale === 'ru' ? 'ru' : 'uz',
+    user.locale === 'ru' || user.locale === 'en' ? user.locale : 'uz',
   );
 
   const submit = useCallback((): void => {
@@ -228,7 +229,7 @@ function ProfileForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="profile-name">To'liq ism</Label>
+        <Label htmlFor="profile-name">{t('profile.field.name')}</Label>
         <Input
           id="profile-name"
           value={fullName}
@@ -251,7 +252,7 @@ function ProfileForm({
       </div>
       <SelectField<SupportedLocale>
         id="profile-locale"
-        label="Til"
+        label={t('profile.field.language')}
         value={locale}
         // SelectField returns null on empty pick — locale is non-nullable so
         // we ignore the null case (the modal cannot select an empty option).
@@ -261,6 +262,7 @@ function ProfileForm({
         options={[
           { value: 'uz', label: "O'zbekcha" },
           { value: 'ru', label: 'Русский' },
+          { value: 'en', label: 'English' },
         ]}
       />
       {update.isError ? (
@@ -275,7 +277,7 @@ function ProfileForm({
         disabled={update.isPending || fullName.trim().length < 2}
       >
         {update.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );

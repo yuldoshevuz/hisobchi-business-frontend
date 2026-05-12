@@ -6,6 +6,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 import { env } from '@/config/env';
+import i18n from '@/i18n';
 import { tokenStore } from '@/store/token-store';
 import type { TokensResponse } from '@/types/auth.types';
 
@@ -21,15 +22,16 @@ export const api: AxiosInstance = axios.create({
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const cfg = config as RetriableConfig;
+  const headers =
+    config.headers instanceof AxiosHeaders
+      ? config.headers
+      : new AxiosHeaders(config.headers);
+  headers.set('Accept-Language', i18n.language);
+  config.headers = headers;
   if (cfg._skipAuth) return config;
   const token = tokenStore.getAccessToken();
   if (token) {
-    const headers =
-      config.headers instanceof AxiosHeaders
-        ? config.headers
-        : new AxiosHeaders(config.headers);
     headers.set('Authorization', `Bearer ${token}`);
-    config.headers = headers;
   }
   return config;
 });

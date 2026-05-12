@@ -1,4 +1,4 @@
-export type SupportedLocale = 'uz' | 'ru';
+export type SupportedLocale = 'uz' | 'ru' | 'en';
 
 export interface User {
   id: number;

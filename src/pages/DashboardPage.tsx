@@ -370,7 +370,7 @@ function AccountsOverview(): React.ReactElement {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="text-[13px] text-muted-foreground">
-              Umumiy balans
+              {t('dashboard.total_balance')}
             </div>
             {accounts.isPending ? (
               <div className="mt-2">
@@ -594,6 +594,7 @@ function AccountChip({
   hidden,
   onTap,
 }: AccountChipProps): React.ReactElement {
+  const { t } = useTranslation();
   const Icon = ACCOUNT_TYPE_ICON[account.type];
   return (
     <button
@@ -619,7 +620,7 @@ function AccountChip({
       {account.isPrimary ? (
         <div className="absolute right-2 top-2 flex items-center gap-0.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-primary">
           <Star className="h-2.5 w-2.5 fill-current" />
-          <span>Asosiy</span>
+          <span>{t('dashboard.primary_badge')}</span>
         </div>
       ) : null}
     </button>
@@ -633,11 +634,12 @@ interface ViewerRoleBadgesProps {
 function ViewerRoleBadges({
   roleNames,
 }: ViewerRoleBadgesProps): React.ReactElement | null {
+  const { t } = useTranslation();
   if (roleNames.length === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-1.5 px-4">
       <span className="text-[12px] uppercase tracking-wide text-muted-foreground">
-        Sizning rollaringiz
+        {t('dashboard.your_roles')}
       </span>
       {roleNames.map((name) => (
         <Badge key={name} variant="secondary" className="text-[11px]">

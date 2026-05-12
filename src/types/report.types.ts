@@ -190,7 +190,7 @@ export interface ContactCurrencyTotals {
 export interface ContactsReportRow {
   contactId: number;
   name: string;
-  type: ContactType;
+  type: ContactType | null;
   phone: string | null;
   lastActivityAt: string | null;
   byCurrency: ContactCurrencyTotals[];

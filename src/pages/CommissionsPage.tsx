@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import {
   Coins,
   ListChecks,
@@ -46,10 +47,9 @@ import type { Member } from '@/types/member.types';
 type StatusFilter = CommissionStatus | 'all';
 type Tab = 'list' | 'reports';
 
-const MONTHS_UZ_SHORT = [
-  'Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn',
-  'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek',
-] as const;
+function getMonthsShort(): readonly string[] {
+  return i18n.t('date_picker.months', { returnObjects: true }) as string[];
+}
 
 const TAB_DEFS: ReadonlyArray<{ id: Tab; icon: typeof ListChecks }> = [
   { id: 'list', icon: ListChecks },
@@ -962,7 +962,7 @@ function groupByDate(rows: Commission[], labels: GroupLabels): DateGroup[] {
     else if (dateKey === yesterdayKey) label = labels.yesterday;
     else if (inSameMonth) label = labels.thisMonth;
     else
-      label = `${MONTHS_UZ_SHORT[created.getMonth()]} ${created.getFullYear()}`;
+      label = `${getMonthsShort()[created.getMonth()]} ${created.getFullYear()}`;
 
     if (!buckets.has(label)) {
       buckets.set(label, []);
@@ -994,5 +994,5 @@ function formatRowDate(iso: string): string {
       minute: '2-digit',
     });
   }
-  return `${d.getDate().toString().padStart(2, '0')} ${MONTHS_UZ_SHORT[d.getMonth()]}`;
+  return `${d.getDate().toString().padStart(2, '0')} ${getMonthsShort()[d.getMonth()]}`;
 }

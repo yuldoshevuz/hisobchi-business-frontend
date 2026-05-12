@@ -50,11 +50,11 @@ import type {
   Transaction,
   TransactionType,
 } from '@/types/transaction.types';
+import i18n from '@/i18n';
 
-const MONTHS_UZ_SHORT = [
-  'Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn',
-  'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek',
-] as const;
+function getMonthsShort(): readonly string[] {
+  return i18n.t('date_picker.months', { returnObjects: true }) as string[];
+}
 
 /**
  * Transaction types we surface in the contact summary. Order = display order
@@ -915,7 +915,7 @@ function formatDateHeader(iso: string, labels: DateHeaderLabels): string {
   const yesterdayKey = isoDate(yesterday);
   if (iso === todayKey) return labels.today;
   if (iso === yesterdayKey) return labels.yesterday;
-  return `${d.toString().padStart(2, '0')} ${MONTHS_UZ_SHORT[m - 1]} ${y}`;
+  return `${d.toString().padStart(2, '0')} ${getMonthsShort()[m - 1]} ${y}`;
 }
 
 function isoDate(d: Date): string {

@@ -1,23 +1,7 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const WEEKDAYS_UZ = ['Du', 'Se', 'Cho', 'Pa', 'Ju', 'Sha', 'Ya'] as const;
-
-const MONTHS_UZ = [
-  'Yanvar',
-  'Fevral',
-  'Mart',
-  'Aprel',
-  'May',
-  'Iyun',
-  'Iyul',
-  'Avgust',
-  'Sentyabr',
-  'Oktyabr',
-  'Noyabr',
-  'Dekabr',
-] as const;
 
 interface CalendarProps {
   /** ISO `YYYY-MM-DD` or `null` when nothing is picked. */
@@ -47,6 +31,11 @@ export function Calendar({
   min,
   max,
 }: CalendarProps): React.ReactElement {
+  const { t } = useTranslation();
+  const weekdays = t('calendar.weekdays', { returnObjects: true }) as string[];
+  const monthsLong = t('calendar.months_long', {
+    returnObjects: true,
+  }) as string[];
   const seed = value ? parseIso(value) : (initialMonth ?? new Date());
   const [view, setView] = useState<{ year: number; month: number }>({
     year: seed.getUTCFullYear(),
@@ -74,18 +63,18 @@ export function Calendar({
       <div className="flex items-center justify-between">
         <button
           type="button"
-          aria-label="Avvalgi oy"
+          aria-label={t('calendar.prev_month_aria')}
           onClick={() => shiftMonth(-1)}
           className="press flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
         <div className="text-[15px] font-medium tabular-nums">
-          {MONTHS_UZ[view.month]} {view.year}
+          {monthsLong[view.month]} {view.year}
         </div>
         <button
           type="button"
-          aria-label="Keyingi oy"
+          aria-label={t('calendar.next_month_aria')}
           onClick={() => shiftMonth(1)}
           className="press flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent"
         >
@@ -94,7 +83,7 @@ export function Calendar({
       </div>
 
       <div className="grid grid-cols-7 gap-1 text-center text-[11px] text-muted-foreground">
-        {WEEKDAYS_UZ.map((d) => (
+        {weekdays.map((d) => (
           <div key={d} className="py-1">
             {d}
           </div>

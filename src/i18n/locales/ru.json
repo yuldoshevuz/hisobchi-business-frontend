@@ -146,7 +146,10 @@
     "edit_account_title": "Изменить счёт",
     "archive_title": "Архив",
     "archived_count": "Архивных счетов: {count}",
-    "archive_empty": "Архивных счетов нет"
+    "archive_empty": "Архивных счетов нет",
+    "primary_badge": "Основной",
+    "total_balance": "Общий баланс",
+    "your_roles": "Ваша роль"
   },
   "katalog": {
     "products": "Товары",
@@ -306,7 +309,8 @@
     "field.name": "Название",
     "field.currency": "Валюта",
     "create": "Создать",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "limit_reached_caption": "Лимит тарифа исчерпан"
   },
   "access_denied": {
     "title": "Нет доступа",
@@ -411,6 +415,68 @@
     "delete.title": "Удалить организацию",
     "delete.subtitle": "Удалит все данные организации",
     "delete.confirm": "Подтверждаю: удалить всё"
+  },
+  "date_picker": {
+    "placeholder": "Выберите дату",
+    "modal_title": "Выбор даты",
+    "today": "Сегодня",
+    "clear": "Очистить",
+    "clear_aria": "Очистить дату",
+    "months": ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"]
+  },
+  "calendar": {
+    "weekdays": ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+    "months_long": ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+    "prev_month_aria": "Предыдущий месяц",
+    "next_month_aria": "Следующий месяц"
+  },
+  "layout": {
+    "back_aria": "Назад"
+  },
+  "period_presets": {
+    "last_30_days": "30 дней",
+    "start_label": "Начало",
+    "end_label": "Конец"
+  },
+  "limit_guard": {
+    "not_in_plan": "Нет в тарифе",
+    "unlimited": "Без ограничений"
+  },
+  "commissions_meta": {
+    "status": {
+      "active": "Активна",
+      "voided": "Отменена"
+    }
+  },
+  "scheduled_meta": {
+    "recurrence": {
+      "once": "Однократно",
+      "daily": "Ежедневно",
+      "weekly": "Еженедельно",
+      "monthly": "Ежемесячно",
+      "yearly": "Ежегодно"
+    },
+    "status": {
+      "active": "Активно",
+      "paused": "Приостановлено",
+      "ended": "Завершено",
+      "cancelled": "Отменено"
+    },
+    "reminder_status": {
+      "pending": "Ожидает",
+      "notified": "Отправлено",
+      "confirmed": "Подтверждено",
+      "skipped": "Пропущено"
+    }
+  },
+  "edit_scheduled": {
+    "description": "Описание",
+    "amount_label": "Сумма ({currency})",
+    "ask_on_confirm_title": "Спрашивать сумму каждый раз",
+    "ask_on_confirm_description": "Когда придёт напоминание, бот уточнит сумму",
+    "end_date": "Дата окончания",
+    "end_date_invalid": "Дата окончания не может быть раньше следующей",
+    "end_date_empty": "Пусто — без ограничения"
   },
   "scheduled_page": {
     "title": "Запланированное",
@@ -546,7 +612,7 @@
     "restore_subtitle": "Счёт снова станет активным",
     "delete_title": "Удалить счёт",
     "delete_subtitle": "Действие необратимо",
-    "delete_confirm": "Удалить счёт {{name}}?"
+    "delete_confirm": "Удалить счёт {name}?"
   },
   "adjust_stock": {
     "current_stock": "Текущий остаток",
@@ -571,7 +637,7 @@
     "name_placeholder": "Основная касса",
     "type": "Тип",
     "currency": "Валюта",
-    "base_currency_only": "Доступна только основная валюта ({{currency}}). Чтобы открыть счёт в другой валюте, ",
+    "base_currency_only": "Доступна только основная валюта ({currency}). Чтобы открыть счёт в другой валюте, ",
     "upgrade_plan": "повысьте тариф",
     "opening_balance": "Начальный остаток",
     "opening_balance_placeholder": "0",
@@ -615,7 +681,7 @@
     "correction": "Корректировка",
     "correction_add": "Будет добавлено к остатку",
     "correction_subtract": "Будет вычтено из остатка",
-    "adjustment_description": "Корректировка остатка ({{old}} → {{new}})"
+    "adjustment_description": "Корректировка остатка ({old} → {new})"
   },
   "edit_contact": {
     "name": "Название",
@@ -634,7 +700,7 @@
     "price_placeholder": "12 000",
     "cost": "Себестоимость",
     "cost_placeholder": "8 000",
-    "currency_locked": "Валюту изменить нельзя ({{currency}}). Для этого заархивируйте товар и создайте заново."
+    "currency_locked": "Валюту изменить нельзя ({currency}). Для этого заархивируйте товар и создайте заново."
   },
   "expense_form": {
     "kind_label": "Тип расхода",
@@ -716,7 +782,7 @@
   },
   "contact_picker": {
     "empty": "Нет контактов",
-    "empty_for_type": "Нет контактов в категории {{type}}",
+    "empty_for_type": "Нет контактов в категории {type}",
     "filter_by_type": "Фильтр по типу",
     "all": "Все"
   },
@@ -847,10 +913,10 @@
     "edit_form.new_product_option": "+ Новый товар…",
     "edit_form.new_product_placeholder": "Название нового товара",
     "edit_form.item_quantity": "Количество",
-    "edit_form.item_price": "Цена ({{currency}})",
+    "edit_form.item_price": "Цена ({currency})",
     "edit_form.line_total": "Итого:",
     "edit_form.grand_total": "Общая сумма",
-    "edit_form.amount_label": "Сумма ({{currency}})",
+    "edit_form.amount_label": "Сумма ({currency})",
     "edit_form.no_accounts_hint": "Счёт (касса / банк) не найден. Сначала создайте счёт в разделе «Счета».",
     "edit_form.no_cash_flow_hint": "Платежей нет — запись сохранится как долг. Если платёж был, нажмите «Добавить».",
     "edit_form.contact_customer": "Клиент (необязательно)",
@@ -935,7 +1001,7 @@
     "title": "Напоминания о долгах",
     "direction_in": "Взято в долг",
     "direction_out": "Дано в долг",
-    "tx_placeholder": "Транзакция #{{id}}",
+    "tx_placeholder": "Транзакция #{id}",
     "overdue": "Просрочено",
     "approaching": "Скоро срок",
     "partial_paid": "Частично оплачено",
@@ -967,7 +1033,7 @@
     "reminder_time_hint": "ℹ️ Напоминание приходит каждый день в 00:15 (Ташкент). Если выбрана сегодняшняя дата, первое напоминание придёт завтра."
   },
   "reminder_detail": {
-    "plan_placeholder": "План #{{id}}",
+    "plan_placeholder": "План #{id}",
     "fallback_description": "Напоминание",
     "date": "Дата",
     "amount": "Сумма",
@@ -992,7 +1058,7 @@
   },
   "reminder_highlights": {
     "title": "Напоминания",
-    "plan_placeholder": "План #{{id}}",
+    "plan_placeholder": "План #{id}",
     "amount_on_confirm": "Сумма указывается при подтверждении",
     "month": {
       "jan": "янв", "feb": "фев", "mar": "мар", "apr": "апр",
@@ -1013,7 +1079,7 @@
     "commission_hint": "Используется как значение по умолчанию при создании комиссии.",
     "roles": "Роли",
     "no_roles": "В организации ещё нет ролей",
-    "permissions_count": "{{count}} разрешений",
+    "permissions_count": "{count} разрешений",
     "system_badge": "система"
   },
   "role_form": {
@@ -1031,7 +1097,7 @@
     "no_members": "Активных сотрудников нет",
     "amount": "Сумма",
     "percentage": "Процент (необязательно)",
-    "currency_label": "Валюта: {{currency}}"
+    "currency_label": "Валюта: {currency}"
   },
   "report": {
     "cash_flow": {
@@ -1044,7 +1110,7 @@
       "plus_others": "+ другие",
       "others": "Другие",
       "daily_chart": "Дневной график",
-      "no_data_for_direction": "За выбранный период {{direction}} нет",
+      "no_data_for_direction": "За выбранный период {direction} нет",
       "no_data_for_period": "Нет данных за выбранный период"
     },
     "pnl": {
@@ -1065,7 +1131,7 @@
       "equity": "Капитал",
       "assets": "Активы",
       "cash_and_accounts": "Наличные и счета",
-      "accounts_count": "{{count}} счёт(ов)",
+      "accounts_count": "{count} счёт(ов)",
       "receivables": "Дебиторская задолженность (мне должны)",
       "inventory": "Товарные запасы",
       "inventory_subtitle": "Себестоимость товаров",
@@ -1073,7 +1139,7 @@
       "liabilities": "Пассивы",
       "payables": "Долги (я должен)",
       "total_liabilities": "Итого пассивы",
-      "contacts_count": "{{count}} контакт(ов)",
+      "contacts_count": "{count} контакт(ов)",
       "plus_other_contacts": "+ другие (более 50 контактов)",
       "no_data_for_date": "Нет данных на выбранную дату"
     },
@@ -1087,15 +1153,16 @@
       "badge": {
         "customer": "клиент",
         "supplier": "поставщик",
-        "partner": "партнёр"
+        "partner": "партнёр",
+        "unset": "контакт"
       },
       "search_placeholder": "Имя или телефон контакта",
       "clear": "Очистить",
-      "count": "{{count}} контакт(ов)",
+      "count": "{count} контакт(ов)",
       "no_match": "Нет контактов под фильтр",
       "no_activity": "Нет активности за выбранный период",
       "totals_empty": "За выбранный период записей не найдено",
-      "totals_label": "Итого {{currency}}",
+      "totals_label": "Итого {currency}",
       "totals": {
         "sales": "Продажи",
         "purchases": "Закупки",
@@ -1108,8 +1175,8 @@
         "receivable": "К получению",
         "payable": "К выплате"
       },
-      "records_count": "{{count}} записей",
-      "last_activity": "посл.: {{date}}",
+      "records_count": "{count} записей",
+      "last_activity": "посл.: {date}",
       "month": {
         "jan": "янв", "feb": "фев", "mar": "мар", "apr": "апр",
         "may": "май", "jun": "июн", "jul": "июл", "aug": "авг",
@@ -1140,5 +1207,230 @@
     "FEATURE_LIMIT_REACHED": "Достигнут лимит тарифа.",
     "SUBSCRIPTION_REQUIRED": "Нужна подписка. Обновите тариф в приложении.",
     "VALIDATION_ERROR": "Введённые данные некорректны."
+  },
+  "api_error": {
+    "fallback": "Произошла ошибка",
+    "MISSING_PERMISSION": "У вас нет прав на это действие",
+    "NOT_ORGANIZATION_MEMBER": "Вы не являетесь участником этой организации",
+    "FORBIDDEN": "Доступ запрещён",
+    "UNAUTHORIZED": "Сначала войдите в систему",
+    "ACCOUNT_NOT_FOUND": "Счёт не найден",
+    "ACCOUNT_NAME_EXISTS": "Счёт с таким именем уже существует",
+    "ACCOUNT_BALANCE_NOT_ZERO": "Остаток на счёте не равен нулю. Архивируйте вместо удаления",
+    "ACCOUNT_HAS_CASH_FLOWS": "На счёте есть активные движения. Удалить нельзя",
+    "ACCOUNT_CURRENCY_CHANGE_FORBIDDEN": "Валюту счёта нельзя изменить",
+    "ACCOUNT_OPENING_BALANCE_NOT_SUPPORTED": "На этом этапе начальный остаток может быть только 0",
+    "ACCOUNT_INVALID_STATUS": "Некорректный статус счёта",
+    "INVALID_CURRENCY_CODE": "Неверный код валюты",
+    "CATEGORY_NOT_FOUND": "Категория не найдена",
+    "CATEGORY_IN_USE": "Эта категория используется в транзакциях или товарах. Удалить нельзя",
+    "CATEGORY_TYPE_MISMATCH": "Тип категории не соответствует системной",
+    "CATEGORY_DUPLICATE_SYSTEM_LINK": "Эта системная категория уже добавлена",
+    "CATEGORY_INVALID_TYPE": "Некорректный тип категории",
+    "CATEGORY_ARCHIVED": "Категория в архиве. Сначала восстановите",
+    "CATEGORY_NOT_ARCHIVED": "Категория не в архиве",
+    "CATEGORY_RESTORE_CONFLICT": "Активная категория с таким именем уже есть. Сначала измените её",
+    "UNKNOWN_SYSTEM_CATEGORY": "Такой системной категории нет",
+    "SYSTEM_CATEGORY_IN_USE": "Системная категория используется",
+    "SYSTEM_CATEGORY_CODE_EXISTS": "Системная категория с таким кодом уже есть",
+    "SYSTEM_CATEGORY_NOT_FOUND": "Системная категория не найдена",
+    "TRANSLATION_LOCALE_UNSUPPORTED": "Этот язык не поддерживается",
+    "CONTACT_NOT_FOUND": "Контакт не найден",
+    "CONTACT_PHONE_EXISTS": "Контакт с этим номером уже существует",
+    "CONTACT_IN_USE": "Контакт используется в активных транзакциях. Архивируйте вместо удаления",
+    "CONTACT_INVALID_TYPE": "Некорректный тип контакта",
+    "CONTACT_INVALID_STATUS": "Некорректный статус контакта",
+    "CONTACT_CREDIT_LIMIT_NEGATIVE": "Кредитный лимит не может быть отрицательным",
+    "PRODUCT_NOT_FOUND": "Товар не найден",
+    "PRODUCT_IN_USE": "Товар используется в транзакциях. Архивируйте вместо удаления",
+    "PRODUCT_NAME_EXISTS": "Товар с таким названием уже существует",
+    "PRODUCT_INVALID_STATUS": "Некорректный статус товара",
+    "PRODUCT_CATEGORY_TYPE_MISMATCH": "Выбранная категория не для товаров",
+    "PRODUCT_DEFAULT_PRICE_NEGATIVE": "Цена не может быть отрицательной",
+    "PRODUCT_DEFAULT_COST_NEGATIVE": "Себестоимость не может быть отрицательной",
+    "STOCK_NOT_TRACKED": "По этому товару не ведётся складской учёт",
+    "STOCK_TRACKING_TOGGLE_FORBIDDEN": "Складской учёт нельзя включить/выключить. Создайте товар заново",
+    "NEGATIVE_STOCK": "Такой остаток недопустим (будет отрицательным)",
+    "STOCK_ADJUSTMENT_ZERO": "Сумма корректировки не может быть 0",
+    "CATEGORY_ONE_OF_REQUIRED": "Выбор категории обязателен",
+    "OVERPAYMENT_REJECTED": "Сумма больше остатка. Подтвердите кнопкой «Принять с переплатой»",
+    "OVERPAYMENT_REQUIRES_FLAG": "Нужно подтвердить переплату",
+    "CURRENCY_MISMATCH": "Валюта счёта не совпадает с валютой транзакции",
+    "TRANSFER_AMOUNT_MISMATCH": "Суммы перевода не совпадают",
+    "TRANSFER_INVALID_LEGS": "Для перевода нужны ровно 1 списание и 1 поступление",
+    "TRANSACTION_VOIDED": "Отменённую транзакцию нельзя изменить",
+    "CASH_FLOW_DIRECTION_MISMATCH": "Направление платежа не соответствует типу транзакции",
+    "DUPLICATE_DETECTED": "Эта транзакция, похоже, уже введена. Открыта существующая",
+    "OPENING_BALANCE_HAS_CASH_FLOWS": "К начальному остатку нельзя добавлять платежи",
+    "DEBT_CREATE_REQUIRES_CASH_FLOW": "При создании долговой транзакции нужен 1 платёж",
+    "IMMUTABLE_FIELD": "Это поле нельзя изменить. Отмените запись и создайте заново",
+    "TRANSACTION_NOT_FOUND": "Транзакция не найдена",
+    "CASH_FLOW_NOT_FOUND": "Платёж не найден",
+    "CASH_FLOW_VOID_FORBIDDEN": "Этот платёж нельзя отменить отдельно",
+    "FEATURE_DISABLED": "Эта возможность не включена в вашем тарифе. Обратитесь к администратору для обновления",
+    "FEATURE_LIMIT_REACHED": "Достигнут лимит тарифа. Обновите тариф для добавления новой записи",
+    "SUBSCRIPTION_REQUIRED": "Для этого действия нужна активная подписка",
+    "SUBSCRIPTION_NOT_FOUND": "Подписка не найдена",
+    "PLAN_NOT_FOUND": "Тариф не найден",
+    "PLAN_INACTIVE": "Тариф неактивен",
+    "DEFAULT_PLAN_NOT_CONFIGURED": "В системе не настроен тариф по умолчанию. Обратитесь к администратору"
+  },
+  "feature_meta": {
+    "EMPLOYEES_LIMIT": {
+      "name": "Количество сотрудников",
+      "description": "Общее количество сотрудников в организации (включая владельца). Лимит проверяется при приглашении нового сотрудника."
+    },
+    "ACCOUNT_LIMIT": {
+      "name": "Количество счетов (касс)",
+      "description": "Количество касс, банковских счетов и электронных кошельков в одной организации."
+    },
+    "ORGANIZATION_LIMIT": {
+      "name": "Количество организаций",
+      "description": "Количество организаций, которое может создать один пользователь (где он владелец)."
+    },
+    "ADVANCED_REPORTS": {
+      "name": "Расширенные отчёты",
+      "description": "Отчёты о прибыли и убытках (P&L) и финансовом состоянии (баланс). Отчёт по кассе доступен во всех тарифах."
+    },
+    "MULTI_CURRENCY_SUPPORT": {
+      "name": "Мультивалютный учёт",
+      "description": "Ведение счетов и транзакций в валютах, отличных от основной валюты организации."
+    },
+    "DEBT_TRACKING": {
+      "name": "Отчёты по долгам",
+      "description": "Отчёты по задолженности клиентов и поставщиков, балансы по контактам. Создание долговых транзакций доступно во всех тарифах."
+    },
+    "ADVANCED_TRANSACTIONS": {
+      "name": "Сложные транзакции",
+      "description": "Ручная корректировка баланса (инвентаризация, недостача) и перевод между валютами."
+    },
+    "SCHEDULED_TRANSACTIONS": {
+      "name": "Запланированные платежи",
+      "description": "Повторяющиеся ежемесячные/еженедельные транзакции и автоматические напоминания в Telegram."
+    },
+    "INVENTORY_MANAGEMENT": {
+      "name": "Управление складом",
+      "description": "Учёт остатков товаров, складские движения и инвентаризация."
+    },
+    "ADVANCED_RBAC": {
+      "name": "Пользовательские роли",
+      "description": "Создание своих ролей в организации и привязка к ним набора прав."
+    },
+    "SALES_COMMISSION": {
+      "name": "Комиссии с продаж",
+      "description": "Расчёт, учёт и отмена комиссий сотрудникам по продажам."
+    }
+  },
+  "permission_meta": {
+    "module": {
+      "organizations": "Организация",
+      "members": "Сотрудники",
+      "roles": "Роли",
+      "accounts": "Счета",
+      "categories": "Категории",
+      "contacts": "Контакты",
+      "products": "Товары",
+      "transactions": "Транзакции",
+      "cash_flows": "Движение денег",
+      "reports": "Отчёты",
+      "scheduled": "Запланированные действия",
+      "commissions": "Комиссии",
+      "ai": "AI",
+      "plans": "Тарифы"
+    },
+    "permission": {
+      "organizations.manage": {
+        "title": "Управление организацией",
+        "description": "Изменение названия организации, тарифа, языка и основной валюты"
+      },
+      "members.manage": {
+        "title": "Управление сотрудниками",
+        "description": "Приглашение сотрудников, приостановка, архивирование и назначение ролей"
+      },
+      "roles.manage": {
+        "title": "Управление ролями",
+        "description": "Создание, редактирование и удаление пользовательских ролей"
+      },
+      "accounts.manage": {
+        "title": "Управление счетами",
+        "description": "Создание, редактирование и архивирование счетов"
+      },
+      "accounts.read": {
+        "title": "Просмотр счетов",
+        "description": "Просмотр счетов и остатков"
+      },
+      "categories.manage": {
+        "title": "Управление категориями",
+        "description": "Управление категориями организации"
+      },
+      "contacts.manage": {
+        "title": "Управление контактами",
+        "description": "Создание, редактирование и архивирование контактов"
+      },
+      "contacts.read": {
+        "title": "Просмотр контактов",
+        "description": "Просмотр контактов и их истории"
+      },
+      "products.manage": {
+        "title": "Управление товарами",
+        "description": "Создание, редактирование и архивирование товаров"
+      },
+      "products.read": {
+        "title": "Просмотр товаров",
+        "description": "Просмотр каталога товаров"
+      },
+      "transactions.create": {
+        "title": "Создание транзакций",
+        "description": "Запись продаж, расходов, переводов и других транзакций"
+      },
+      "transactions.update": {
+        "title": "Редактирование транзакций",
+        "description": "Изменение полей существующих транзакций и подтверждение AI-предложений"
+      },
+      "transactions.void": {
+        "title": "Отмена транзакций",
+        "description": "Отмена существующих транзакций"
+      },
+      "transactions.read": {
+        "title": "Просмотр транзакций",
+        "description": "Просмотр транзакций и их деталей"
+      },
+      "cash_flows.create": {
+        "title": "Добавление платежей",
+        "description": "Запись приходов и расходов по транзакции"
+      },
+      "cash_flows.read": {
+        "title": "Просмотр движения денег",
+        "description": "Просмотр истории движения денег"
+      },
+      "reports.read": {
+        "title": "Просмотр отчётов",
+        "description": "Финансовые отчёты: движение денег, прибыль/убытки, финансовое состояние"
+      },
+      "scheduled.manage": {
+        "title": "Управление запланированными действиями",
+        "description": "Управление повторяющимися транзакциями и напоминаниями"
+      },
+      "scheduled.read": {
+        "title": "Просмотр запланированных действий",
+        "description": "Просмотр повторяющихся транзакций и напоминаний"
+      },
+      "commissions.read": {
+        "title": "Просмотр комиссий",
+        "description": "Просмотр начисленных комиссий"
+      },
+      "commissions.manage": {
+        "title": "Управление комиссиями",
+        "description": "Запись и отмена комиссий с продаж"
+      },
+      "ai.manage": {
+        "title": "Возможности AI",
+        "description": "Ввод данных через AI и проверка AI-предложений"
+      },
+      "plans.manage": {
+        "title": "Управление тарифами",
+        "description": "Управление тарифами платформы (только администратор платформы)"
+      }
+    }
   }
 }

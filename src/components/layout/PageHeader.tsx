@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft } from 'lucide-react';
 import { useTelegramBackButton } from '@/hooks/use-tg-back-button';
 import { tgHapticImpact } from '@/lib/telegram';
@@ -27,6 +28,7 @@ export function PageHeader({
   onBack,
 }: PageHeaderProps): React.ReactElement {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleBack = useCallback(() => {
     tgHapticImpact('light');
@@ -55,7 +57,7 @@ export function PageHeader({
           <button
             type="button"
             onClick={handleBack}
-            aria-label="Orqaga"
+            aria-label={t('layout.back_aria')}
             className="press -ml-2 mb-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-primary active:bg-accent"
           >
             <ChevronLeft className="h-6 w-6" strokeWidth={2.5} />

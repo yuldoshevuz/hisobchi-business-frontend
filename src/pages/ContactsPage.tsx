@@ -389,7 +389,7 @@ function TypeFilterButton({
                   : CONTACT_TYPE_ICON[key];
             const label =
               key === 'all'
-                ? 'Hammasi'
+                ? t('common.all')
                 : key === CONTACT_TYPE_NONE
                   ? getContactTypeNoneLabel()
                   : CONTACT_TYPE_LABEL[key];

@@ -1,10 +1,21 @@
 import { CheckCircle2, XCircle, type LucideIcon } from 'lucide-react';
+import i18n from '@/i18n';
 import type { CommissionStatus } from '@/types/commission.types';
 
-export const COMMISSION_STATUS_LABEL: Record<CommissionStatus, string> = {
-  active: 'Faol',
-  voided: 'Bekor qilingan',
+const COMMISSION_STATUS_LABEL_KEY: Record<CommissionStatus, string> = {
+  active: 'commissions_meta.status.active',
+  voided: 'commissions_meta.status.voided',
 };
+
+/** Locale-aware label record — see contact-meta.ts for the proxy
+ *  pattern rationale. */
+export const COMMISSION_STATUS_LABEL: Record<CommissionStatus, string> =
+  new Proxy(COMMISSION_STATUS_LABEL_KEY, {
+    get(target, prop: string) {
+      const key = target[prop as CommissionStatus];
+      return key ? i18n.t(key) : (prop as string);
+    },
+  }) as Record<CommissionStatus, string>;
 
 export const COMMISSION_STATUS_VARIANT: Record<
   CommissionStatus,

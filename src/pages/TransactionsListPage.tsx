@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import i18n from '@/i18n';
 import { Filter, Receipt, Search } from 'lucide-react';
 import { useTransactionsInfinite } from '@/api/hooks/use-transactions';
 import { useContacts } from '@/api/hooks/use-contacts';
@@ -34,9 +35,9 @@ function formatDateHeader(iso: string): string {
   const d = new Date(iso);
   d.setHours(0, 0, 0, 0);
 
-  if (d.getTime() === today.getTime()) return 'Bugun';
-  if (d.getTime() === yesterday.getTime()) return 'Kecha';
-  return new Intl.DateTimeFormat('uz-UZ', {
+  if (d.getTime() === today.getTime()) return i18n.t('common.today');
+  if (d.getTime() === yesterday.getTime()) return i18n.t('common.yesterday');
+  return new Intl.DateTimeFormat(i18n.language, {
     day: 'numeric',
     month: 'long',
     year: d.getFullYear() === today.getFullYear() ? undefined : 'numeric',

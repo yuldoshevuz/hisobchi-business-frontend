@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -25,11 +26,12 @@ export function PeriodPresets({
   dateTo,
   onChange,
 }: PeriodPresetsProps): React.ReactElement {
+  const { t } = useTranslation();
   const presets: ReadonlyArray<{ key: PresetKey; label: string }> = [
-    { key: 'this-month', label: 'Bu oy' },
-    { key: 'last-month', label: "O'tgan oy" },
-    { key: 'last-30', label: '30 kun' },
-    { key: 'this-year', label: 'Bu yil' },
+    { key: 'this-month', label: t('common.this_month') },
+    { key: 'last-month', label: t('common.last_month') },
+    { key: 'last-30', label: t('period_presets.last_30_days') },
+    { key: 'this-year', label: t('common.this_year') },
   ];
 
   function applyPreset(key: PresetKey): void {
@@ -65,7 +67,7 @@ export function PeriodPresets({
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1.5">
           <Label htmlFor="period-from" className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            Boshlanish
+            {t('period_presets.start_label')}
           </Label>
           <DatePicker
             id="period-from"
@@ -76,7 +78,7 @@ export function PeriodPresets({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="period-to" className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            Tugash
+            {t('period_presets.end_label')}
           </Label>
           <DatePicker
             id="period-to"

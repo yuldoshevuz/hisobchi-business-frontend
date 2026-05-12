@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -23,20 +24,10 @@ interface DatePickerProps {
   className?: string;
 }
 
-const MONTHS_UZ_SHORT = [
-  'Yan',
-  'Fev',
-  'Mar',
-  'Apr',
-  'May',
-  'Iyn',
-  'Iyl',
-  'Avg',
-  'Sen',
-  'Okt',
-  'Noy',
-  'Dek',
-] as const;
+// Month labels resolved per-render from the active locale dictionary so
+// the trigger text "12 Sen 2025" / "12 Сен 2025" / "12 Sep 2025" matches
+// the current language. The previous static MONTHS_UZ_SHORT constant
+// stayed in Uzbek regardless of locale.
 
 /**
  * Drop-in replacement for `<Input type="date">`. The trigger is styled like
@@ -56,15 +47,19 @@ export function DatePicker({
   id,
   value,
   onChange,
-  placeholder = 'Sana tanlang',
+  placeholder,
   disabled,
   clearable = false,
-  modalTitle = 'Sana tanlash',
+  modalTitle,
   min,
   max,
   className,
 }: DatePickerProps): React.ReactElement {
+  const { t } = useTranslation();
   const [open, setOpen] = useState<boolean>(false);
+  const months = t('date_picker.months', { returnObjects: true }) as string[];
+  const resolvedPlaceholder = placeholder ?? t('date_picker.placeholder');
+  const resolvedModalTitle = modalTitle ?? t('date_picker.modal_title');
 
   function setToday(): void {
     const today = isoToday();
@@ -109,13 +104,13 @@ export function DatePicker({
               value ? 'text-foreground' : 'text-muted-foreground',
             )}
           >
-            {value ? formatDisplay(value) : placeholder}
+            {value ? formatDisplay(value, months) : resolvedPlaceholder}
           </span>
         </div>
         {clearable && value ? (
           <span
             role="button"
-            aria-label="Sanani tozalash"
+            aria-label={t('date_picker.clear_aria')}
             onClick={handleClear}
             className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent"
           >
@@ -124,7 +119,7 @@ export function DatePicker({
         ) : null}
       </button>
 
-      <Modal open={open} onOpenChange={setOpen} title={modalTitle}>
+      <Modal open={open} onOpenChange={setOpen} title={resolvedModalTitle}>
         <div className="space-y-4">
           <Calendar
             value={value || null}
@@ -140,7 +135,7 @@ export function DatePicker({
               className="flex-1"
               onClick={setToday}
             >
-              Bugun
+              {t('date_picker.today')}
             </Button>
             {clearable && value ? (
               <Button
@@ -154,7 +149,7 @@ export function DatePicker({
                   setOpen(false);
                 }}
               >
-                Tozalash
+                {t('date_picker.clear')}
               </Button>
             ) : null}
           </div>
@@ -164,10 +159,10 @@ export function DatePicker({
   );
 }
 
-function formatDisplay(iso: string): string {
+function formatDisplay(iso: string, months: string[]): string {
   const [y, m, d] = iso.split('-').map((p) => Number(p));
   if (!y || !m || !d) return iso;
-  return `${d.toString().padStart(2, '0')} ${MONTHS_UZ_SHORT[m - 1]} ${y}`;
+  return `${d.toString().padStart(2, '0')} ${months[m - 1]} ${y}`;
 }
 
 function isoToday(): string {

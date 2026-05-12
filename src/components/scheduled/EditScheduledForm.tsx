@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUpdateScheduled } from '@/api/hooks/use-scheduled';
 import {
   formatAmount,
@@ -33,6 +34,7 @@ export function EditScheduledForm({
   scheduled,
   onClose,
 }: EditScheduledFormProps): React.ReactElement {
+  const { t } = useTranslation();
   const update = useUpdateScheduled();
 
   const [askOnConfirm, setAskOnConfirm] = useState<boolean>(
@@ -104,7 +106,9 @@ export function EditScheduledForm({
       className="space-y-4"
     >
       <div className="space-y-1.5">
-        <Label htmlFor="edit-sched-description">Tavsif</Label>
+        <Label htmlFor="edit-sched-description">
+          {t('edit_scheduled.description')}
+        </Label>
         <Input
           id="edit-sched-description"
           value={description}
@@ -114,7 +118,9 @@ export function EditScheduledForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="edit-sched-amount">Summa ({scheduled.currency})</Label>
+        <Label htmlFor="edit-sched-amount">
+          {t('edit_scheduled.amount_label', { currency: scheduled.currency })}
+        </Label>
         <Input
           id="edit-sched-amount"
           inputMode="decimal"
@@ -137,16 +143,16 @@ export function EditScheduledForm({
         />
         <span className="flex-1">
           <span className="block text-[14px] font-medium leading-tight">
-            Summa har safar so'ralsin
+            {t('edit_scheduled.ask_on_confirm_title')}
           </span>
           <span className="mt-0.5 block text-[12px] text-muted-foreground">
-            Eslatma kelganda bot summani aniqlaydi
+            {t('edit_scheduled.ask_on_confirm_description')}
           </span>
         </span>
       </label>
 
       <div className="space-y-1.5">
-        <Label htmlFor="edit-sched-end">Tugash sanasi</Label>
+        <Label htmlFor="edit-sched-end">{t('edit_scheduled.end_date')}</Label>
         <DatePicker
           id="edit-sched-end"
           value={endDate}
@@ -156,11 +162,11 @@ export function EditScheduledForm({
         />
         {!endDateValid ? (
           <p className="text-[12px] text-destructive">
-            Tugash sanasi keyingi sanadan oldin bo'la olmaydi
+            {t('edit_scheduled.end_date_invalid')}
           </p>
         ) : (
           <p className="text-[12px] text-muted-foreground">
-            Bo'sh — cheksiz davom etadi
+            {t('edit_scheduled.end_date_empty')}
           </p>
         )}
       </div>
@@ -178,7 +184,7 @@ export function EditScheduledForm({
         disabled={!isValid || update.isPending}
       >
         {update.isPending ? <Spinner /> : null}
-        Saqlash
+        {t('common.save')}
       </Button>
     </form>
   );
