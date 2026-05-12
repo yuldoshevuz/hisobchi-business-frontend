@@ -25,6 +25,9 @@ export const TRANSACTION_TYPE_VALUES: readonly TransactionType[] = [
   'suspense',
 ] as const;
 
+export type AttachmentType = 'photo' | 'audio';
+export const ATTACHMENT_TYPE_VALUES: readonly AttachmentType[] = ['photo', 'audio'] as const;
+
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid' | 'overpaid';
 export const PAYMENT_STATUS_VALUES: readonly PaymentStatus[] = [
   'unpaid',
@@ -130,6 +133,7 @@ export interface Transaction {
   status: TransactionStatus;
   dueDate: string | null;
   attachmentUrl: string | null;
+  attachmentType: AttachmentType | null;
   metadata: Record<string, unknown> | null;
   cashFlows: CashFlow[];
   saleItems?: SaleItem[];

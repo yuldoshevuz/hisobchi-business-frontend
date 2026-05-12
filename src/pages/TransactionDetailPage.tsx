@@ -70,6 +70,7 @@ import { ContactPickerField } from '@/components/transactions/forms/ContactPicke
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
 import type {
+  AttachmentType,
   CashFlow,
   SaleItem,
   Transaction,
@@ -324,6 +325,23 @@ export function TransactionDetailPage(): React.ReactElement {
         </div>
       </section>
 
+      {/* Voice memo — surfaced above the meta block so the user hears the
+          original audio before scanning the parsed fields. Photo receipts
+          stay below the meta because the image is heavier and shouldn't
+          push the data off-screen on first paint. Legacy rows
+          (attachmentType === null) fall back to URL-extension sniffing so
+          they land in the right slot without a backfill. */}
+      {tx.attachmentUrl && tx.attachmentType === 'audio' ? (
+        <section className="px-4 pt-3">
+          <div className="overflow-hidden rounded-2xl bg-card p-3">
+            <TransactionMediaPreview
+              url={tx.attachmentUrl}
+              attachmentType={tx.attachmentType ?? null}
+            />
+          </div>
+        </section>
+      ) : null}
+
       {/* Meta details */}
       <section className="px-4 pt-3">
         <div className="space-y-2 rounded-2xl bg-card p-4 text-[14px]">
@@ -364,16 +382,19 @@ export function TransactionDetailPage(): React.ReactElement {
         </div>
       </section>
 
-      {/* AI media — the bot stores the original voice memo / receipt
-          photo as `attachmentUrl`. Render the source so the user can
-          play / view what the AI saw, not just the transcript. */}
-      {tx.attachmentUrl ? (
+      {/* Receipt photo — kept under the meta block so the data lands
+          above the fold; the image renders next to the cash flows. Voice
+          memos render above the meta block instead — see the section
+          before the meta details. Legacy rows where `attachmentType` is
+          NULL fall back here so the inline preview still works without a
+          backfill (TransactionMediaPreview sniffs the file extension). */}
+      {tx.attachmentUrl && tx.attachmentType === 'photo' ? (
         <section className="px-4 pt-3">
-          <h2 className="px-1 pb-1.5 text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
-            {t('tx_detail.attachment_section')}
-          </h2>
           <div className="overflow-hidden rounded-2xl bg-card p-3">
-            <TransactionMediaPreview url={tx.attachmentUrl} />
+            <TransactionMediaPreview
+              url={tx.attachmentUrl}
+              attachmentType={tx.attachmentType ?? null}
+            />
           </div>
         </section>
       ) : null}
@@ -1828,16 +1849,25 @@ function ActiveEditForm({
  */
 function TransactionMediaPreview({
   url,
+  attachmentType,
 }: {
   url: string;
+  attachmentType: AttachmentType | null;
 }): React.ReactElement {
   const { t } = useTranslation();
   const absolute = url.startsWith('http')
     ? url
     : `${env.backendOrigin}${url}`;
+  // Prefer the server-provided `attachmentType`. Legacy rows persisted
+  // before the column existed fall back to file-extension sniffing so
+  // the inline player keeps working without a backfill migration.
   const lower = url.toLowerCase();
-  const isAudio = /\.(ogg|oga|mp3|m4a|wav|aac|webm)(\?|$)/.test(lower);
-  const isImage = /\.(jpe?g|png|webp|heic|heif|gif)(\?|$)/.test(lower);
+  const isAudio =
+    attachmentType === 'audio' ||
+    (attachmentType === null && /\.(ogg|oga|mp3|m4a|wav|aac|webm)(\?|$)/.test(lower));
+  const isImage =
+    attachmentType === 'photo' ||
+    (attachmentType === null && /\.(jpe?g|png|webp|heic|heif|gif)(\?|$)/.test(lower));
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
 
   if (isAudio) {
@@ -1993,7 +2023,7 @@ function VoiceWavePlayer({
     duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-muted/40 p-3">
+    <div className="flex items-center gap-3">
       <button
         type="button"
         onClick={toggle}
@@ -2006,27 +2036,22 @@ function VoiceWavePlayer({
           <Play className="ml-0.5 h-5 w-5" fill="currentColor" />
         )}
       </button>
-      <div className="min-w-0 flex-1 space-y-1">
-        <p className="truncate text-[13px] font-medium leading-tight">
-          {label}
-        </p>
+      <div
+        ref={progressRef}
+        role="slider"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={duration || 0}
+        aria-valuenow={currentTime}
+        onClick={seekFromEvent}
+        className="relative h-3 min-w-0 flex-1 cursor-pointer overflow-hidden rounded-full bg-muted-foreground/20"
+      >
         <div
-          ref={progressRef}
-          role="slider"
-          aria-label={label}
-          aria-valuemin={0}
-          aria-valuemax={duration || 0}
-          aria-valuenow={currentTime}
-          onClick={seekFromEvent}
-          className="relative h-1.5 w-full cursor-pointer overflow-hidden rounded-full bg-muted-foreground/20"
-        >
-          <div
-            className="h-full rounded-full bg-primary transition-[width] duration-100"
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
+          className="h-full rounded-full bg-primary transition-[width] duration-100"
+          style={{ width: `${progressPct}%` }}
+        />
       </div>
-      <span className="shrink-0 self-end pb-0.5 text-[12px] tabular-nums text-muted-foreground">
+      <span className="shrink-0 text-[12px] tabular-nums text-muted-foreground">
         {formatAudioTime(currentTime)} / {formatAudioTime(duration)}
       </span>
       <audio
