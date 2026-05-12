@@ -936,7 +936,15 @@
     "audit.field.dueDate": "Срок",
     "audit.field.categoryId": "Категория",
     "audit.field.contactId": "Контакт",
-    "audit.field.amount": "Сумма"
+    "audit.field.amount": "Сумма",
+    "audit.change.set": "{field} установлено: {to}",
+    "audit.change.cleared": "{field} удалено (было: {from})",
+    "audit.change.changed": "{field} изменено с «{from}» на «{to}»",
+    "audit.action.voided": "Транзакция отменена",
+    "audit.action.voided_with_reason": "Транзакция отменена: {reason}",
+    "audit.action.cancelled": "Транзакция удалена",
+    "audit.action.payment_added": "Добавлен платёж {amount}",
+    "audit.action.payment_voided": "Отменён платёж {amount}"
   },
   "use_case": {
     "sale.label": "Продажа",

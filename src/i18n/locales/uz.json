@@ -936,7 +936,15 @@
     "audit.field.dueDate": "Muddat",
     "audit.field.categoryId": "Kategoriya",
     "audit.field.contactId": "Kontakt",
-    "audit.field.amount": "Summa"
+    "audit.field.amount": "Summa",
+    "audit.change.set": "{field} kiritildi: {to}",
+    "audit.change.cleared": "{field} olib tashlandi (avval: {from})",
+    "audit.change.changed": "{field} \"{from}\" dan \"{to}\" ga o'zgartirildi",
+    "audit.action.voided": "Tranzaksiya bekor qilindi",
+    "audit.action.voided_with_reason": "Tranzaksiya bekor qilindi: {reason}",
+    "audit.action.cancelled": "Tranzaksiya o'chirildi",
+    "audit.action.payment_added": "{amount} to'lov qo'shildi",
+    "audit.action.payment_voided": "{amount} to'lov bekor qilindi"
   },
   "use_case": {
     "sale.label": "Sotuv",

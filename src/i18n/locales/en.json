@@ -936,7 +936,15 @@
     "audit.field.dueDate": "Due date",
     "audit.field.categoryId": "Category",
     "audit.field.contactId": "Contact",
-    "audit.field.amount": "Amount"
+    "audit.field.amount": "Amount",
+    "audit.change.set": "{field} set to {to}",
+    "audit.change.cleared": "{field} cleared (was {from})",
+    "audit.change.changed": "{field} changed from \"{from}\" to \"{to}\"",
+    "audit.action.voided": "Transaction voided",
+    "audit.action.voided_with_reason": "Transaction voided: {reason}",
+    "audit.action.cancelled": "Transaction deleted",
+    "audit.action.payment_added": "Payment of {amount} added",
+    "audit.action.payment_voided": "Payment of {amount} voided"
   },
   "use_case": {
     "sale.label": "Sale",

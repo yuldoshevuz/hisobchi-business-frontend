@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { useAddDebtRepayment } from '@/api/hooks/use-debts';
+import { useAddExpensePayment } from '@/api/hooks/use-expenses';
+import { useAddIncomePayment } from '@/api/hooks/use-incomes';
 import { useAddPurchasePayment } from '@/api/hooks/use-purchases';
 import { useAddSalePayment } from '@/api/hooks/use-sales';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
@@ -19,6 +21,7 @@ import {
   getApiErrorMessage,
   isOverpaymentRejected,
 } from '@/lib/api-error';
+import { formatMoney } from '@/lib/format';
 import { repaymentDirection } from '@/lib/transaction-meta';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import {
@@ -51,15 +54,20 @@ function decimalLte(value: string, max: string): boolean {
 
 /**
  * Whether the parent transaction type accepts repayments through the in-app
- * sheet. INCOME / EXPENSE are out of scope today (no `/incomes/:id/payments`
- * UI flow), and TRANSFER / OPENING_BALANCE / ADJUSTMENT / SUSPENSE never do.
+ * sheet. Every type that carries a `paymentStatus` lifecycle can take an
+ * extra payment when the outstanding balance is non-zero — sales,
+ * purchases, debts (both directions), and incomes / expenses. The other
+ * types (transfer / opening_balance / adjustment / suspense) have no
+ * notion of an unpaid tail so we keep them off the sheet.
  */
 function supportsRepayment(type: TransactionType): boolean {
   return (
     type === 'sale' ||
     type === 'purchase' ||
     type === 'debt_out' ||
-    type === 'debt_in'
+    type === 'debt_in' ||
+    type === 'income' ||
+    type === 'expense'
   );
 }
 
@@ -107,11 +115,13 @@ export function AddCashFlowForm({
     setAccountId(matchingAccounts[0].id);
   }
 
-  // Three mutations are hooked unconditionally (rules of hooks). At call time
+  // Mutations are hooked unconditionally (rules of hooks). At call time
   // we pick the right one based on the parent transaction's type.
   const addSalePayment = useAddSalePayment();
   const addPurchasePayment = useAddPurchasePayment();
   const addDebtRepayment = useAddDebtRepayment();
+  const addExpensePayment = useAddExpensePayment();
+  const addIncomePayment = useAddIncomePayment();
 
   const activeMutation =
     transaction.type === 'sale'
@@ -120,7 +130,11 @@ export function AddCashFlowForm({
         ? addPurchasePayment
         : transaction.type === 'debt_out' || transaction.type === 'debt_in'
           ? addDebtRepayment
-          : null;
+          : transaction.type === 'expense'
+            ? addExpensePayment
+            : transaction.type === 'income'
+              ? addIncomePayment
+              : null;
 
   const trimmedAmount = amount.trim();
   const numericAmount = Number(trimmedAmount);
@@ -154,6 +168,16 @@ export function AddCashFlowForm({
       } else if (transaction.type === 'purchase') {
         await addPurchasePayment.mutateAsync({
           purchaseId: transaction.id,
+          body,
+        });
+      } else if (transaction.type === 'expense') {
+        await addExpensePayment.mutateAsync({
+          expenseId: transaction.id,
+          body,
+        });
+      } else if (transaction.type === 'income') {
+        await addIncomePayment.mutateAsync({
+          incomeId: transaction.id,
           body,
         });
       } else {
@@ -195,7 +219,7 @@ export function AddCashFlowForm({
         <div className="flex justify-between text-muted-foreground">
           <span>{t('add_cash_flow.remaining')}</span>
           <span className="tabular-nums text-foreground">
-            {remaining} {transaction.currency}
+            {formatMoney(remaining, transaction.currency)}
           </span>
         </div>
         <div className="flex justify-between text-muted-foreground">

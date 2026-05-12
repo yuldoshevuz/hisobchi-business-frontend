@@ -123,6 +123,17 @@ export function TransactionDetailPage(): React.ReactElement {
     return m;
   }, [members.data]);
 
+  // Audit log records actor by `user.id` (not member.id), so we keep a
+  // parallel map keyed by user id for the history panel — otherwise the
+  // actor row falls through to the `#id` placeholder.
+  const userNameById = useMemo(() => {
+    const m = new Map<number, string>();
+    for (const member of members.data?.data ?? []) {
+      m.set(member.user.id, member.user.fullName);
+    }
+    return m;
+  }, [members.data]);
+
   const accountNameById = useMemo(() => {
     const m = new Map<number, string>();
     for (const a of accounts.data ?? []) m.set(a.id, a.name);
@@ -451,8 +462,7 @@ export function TransactionDetailPage(): React.ReactElement {
           row stays clean. */}
       <AuditHistorySection
         history={extractAuditHistory(tx.metadata)}
-        memberNameById={memberNameById}
-        accountNameById={accountNameById}
+        userNameById={userNameById}
         contacts={contacts.data?.data ?? []}
         categories={categories.data?.data ?? []}
       />
@@ -1262,21 +1272,51 @@ function InitialEditForm({
 }
 
 /**
- * One entry of the edit history that `updateActiveEvent` appends to
- * `metadata.history`. Field-level diff with the actor + timestamp.
+ * One entry of the audit history backend writes into `metadata.history`.
+ * Two shapes coexist:
+ *   - "edit"   — field-level diff produced by `updateActiveEvent`
+ *   - "action" — lifecycle event (void, cancel, payment add, payment
+ *                void) produced by `appendAuditEvent`
+ *
+ * Both share `at` + `by`; the renderer branches on whether `changes`
+ * or `action` is present.
  */
-interface AuditHistoryEntry {
+type AuditAction =
+  | 'voided'
+  | 'cancelled'
+  | 'payment_added'
+  | 'payment_voided';
+
+interface AuditEditEntry {
+  kind: 'edit';
   at: string;
   by: number | 'ai';
   changes: Record<string, { from: unknown; to: unknown }>;
 }
 
+interface AuditActionEntry {
+  kind: 'action';
+  at: string;
+  by: number | 'ai';
+  action: AuditAction;
+  details: Record<string, unknown>;
+}
+
+type AuditHistoryEntry = AuditEditEntry | AuditActionEntry;
+
+const AUDIT_ACTIONS: ReadonlySet<AuditAction> = new Set([
+  'voided',
+  'cancelled',
+  'payment_added',
+  'payment_voided',
+]);
+
 /**
  * Pulls the audit log entries from a transaction's `metadata.history`
- * array. Backend writes them as { at, by, changes } via
- * `updateActiveEvent` — see modules/transactions/transactions.service.ts.
- * Anything misshapen is silently dropped so a malformed legacy entry
- * doesn't break the panel.
+ * array. Backend writes "edit" entries (`{ at, by, changes }`) via
+ * `updateActiveEvent` and "action" entries (`{ at, by, action,
+ * details }`) via `appendAuditEvent`. Anything misshapen is silently
+ * dropped so a malformed legacy entry doesn't break the panel.
  */
 function extractAuditHistory(
   metadata: Record<string, unknown> | null,
@@ -1290,12 +1330,34 @@ function extractAuditHistory(
     const rec = item as Record<string, unknown>;
     if (typeof rec.at !== 'string') continue;
     if (typeof rec.by !== 'number' && rec.by !== 'ai') continue;
-    if (!rec.changes || typeof rec.changes !== 'object') continue;
-    out.push({
-      at: rec.at,
-      by: rec.by as number | 'ai',
-      changes: rec.changes as Record<string, { from: unknown; to: unknown }>,
-    });
+    const by = rec.by as number | 'ai';
+    if (
+      typeof rec.action === 'string' &&
+      AUDIT_ACTIONS.has(rec.action as AuditAction)
+    ) {
+      out.push({
+        kind: 'action',
+        at: rec.at,
+        by,
+        action: rec.action as AuditAction,
+        details:
+          rec.details && typeof rec.details === 'object'
+            ? (rec.details as Record<string, unknown>)
+            : {},
+      });
+      continue;
+    }
+    if (rec.changes && typeof rec.changes === 'object') {
+      out.push({
+        kind: 'edit',
+        at: rec.at,
+        by,
+        changes: rec.changes as Record<
+          string,
+          { from: unknown; to: unknown }
+        >,
+      });
+    }
   }
   // Newest first — feels right for a chat-style activity feed.
   return out.slice().reverse();
@@ -1303,35 +1365,113 @@ function extractAuditHistory(
 
 interface AuditHistorySectionProps {
   history: AuditHistoryEntry[];
-  memberNameById: Map<number, string>;
-  accountNameById: Map<number, string>;
+  userNameById: Map<number, string>;
   contacts: readonly Contact[];
   categories: readonly MergedCategory[];
 }
 
 function AuditHistorySection({
   history,
-  memberNameById,
+  userNameById,
   contacts,
   categories,
 }: AuditHistorySectionProps): React.ReactElement | null {
   const { t } = useTranslation();
   if (history.length === 0) return null;
 
-  function formatValue(field: string, raw: unknown): string {
-    if (raw === null || raw === undefined) return '—';
+  /**
+   * Render a single value for the from/to phrase. We resolve id-based
+   * fields to their human name (Contact, Category) and dates to the
+   * page's preferred long-date format so the timeline reads like a
+   * sentence instead of an ISO-string dump.
+   */
+  function renderValue(field: string, raw: unknown): string {
+    if (raw === null || raw === undefined) return '';
     if (field === 'categoryId' && typeof raw === 'number') {
       return categories.find((c) => c.id === raw)?.name ?? `#${raw}`;
     }
     if (field === 'contactId' && typeof raw === 'number') {
       return contacts.find((c) => c.id === raw)?.name ?? `#${raw}`;
     }
+    if ((field === 'date' || field === 'dueDate') && typeof raw === 'string') {
+      const date = new Date(raw);
+      if (!Number.isNaN(date.getTime())) {
+        return new Intl.DateTimeFormat('uz-UZ', { dateStyle: 'long' }).format(date);
+      }
+      return raw;
+    }
     return String(raw);
+  }
+
+  function fieldLabel(field: string): string {
+    return t(`tx_detail.audit.field.${field}` as const, {
+      defaultValue: field,
+    });
+  }
+
+  /**
+   * Pick one of three natural-language templates per change. Avoids the
+   * dry `Kategoriya: — → Ijara` form in favour of:
+   *   • set     — "Kategoriya tanlandi: Ijara"
+   *   • cleared — "Kontakt olib tashlandi"
+   *   • changed — "Sana 11 May 2026 ga o'zgartirildi" (uses {from},{to})
+   */
+  function renderChange(
+    field: string,
+    change: { from: unknown; to: unknown },
+  ): string {
+    const from = renderValue(field, change.from);
+    const to = renderValue(field, change.to);
+    const label = fieldLabel(field);
+    if (!from && to) {
+      return t('tx_detail.audit.change.set', { field: label, to });
+    }
+    if (from && !to) {
+      return t('tx_detail.audit.change.cleared', { field: label, from });
+    }
+    return t('tx_detail.audit.change.changed', { field: label, from, to });
   }
 
   function actorLabel(by: AuditHistoryEntry['by']): string {
     if (by === 'ai') return t('tx_detail.audit.actor_ai');
-    return memberNameById.get(by) ?? `#${by}`;
+    return userNameById.get(by) ?? `#${by}`;
+  }
+
+  /**
+   * Single-line summary for the lifecycle events appended by
+   * `appendAuditEvent`. We keep the wording short and reuse the same
+   * money formatter the detail header uses so amounts read identically
+   * across the page.
+   */
+  function renderActionLine(entry: AuditActionEntry): string {
+    if (entry.action === 'voided') {
+      const reason = typeof entry.details.reason === 'string'
+        ? entry.details.reason
+        : '';
+      return reason
+        ? t('tx_detail.audit.action.voided_with_reason', { reason })
+        : t('tx_detail.audit.action.voided');
+    }
+    if (entry.action === 'cancelled') {
+      return t('tx_detail.audit.action.cancelled');
+    }
+    if (entry.action === 'payment_added' || entry.action === 'payment_voided') {
+      const amountRaw = entry.details.amount;
+      const currency =
+        typeof entry.details.currency === 'string'
+          ? entry.details.currency
+          : '';
+      const amount =
+        typeof amountRaw === 'string' || typeof amountRaw === 'number'
+          ? formatMoney(String(amountRaw), currency)
+          : '';
+      const key =
+        entry.action === 'payment_added'
+          ? 'tx_detail.audit.action.payment_added'
+          : 'tx_detail.audit.action.payment_voided';
+      return t(key, { amount });
+    }
+    return '';
   }
 
   return (
@@ -1354,25 +1494,17 @@ function AuditHistorySection({
                   }).format(new Date(entry.at))}
                 </span>
               </div>
-              <ul className="mt-1.5 space-y-1 text-[13px]">
-                {Object.entries(entry.changes).map(([field, change]) => (
-                  <li key={field} className="flex flex-wrap items-baseline gap-1">
-                    <span className="text-muted-foreground">
-                      {t(`tx_detail.audit.field.${field}` as const, {
-                        defaultValue: field,
-                      })}
-                      :
-                    </span>
-                    <span className="line-through opacity-60">
-                      {formatValue(field, change.from)}
-                    </span>
-                    <span>→</span>
-                    <span className="font-medium">
-                      {formatValue(field, change.to)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              {entry.kind === 'edit' ? (
+                <ul className="mt-1.5 space-y-0.5 text-[13px] text-foreground">
+                  {Object.entries(entry.changes).map(([field, change]) => (
+                    <li key={field}>{renderChange(field, change)}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-1.5 text-[13px] text-foreground">
+                  {renderActionLine(entry)}
+                </p>
+              )}
             </li>
           ))}
         </ul>
