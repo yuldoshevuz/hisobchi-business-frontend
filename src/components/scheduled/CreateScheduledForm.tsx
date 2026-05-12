@@ -35,28 +35,31 @@ import {
 import type { CategoryType } from '@/types/category.types';
 
 /**
- * The merged-catalog endpoint returns rows scoped by category type
- * ('expense' / 'income' / 'product'). Scheduled transactions inherit
- * the category from the parent transaction type, so we map each
- * ScheduledType → the category type the picker should pull.
+ * Maps each scheduled transaction type → the category taxonomy the
+ * picker should pull from. Categories in this system have three types
+ * (`expense` / `income` / `product`); `product` is the catalog
+ * taxonomy used to organise products themselves, NOT to label the
+ * cash-flow side of a sale or purchase transaction.
  *
- * Debts skip the category step entirely — they don't carry one on
- * confirm. Returning `null` here disables the picker.
+ * For sale / purchase / debt rows we therefore use the cash-flow
+ * direction, not `product`: sales and incoming debts behave like
+ * income (money in); purchases and outgoing debts behave like
+ * expense (money out). That matches what the user will pick when the
+ * schedule fires and lets the same recurring plan re-use the same
+ * category each occurrence.
  */
-function categoryTypeFor(scheduledType: ScheduledType): CategoryType | null {
+function categoryTypeFor(scheduledType: ScheduledType): CategoryType {
   switch (scheduledType) {
     case 'expense':
+    case 'purchase':
+    case 'debt_out':
       return 'expense';
     case 'income':
-      return 'income';
     case 'sale':
-    case 'purchase':
-      return 'product';
     case 'debt_in':
-    case 'debt_out':
-      return null;
+      return 'income';
     default:
-      return null;
+      return 'expense';
   }
 }
 
@@ -98,15 +101,12 @@ export function CreateScheduledForm({
   const [startDate, setStartDate] = useState<string>(isoToday());
   const [endDate, setEndDate] = useState<string>('');
 
-  // Categories are scoped per transaction type so the picker matches the
-  // taxonomy the user will see when the schedule fires (e.g. expense
-  // categories for `expense`, product categories for `sale`/`purchase`).
-  // Debts intentionally skip the picker.
+  // Categories are scoped to the cash-flow taxonomy matching the
+  // transaction type — see `categoryTypeFor`. The picker shows for
+  // every type (debts included), since users want the same recurring
+  // category to ride along on each occurrence.
   const categoryType = categoryTypeFor(type);
-  const categories = useCategories(
-    categoryType ? { all: true, type: categoryType } : { all: true },
-    { enabled: categoryType !== null },
-  );
+  const categories = useCategories({ all: true, type: categoryType });
 
   const accountList = accounts.data ?? [];
   const contactList = contacts.data?.data ?? [];
@@ -352,16 +352,14 @@ export function CreateScheduledForm({
         helperText={t('create_scheduled.default_account_helper')}
       />
 
-      {categoryType !== null ? (
-        <SelectField<string>
-          id="sched-category"
-          label={t('create_scheduled.category')}
-          value={categoryRef === '' ? null : categoryRef}
-          onChange={(next) => setCategoryRef(next ?? '')}
-          options={categoryOptions}
-          helperText={t('create_scheduled.optional')}
-        />
-      ) : null}
+      <SelectField<string>
+        id="sched-category"
+        label={t('create_scheduled.category')}
+        value={categoryRef === '' ? null : categoryRef}
+        onChange={(next) => setCategoryRef(next ?? '')}
+        options={categoryOptions}
+        helperText={t('create_scheduled.optional')}
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
