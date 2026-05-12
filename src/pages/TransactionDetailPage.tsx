@@ -5,7 +5,10 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Check,
+  ImageIcon,
   Loader2,
+  Maximize2,
+  Mic,
   Pencil,
   Plus,
   Sparkles,
@@ -1815,38 +1818,100 @@ function ActiveEditForm({
  * transaction (voice memo, receipt photo). Backend stores the URL as
  * a path relative to its origin (e.g. `/uploads/2026/04/abc.ogg`) —
  * `useStaticAssets` serves the file directly. We sniff the extension
- * to pick `<audio>` vs `<img>`, then drop a download link below so
- * the user can save the original if they want.
+ * to pick a voice card (Mic + native `<audio controls>` styled to
+ * match the surrounding card) or a tappable image thumbnail that
+ * opens a fullscreen Modal lightbox.
  */
 function TransactionMediaPreview({
   url,
 }: {
   url: string;
 }): React.ReactElement {
+  const { t } = useTranslation();
   const absolute = url.startsWith('http')
     ? url
     : `${env.backendOrigin}${url}`;
   const lower = url.toLowerCase();
   const isAudio = /\.(ogg|oga|mp3|m4a|wav|aac|webm)(\?|$)/.test(lower);
   const isImage = /\.(jpe?g|png|webp|heic|heif|gif)(\?|$)/.test(lower);
+  const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
 
+  if (isAudio) {
+    return (
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <Mic className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="truncate text-[14px] font-medium">
+            {t('tx_detail.attachment.voice_label')}
+          </p>
+          <audio
+            controls
+            src={absolute}
+            preload="metadata"
+            className="h-9 w-full"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (isImage) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => {
+            tgHapticImpact('light');
+            setLightboxOpen(true);
+          }}
+          aria-label={t('tx_detail.attachment.open_image_aria')}
+          className="press group relative block w-full overflow-hidden rounded-xl bg-muted/40"
+        >
+          <img
+            src={absolute}
+            alt={t('tx_detail.attachment.image_alt')}
+            className="aspect-[4/3] w-full object-cover"
+            loading="lazy"
+          />
+          <div className="pointer-events-none absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/85 text-foreground shadow-sm backdrop-blur">
+            <Maximize2 className="h-4 w-4" />
+          </div>
+        </button>
+        <Modal
+          open={lightboxOpen}
+          onOpenChange={setLightboxOpen}
+          contentClassName="bg-background"
+        >
+          <div className="flex items-center justify-center pb-2">
+            <img
+              src={absolute}
+              alt={t('tx_detail.attachment.image_alt')}
+              className="max-h-[80vh] w-full rounded-xl object-contain"
+            />
+          </div>
+        </Modal>
+      </>
+    );
+  }
+
+  // Unknown media type — surface a generic link so the file is still
+  // reachable without breaking the layout with an unstyled placeholder.
   return (
-    <div className="space-y-2">
-      {isAudio ? (
-        <audio
-          controls
-          src={absolute}
-          preload="metadata"
-          className="w-full"
-        />
-      ) : isImage ? (
-        <img
-          src={absolute}
-          alt="attachment"
-          className="max-h-[420px] w-full rounded-xl object-contain"
-        />
-      ) : null}
-    </div>
+    <a
+      href={absolute}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-3 text-[14px]"
+    >
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        <ImageIcon className="h-5 w-5" />
+      </div>
+      <span className="truncate font-medium text-primary underline-offset-4 hover:underline">
+        {t('tx_detail.attachment.open_external')}
+      </span>
+    </a>
   );
 }
 
