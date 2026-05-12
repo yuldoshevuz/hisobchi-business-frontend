@@ -4,6 +4,7 @@ import { useAccounts } from '@/api/hooks/use-accounts';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useContacts } from '@/api/hooks/use-contacts';
 import { useCreateScheduled } from '@/api/hooks/use-scheduled';
+import { CategoryIcon } from '@/components/categories/CategoryIcon';
 import {
   formatAmount,
   unformatAmount,
@@ -31,6 +32,33 @@ import {
   type RecurrenceType,
   type ScheduledType,
 } from '@/types/scheduled.types';
+import type { CategoryType } from '@/types/category.types';
+
+/**
+ * The merged-catalog endpoint returns rows scoped by category type
+ * ('expense' / 'income' / 'product'). Scheduled transactions inherit
+ * the category from the parent transaction type, so we map each
+ * ScheduledType → the category type the picker should pull.
+ *
+ * Debts skip the category step entirely — they don't carry one on
+ * confirm. Returning `null` here disables the picker.
+ */
+function categoryTypeFor(scheduledType: ScheduledType): CategoryType | null {
+  switch (scheduledType) {
+    case 'expense':
+      return 'expense';
+    case 'income':
+      return 'income';
+    case 'sale':
+    case 'purchase':
+      return 'product';
+    case 'debt_in':
+    case 'debt_out':
+      return null;
+    default:
+      return null;
+  }
+}
 
 interface CreateScheduledFormProps {
   onClose: () => void;
@@ -54,7 +82,6 @@ export function CreateScheduledForm({
   const create = useCreateScheduled();
   const accounts = useAccounts({ status: 'active' });
   const contacts = useContacts({ status: 'active', all: true });
-  const categories = useCategories({ all: true });
 
   const [type, setType] = useState<ScheduledType>('expense');
   const [recurrence, setRecurrence] = useState<RecurrenceType>('monthly');
@@ -64,19 +91,26 @@ export function CreateScheduledForm({
   const [description, setDescription] = useState<string>('');
   const [contactId, setContactId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState<number | null>(null);
-  const [categoryId, setCategoryId] = useState<number | null>(null);
+  // Encoded as `id:N` for tenant-instantiated rows and `system:N` for system
+  // defaults the org hasn't customised yet — backend accepts either, we
+  // split on submit. Empty string means "no category".
+  const [categoryRef, setCategoryRef] = useState<string>('');
   const [startDate, setStartDate] = useState<string>(isoToday());
   const [endDate, setEndDate] = useState<string>('');
 
+  // Categories are scoped per transaction type so the picker matches the
+  // taxonomy the user will see when the schedule fires (e.g. expense
+  // categories for `expense`, product categories for `sale`/`purchase`).
+  // Debts intentionally skip the picker.
+  const categoryType = categoryTypeFor(type);
+  const categories = useCategories(
+    categoryType ? { all: true, type: categoryType } : { all: true },
+    { enabled: categoryType !== null },
+  );
+
   const accountList = accounts.data ?? [];
   const contactList = contacts.data?.data ?? [];
-  // The merged-catalog endpoint returns rows with `id === null` for system
-  // defaults the org hasn't customised yet — those still pick fine via
-  // `systemCategoryId`, but for the simple recurring picker we only show
-  // already-instantiated rows (id !== null) to avoid passing both keys.
-  const categoryList = (categories.data?.data ?? []).filter(
-    (c) => c.id !== null,
-  );
+  const categoryList = categories.data?.data ?? [];
 
   const trimmedDescription = description.trim();
   const trimmedAmount = amount.trim();
@@ -108,7 +142,7 @@ export function CreateScheduledForm({
       ...(askOnConfirm
         ? { amount: null }
         : { amount: trimmedAmount }),
-      ...(categoryId !== null ? { categoryId } : {}),
+      ...parseCategoryRef(categoryRef),
       ...(contactId !== null ? { contactId } : {}),
       ...(accountId !== null ? { defaultAccountId: accountId } : {}),
       ...(trimmedEndDate ? { endDate: trimmedEndDate } : {}),
@@ -130,7 +164,7 @@ export function CreateScheduledForm({
     startDate,
     askOnConfirm,
     trimmedAmount,
-    categoryId,
+    categoryRef,
     contactId,
     accountId,
     trimmedEndDate,
@@ -166,12 +200,35 @@ export function CreateScheduledForm({
     [accountList],
   );
 
+  // Mirror IncomeForm/ExpenseForm: emit `id:N` for instantiated rows and
+  // `system:N` for system defaults the org hasn't customised yet. Both
+  // resolve at submit time via `parseCategoryRef`. The icon comes from
+  // the merged category row directly so the picker matches what the
+  // Catalog page shows.
   const categoryOptions = useMemo(
     () =>
-      categoryList.map((c) => ({
-        value: c.id as number,
-        label: c.name,
-      })),
+      categoryList.flatMap((c) => {
+        const ref =
+          c.id !== null
+            ? `id:${c.id}`
+            : c.systemCategoryId !== null
+              ? `system:${c.systemCategoryId}`
+              : '';
+        if (!ref) return [];
+        return [
+          {
+            value: ref,
+            label: c.name,
+            iconNode: (
+              <CategoryIcon
+                icon={c.icon}
+                color={c.color}
+                fallbackText={c.name}
+              />
+            ),
+          },
+        ];
+      }),
     [categoryList],
   );
 
@@ -187,7 +244,15 @@ export function CreateScheduledForm({
         id="sched-type"
         label={t('create_scheduled.type')}
         value={type}
-        onChange={(next) => next && setType(next as ScheduledType)}
+        onChange={(next) => {
+          if (!next) return;
+          const nextType = next as ScheduledType;
+          setType(nextType);
+          // The category list switches taxonomies (expense / income /
+          // product) when type flips — a category picked for the
+          // previous type would be invalid, so reset.
+          setCategoryRef('');
+        }}
         options={typeOptions}
       />
 
@@ -287,14 +352,16 @@ export function CreateScheduledForm({
         helperText={t('create_scheduled.default_account_helper')}
       />
 
-      <SelectField
-        id="sched-category"
-        label={t('create_scheduled.category')}
-        value={categoryId ?? ''}
-        onChange={setCategoryId}
-        options={categoryOptions}
-        helperText={t('create_scheduled.optional')}
-      />
+      {categoryType !== null ? (
+        <SelectField<string>
+          id="sched-category"
+          label={t('create_scheduled.category')}
+          value={categoryRef === '' ? null : categoryRef}
+          onChange={(next) => setCategoryRef(next ?? '')}
+          options={categoryOptions}
+          helperText={t('create_scheduled.optional')}
+        />
+      ) : null}
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
@@ -351,4 +418,21 @@ function isoToday(): string {
   const m = (now.getMonth() + 1).toString().padStart(2, '0');
   const d = now.getDate().toString().padStart(2, '0');
   return `${y}-${m}-${d}`;
+}
+
+/**
+ * Split the encoded picker value back into the request fields the
+ * backend expects. Identical to the helper inside IncomeForm /
+ * ExpenseForm so we stay consistent across forms.
+ */
+function parseCategoryRef(
+  ref: string,
+): { categoryId?: number; systemCategoryId?: number } {
+  if (!ref) return {};
+  const [kind, idStr] = ref.split(':');
+  const id = Number(idStr);
+  if (!Number.isFinite(id)) return {};
+  if (kind === 'system') return { systemCategoryId: id };
+  if (kind === 'id') return { categoryId: id };
+  return {};
 }
