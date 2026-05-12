@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
@@ -7,14 +7,17 @@ import {
   Check,
   ImageIcon,
   Loader2,
-  Maximize2,
-  Mic,
+  Pause,
   Pencil,
+  Play,
   Plus,
   Sparkles,
   Trash2,
   XCircle,
 } from 'lucide-react';
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import 'yet-another-react-lightbox/styles.css';
 import {
   useCancelTransaction,
   useConfirmTransaction,
@@ -1817,10 +1820,11 @@ function ActiveEditForm({
  * Inline player / preview for the AI source media attached to a
  * transaction (voice memo, receipt photo). Backend stores the URL as
  * a path relative to its origin (e.g. `/uploads/2026/04/abc.ogg`) —
- * `useStaticAssets` serves the file directly. We sniff the extension
- * to pick a voice card (Mic + native `<audio controls>` styled to
- * match the surrounding card) or a tappable image thumbnail that
- * opens a fullscreen Modal lightbox.
+ * `useStaticAssets` serves the file directly. Native browser controls
+ * are skipped in favour of:
+ *
+ *   • voice  → wavesurfer.js (waveform + custom play/pause button)
+ *   • image  → yet-another-react-lightbox (zoom + swipe + keyboard)
  */
 function TransactionMediaPreview({
   url,
@@ -1837,24 +1841,7 @@ function TransactionMediaPreview({
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
 
   if (isAudio) {
-    return (
-      <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Mic className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className="truncate text-[14px] font-medium">
-            {t('tx_detail.attachment.voice_label')}
-          </p>
-          <audio
-            controls
-            src={absolute}
-            preload="metadata"
-            className="h-9 w-full"
-          />
-        </div>
-      </div>
-    );
+    return <VoiceWavePlayer src={absolute} label={t('tx_detail.attachment.voice_label')} />;
   }
 
   if (isImage) {
@@ -1875,23 +1862,17 @@ function TransactionMediaPreview({
             className="aspect-[4/3] w-full object-cover"
             loading="lazy"
           />
-          <div className="pointer-events-none absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/85 text-foreground shadow-sm backdrop-blur">
-            <Maximize2 className="h-4 w-4" />
-          </div>
         </button>
-        <Modal
+        <Lightbox
           open={lightboxOpen}
-          onOpenChange={setLightboxOpen}
-          contentClassName="bg-background"
-        >
-          <div className="flex items-center justify-center pb-2">
-            <img
-              src={absolute}
-              alt={t('tx_detail.attachment.image_alt')}
-              className="max-h-[80vh] w-full rounded-xl object-contain"
-            />
-          </div>
-        </Modal>
+          close={() => setLightboxOpen(false)}
+          slides={[{ src: absolute, alt: t('tx_detail.attachment.image_alt') }]}
+          plugins={[Zoom]}
+          // Single image — hide the prev/next chrome that the
+          // library shows by default for galleries.
+          carousel={{ finite: true }}
+          render={{ buttonPrev: () => null, buttonNext: () => null }}
+        />
       </>
     );
   }
@@ -1913,6 +1894,156 @@ function TransactionMediaPreview({
       </span>
     </a>
   );
+}
+
+/**
+ * Custom voice player built on top of a hidden `<audio>` element +
+ * Tailwind. We skip third-party audio components because every one we
+ * tried either rendered a "default browser" look-and-feel
+ * (react-h5-audio-player) or needed CORS-decoded peaks (wavesurfer)
+ * that don't work for Telegram OGG/opus uploads. A single ref to the
+ * `<audio>` tag gives us play/pause control + the time events; React
+ * state drives the styled progress bar and the timer readout.
+ */
+function VoiceWavePlayer({
+  src,
+  label,
+}: {
+  src: string;
+  label: string;
+}): React.ReactElement {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const progressRef = useRef<HTMLDivElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+
+  // Some browsers (Safari, Telegram WebView with OGG) only expose
+  // duration AFTER playback starts. Re-read it on every timeupdate so
+  // the readout fills in once metadata arrives.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    function onLoaded(): void {
+      if (audio && Number.isFinite(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    }
+    function onTime(): void {
+      if (!audio) return;
+      setCurrentTime(audio.currentTime);
+      if (
+        (duration === 0 || !Number.isFinite(duration)) &&
+        Number.isFinite(audio.duration)
+      ) {
+        setDuration(audio.duration);
+      }
+    }
+    function onEnded(): void {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    }
+    function onPlay(): void {
+      setIsPlaying(true);
+    }
+    function onPause(): void {
+      setIsPlaying(false);
+    }
+    audio.addEventListener('loadedmetadata', onLoaded);
+    audio.addEventListener('durationchange', onLoaded);
+    audio.addEventListener('timeupdate', onTime);
+    audio.addEventListener('ended', onEnded);
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
+    return () => {
+      audio.removeEventListener('loadedmetadata', onLoaded);
+      audio.removeEventListener('durationchange', onLoaded);
+      audio.removeEventListener('timeupdate', onTime);
+      audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
+    };
+  }, [duration]);
+
+  function toggle(): void {
+    const audio = audioRef.current;
+    if (!audio) return;
+    tgHapticImpact('light');
+    if (audio.paused) {
+      void audio.play();
+    } else {
+      audio.pause();
+    }
+  }
+
+  function seekFromEvent(e: React.MouseEvent<HTMLDivElement>): void {
+    const audio = audioRef.current;
+    const bar = progressRef.current;
+    if (!audio || !bar || !Number.isFinite(audio.duration)) return;
+    const rect = bar.getBoundingClientRect();
+    const ratio = Math.min(
+      Math.max((e.clientX - rect.left) / rect.width, 0),
+      1,
+    );
+    audio.currentTime = ratio * audio.duration;
+    setCurrentTime(audio.currentTime);
+  }
+
+  const progressPct =
+    duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
+
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-muted/40 p-3">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={isPlaying ? 'pause' : 'play'}
+        className="press flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm active:bg-primary/90"
+      >
+        {isPlaying ? (
+          <Pause className="h-5 w-5" />
+        ) : (
+          <Play className="ml-0.5 h-5 w-5" fill="currentColor" />
+        )}
+      </button>
+      <div className="min-w-0 flex-1 space-y-1">
+        <p className="truncate text-[13px] font-medium leading-tight">
+          {label}
+        </p>
+        <div
+          ref={progressRef}
+          role="slider"
+          aria-label={label}
+          aria-valuemin={0}
+          aria-valuemax={duration || 0}
+          aria-valuenow={currentTime}
+          onClick={seekFromEvent}
+          className="relative h-1.5 w-full cursor-pointer overflow-hidden rounded-full bg-muted-foreground/20"
+        >
+          <div
+            className="h-full rounded-full bg-primary transition-[width] duration-100"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+      </div>
+      <span className="shrink-0 self-end pb-0.5 text-[12px] tabular-nums text-muted-foreground">
+        {formatAudioTime(currentTime)} / {formatAudioTime(duration)}
+      </span>
+      <audio
+        ref={audioRef}
+        src={src}
+        preload="metadata"
+        className="hidden"
+      />
+    </div>
+  );
+}
+
+function formatAudioTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
 /**
