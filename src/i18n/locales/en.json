@@ -838,6 +838,7 @@
     "select": "Pick one...",
     "search": "Search",
     "no_options": "No options to pick",
+    "clear_selection": "Clear selection",
     "contact": "Contact",
     "category": "Category",
     "account": "Account",

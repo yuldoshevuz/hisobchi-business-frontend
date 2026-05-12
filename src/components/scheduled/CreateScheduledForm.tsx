@@ -341,6 +341,7 @@ export function CreateScheduledForm({
         onChange={setContactId}
         contacts={contactList}
         helperText={t('create_scheduled.contact_helper')}
+        clearable
       />
 
       <SelectField
@@ -350,6 +351,7 @@ export function CreateScheduledForm({
         onChange={setAccountId}
         options={accountOptions}
         helperText={t('create_scheduled.default_account_helper')}
+        clearable
       />
 
       <SelectField<string>
@@ -359,6 +361,7 @@ export function CreateScheduledForm({
         onChange={(next) => setCategoryRef(next ?? '')}
         options={categoryOptions}
         helperText={t('create_scheduled.optional')}
+        clearable
       />
 
       <div className="grid grid-cols-2 gap-3">

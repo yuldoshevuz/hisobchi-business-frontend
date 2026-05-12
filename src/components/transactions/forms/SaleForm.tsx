@@ -198,6 +198,7 @@ export function SaleForm({
             ? t('sale_form.contact_helper_credit')
             : t('sale_form.contact_helper_normal')
         }
+        clearable={!isCredit}
       />
 
       {tracksStock ? (

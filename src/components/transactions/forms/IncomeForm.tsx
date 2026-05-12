@@ -157,6 +157,7 @@ export function IncomeForm({
         })}
         placeholder={t('edit_tx_category.placeholder')}
         helperText={t('expense_form.category_helper')}
+        clearable
       />
 
       <ContactPickerField
@@ -166,6 +167,7 @@ export function IncomeForm({
         onChange={setContactId}
         contacts={contactList}
         helperText={t('income_form.contact_helper')}
+        clearable
       />
 
       <DescriptionField

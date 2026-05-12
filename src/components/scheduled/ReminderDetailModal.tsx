@@ -240,6 +240,7 @@ export function ReminderDetailModal({
               onChange={setAccountId}
               options={accountOptions}
               helperText={t('reminder_detail.account_helper')}
+              clearable
             />
           </div>
         ) : null}

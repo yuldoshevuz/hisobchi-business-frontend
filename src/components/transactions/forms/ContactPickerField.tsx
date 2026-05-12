@@ -39,6 +39,10 @@ interface ContactPickerFieldProps {
    */
   defaultTypeFilter?: TypeFilter;
   emptyText?: string;
+  /** Mirror of SelectField.clearable — surface an inline ✕ + modal row
+   *  so users can drop an optional contact selection. Defaults to false
+   *  to preserve required-picker behaviour at existing call sites. */
+  clearable?: boolean;
 }
 
 /**
@@ -64,6 +68,7 @@ export function ContactPickerField({
   modalTitle,
   defaultTypeFilter = 'all',
   emptyText,
+  clearable = false,
 }: ContactPickerFieldProps): React.ReactElement {
   const { t } = useTranslation();
   const [typeFilter, setTypeFilter] = useState<TypeFilter>(defaultTypeFilter);
@@ -97,6 +102,7 @@ export function ContactPickerField({
       errorText={errorText}
       modalTitle={modalTitle}
       emptyText={computedEmpty}
+      clearable={clearable}
       // The search threshold is intentionally low so users with even a small
       // address book can still narrow by name.
       searchThreshold={4}

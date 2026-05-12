@@ -250,6 +250,7 @@ export function ExpenseForm({
               .filter((o): o is NonNullable<typeof o> => o !== null)}
             label={t('expense_form.category')}
             helperText={t('expense_form.category_helper')}
+            clearable
           />
 
           <ContactPickerField
@@ -259,6 +260,7 @@ export function ExpenseForm({
             onChange={setContactId}
             contacts={contactList}
             helperText={t('expense_form.contact_helper')}
+            clearable
           />
         </>
       )}
@@ -349,6 +351,7 @@ interface CategoryPickerProps {
   onChange: (next: string) => void;
   options: CategoryPickerOption[];
   helperText?: string;
+  clearable?: boolean;
 }
 
 function CategoryPicker({
@@ -358,6 +361,7 @@ function CategoryPicker({
   onChange,
   options,
   helperText,
+  clearable = false,
 }: CategoryPickerProps): React.ReactElement {
   const { t } = useTranslation();
   return (
@@ -369,6 +373,7 @@ function CategoryPicker({
       options={options}
       placeholder={t('edit_tx_category.placeholder')}
       helperText={helperText}
+      clearable={clearable}
     />
   );
 }

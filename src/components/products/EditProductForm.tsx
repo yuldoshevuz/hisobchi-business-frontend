@@ -176,6 +176,7 @@ export function EditProductForm({
             label: o.name,
             iconNode: <CategoryIcon icon={o.icon} color={o.color} fallbackText={o.name} />,
           }))}
+          clearable
         />
       )}
 

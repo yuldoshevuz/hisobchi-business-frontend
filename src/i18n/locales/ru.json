@@ -838,6 +838,7 @@
     "select": "Выберите...",
     "search": "Поиск",
     "no_options": "Нет вариантов для выбора",
+    "clear_selection": "Очистить выбор",
     "contact": "Контакт",
     "category": "Категория",
     "account": "Счёт",

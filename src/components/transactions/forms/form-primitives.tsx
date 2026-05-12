@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, ChevronDown, type LucideIcon } from 'lucide-react';
+import { Check, ChevronDown, X, type LucideIcon } from 'lucide-react';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,6 +62,13 @@ interface SelectFieldProps<T extends string | number> {
    * is always reachable.
    */
   searchSlot?: React.ReactNode;
+  /**
+   * When `true`, lets the user clear the current selection — an inline ✕
+   * appears in the trigger pill and a "Clear" row anchors the top of the
+   * modal list. Use it for optional fields (category, contact, default
+   * account) so a stray pick can be reverted without re-loading the form.
+   */
+  clearable?: boolean;
 }
 
 /**
@@ -86,6 +93,7 @@ export function SelectField<T extends string | number>({
   searchThreshold = 8,
   emptyText,
   searchSlot,
+  clearable = false,
 }: SelectFieldProps<T>): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState<boolean>(false);
@@ -119,10 +127,19 @@ export function SelectField<T extends string | number>({
     setSearch('');
   }
 
+  function clearSelection(): void {
+    tgHapticImpact('light');
+    onChange(null);
+    setOpen(false);
+    setSearch('');
+  }
+
   function handleOpenChange(nextOpen: boolean): void {
     setOpen(nextOpen);
     if (!nextOpen) setSearch('');
   }
+
+  const showInlineClear = clearable && normalizedValue !== null && !disabled;
 
   return (
     <div className="space-y-1.5">
@@ -158,6 +175,22 @@ export function SelectField<T extends string | number>({
             {selected ? selected.label : (placeholder ?? t('form.select'))}
           </span>
         </div>
+        {showInlineClear ? (
+          <span
+            role="button"
+            aria-label={t('form.clear_selection')}
+            onClick={(e) => {
+              // Stop the outer trigger from also firing — without this the
+              // clear tap would land on the button parent and open the modal
+              // immediately after wiping the value, which feels wrong.
+              e.stopPropagation();
+              clearSelection();
+            }}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent"
+          >
+            <X className="h-3.5 w-3.5" />
+          </span>
+        ) : null}
         <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
       </button>
 
@@ -184,6 +217,24 @@ export function SelectField<T extends string | number>({
             </div>
             {searchSlot}
           </div>
+        ) : null}
+
+        {clearable && normalizedValue !== null ? (
+          // Anchor a "Clear" row above the list so the action stays
+          // reachable even when the list is long and the inline ✕ in the
+          // trigger pill has scrolled out of view behind the keyboard.
+          <button
+            type="button"
+            onClick={clearSelection}
+            className="press -mx-4 flex w-[calc(100%+2rem)] items-center gap-3 border-b border-border bg-card px-4 py-3 text-left active:bg-accent"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <X className="h-4 w-4" />
+            </div>
+            <span className="text-[15px] font-medium text-muted-foreground">
+              {t('form.clear_selection')}
+            </span>
+          </button>
         ) : null}
 
         {options.length === 0 ? (
