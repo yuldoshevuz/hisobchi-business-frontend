@@ -115,17 +115,10 @@ export function TransactionDetailPage(): React.ReactElement {
   );
   const members = useMembers({ all: true }, { enabled: Boolean(tx) });
 
-  const memberNameById = useMemo(() => {
-    const m = new Map<number, string>();
-    for (const member of members.data?.data ?? []) {
-      m.set(member.id, member.user.fullName);
-    }
-    return m;
-  }, [members.data]);
-
-  // Audit log records actor by `user.id` (not member.id), so we keep a
-  // parallel map keyed by user id for the history panel — otherwise the
-  // actor row falls through to the `#id` placeholder.
+  // Audit log + `transaction.createdBy` both key the actor by `users.id`
+  // (NOT `members.id`). We map user id → fullName for both the detail
+  // "Yaratdi" row and the audit panel; without this both fall through to
+  // the `#id` placeholder when the org has more than one member.
   const userNameById = useMemo(() => {
     const m = new Map<number, string>();
     for (const member of members.data?.data ?? []) {
@@ -353,7 +346,7 @@ export function TransactionDetailPage(): React.ReactElement {
           ) : null}
           <DetailRow
             label={t('tx_detail.field.created_by')}
-            value={`${memberNameById.get(tx.createdBy) ?? `#${tx.createdBy}`} · ${new Intl.DateTimeFormat(
+            value={`${userNameById.get(tx.createdBy) ?? `#${tx.createdBy}`} · ${new Intl.DateTimeFormat(
               'uz-UZ',
               {
                 dateStyle: 'short',
