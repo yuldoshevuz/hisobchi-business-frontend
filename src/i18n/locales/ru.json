@@ -926,7 +926,16 @@
     "edit_form.contact_placeholder": "Выберите контакт",
     "edit_form.contact_empty": "Подходящего контакта для этого типа нет",
     "edit_form.contact_clear": "Очистить",
-    "edit_form.due_date_label": "Срок (для долговых операций)"
+    "edit_form.due_date_label": "Срок (для долговых операций)",
+    "edit_form.description_placeholder": "Необязательное описание",
+    "audit.section_title": "История изменений",
+    "audit.actor_ai": "AI",
+    "audit.field.description": "Описание",
+    "audit.field.date": "Дата",
+    "audit.field.dueDate": "Срок",
+    "audit.field.categoryId": "Категория",
+    "audit.field.contactId": "Контакт",
+    "audit.field.amount": "Сумма"
   },
   "use_case": {
     "sale.label": "Продажа",

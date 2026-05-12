@@ -926,7 +926,16 @@
     "edit_form.contact_placeholder": "Kontakt tanlang",
     "edit_form.contact_empty": "Bu turga mos kontakt yo'q",
     "edit_form.contact_clear": "Tozalash",
-    "edit_form.due_date_label": "Muddat (qarz holatlarida)"
+    "edit_form.due_date_label": "Muddat (qarz holatlarida)",
+    "edit_form.description_placeholder": "Ixtiyoriy izoh",
+    "audit.section_title": "Tahrirlashlar tarixi",
+    "audit.actor_ai": "AI",
+    "audit.field.description": "Izoh",
+    "audit.field.date": "Sana",
+    "audit.field.dueDate": "Muddat",
+    "audit.field.categoryId": "Kategoriya",
+    "audit.field.contactId": "Kontakt",
+    "audit.field.amount": "Summa"
   },
   "use_case": {
     "sale.label": "Sotuv",

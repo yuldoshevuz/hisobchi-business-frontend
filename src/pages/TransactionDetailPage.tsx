@@ -15,6 +15,7 @@ import {
 import {
   useCancelTransaction,
   useConfirmTransaction,
+  useSwapCashFlowAccount,
   useTransaction,
   useUpdateTransaction,
   useVoidCashFlow,
@@ -55,8 +56,12 @@ import {
   formatAmountDisplay,
   unformatAmount,
 } from '@/components/transactions/forms/form-utils';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/transactions/forms/form-primitives';
+import { ContactPickerField } from '@/components/transactions/forms/ContactPickerField';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
+import { CategoryIcon } from '@/components/categories/CategoryIcon';
 import type {
   CashFlow,
   SaleItem,
@@ -67,6 +72,7 @@ import type {
 import type { Account } from '@/types/account.types';
 import type { Product } from '@/types/product.types';
 import type { Contact } from '@/types/contact.types';
+import type { MergedCategory } from '@/types/category.types';
 
 export function TransactionDetailPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -78,6 +84,7 @@ export function TransactionDetailPage(): React.ReactElement {
   const canRead = useCan(PermissionSlug.TRANSACTIONS_READ);
   const canCreateCashFlow = useCan(PermissionSlug.CASH_FLOWS_CREATE);
   const canVoid = useCan(PermissionSlug.TRANSACTIONS_VOID);
+  const canEdit = useCan(PermissionSlug.TRANSACTIONS_UPDATE);
 
   const txId = Number(id);
   const transactionQuery = useTransaction(Number.isFinite(txId) ? txId : null, {
@@ -99,9 +106,12 @@ export function TransactionDetailPage(): React.ReactElement {
     { all: true, status: 'active' },
     { enabled: Boolean(tx) },
   );
+  // Always fetch the merged category list when we have a tx — the edit
+  // modal needs it as a picker, not just as a label lookup. Cheap query
+  // (org-scoped, paginated `all`) so always-on is fine.
   const categories = useCategories(
     { all: true },
-    { enabled: Boolean(tx?.categoryId) },
+    { enabled: Boolean(tx) },
   );
   const members = useMembers({ all: true }, { enabled: Boolean(tx) });
 
@@ -163,6 +173,7 @@ export function TransactionDetailPage(): React.ReactElement {
   const confirmTx = useConfirmTransaction();
   const cancelTx = useCancelTransaction();
   const updateTx = useUpdateTransaction();
+  const swapAccount = useSwapCashFlowAccount();
 
   if (isReady && !canRead) {
     return (
@@ -435,6 +446,17 @@ export function TransactionDetailPage(): React.ReactElement {
         </section>
       ) : null}
 
+      {/* Audit history — read directly from metadata.history. Only
+          rendered when the tx has actually been edited so an unchanged
+          row stays clean. */}
+      <AuditHistorySection
+        history={extractAuditHistory(tx.metadata)}
+        memberNameById={memberNameById}
+        accountNameById={accountNameById}
+        contacts={contacts.data?.data ?? []}
+        categories={categories.data?.data ?? []}
+      />
+
       {isInitial ? (
         <ScreenAction>
           <div className="flex w-full flex-col gap-2">
@@ -496,35 +518,51 @@ export function TransactionDetailPage(): React.ReactElement {
             </Button>
           </div>
         </ScreenAction>
-      ) : (showAddCashFlowAction || (canVoid && !isVoided)) ? (
+      ) : (showAddCashFlowAction || (canVoid && !isVoided) || (canEdit && !isVoided)) ? (
         <ScreenAction>
-          <div className="flex w-full gap-2">
-            {showAddCashFlowAction ? (
-              <Button
-                type="button"
-                size="xl"
-                className="flex-1"
-                onClick={() => {
-                  tgHapticImpact('light');
-                  setAddCashFlowOpen(true);
-                }}
-              >
-                <Plus className="h-5 w-5" />
-                {t('tx_detail.add_payment')}
-              </Button>
-            ) : null}
+          <div className="flex w-full flex-col gap-2">
+            <div className="flex w-full gap-2">
+              {showAddCashFlowAction ? (
+                <Button
+                  type="button"
+                  size="xl"
+                  className="flex-1"
+                  onClick={() => {
+                    tgHapticImpact('light');
+                    setAddCashFlowOpen(true);
+                  }}
+                >
+                  <Plus className="h-5 w-5" />
+                  {t('tx_detail.add_payment')}
+                </Button>
+              ) : null}
+              {canEdit && !isVoided ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="xl"
+                  className="flex-1"
+                  onClick={() => {
+                    tgHapticImpact('light');
+                    setEditOpen(true);
+                  }}
+                >
+                  <Pencil className="h-5 w-5" />
+                  {t('common.edit')}
+                </Button>
+              ) : null}
+            </div>
             {canVoid && !isVoided ? (
               <Button
                 type="button"
-                variant="destructive"
-                size="xl"
-                className="flex-1"
+                variant="ghost"
+                size="lg"
                 onClick={() => {
                   tgHapticImpact('medium');
                   setVoidTxOpen(true);
                 }}
               >
-                <XCircle className="h-5 w-5" />
+                <XCircle className="h-4 w-4" />
                 {t('tx_detail.void')}
               </Button>
             ) : null}
@@ -581,20 +619,45 @@ export function TransactionDetailPage(): React.ReactElement {
         title={t('tx_detail.edit_modal.title')}
         description={t('tx_detail.edit_modal.description')}
       >
-        <InitialEditForm
-          transaction={tx}
-          accounts={accounts.data ?? []}
-          products={products.data?.data ?? []}
-          contacts={contacts.data?.data ?? []}
-          deferredCashFlows={deferredCashFlows}
-          isPending={updateTx.isPending}
-          error={updateTx.error}
-          onSubmit={async (body) => {
-            await updateTx.mutateAsync({ transactionId: tx.id, body });
-            setEditOpen(false);
-          }}
-          onCancel={() => setEditOpen(false)}
-        />
+        {isInitial ? (
+          <InitialEditForm
+            transaction={tx}
+            accounts={accounts.data ?? []}
+            products={products.data?.data ?? []}
+            contacts={contacts.data?.data ?? []}
+            deferredCashFlows={deferredCashFlows}
+            isPending={updateTx.isPending}
+            error={updateTx.error}
+            onSubmit={async (body) => {
+              await updateTx.mutateAsync({ transactionId: tx.id, body });
+              setEditOpen(false);
+            }}
+            onCancel={() => setEditOpen(false)}
+          />
+        ) : (
+          <ActiveEditForm
+            transaction={tx}
+            accounts={accounts.data ?? []}
+            contacts={contacts.data?.data ?? []}
+            categories={categories.data?.data ?? []}
+            isPending={updateTx.isPending || swapAccount.isPending}
+            error={updateTx.error ?? swapAccount.error}
+            onSubmit={async ({ body, accountSwap }) => {
+              if (Object.keys(body).length > 0) {
+                await updateTx.mutateAsync({ transactionId: tx.id, body });
+              }
+              if (accountSwap) {
+                await swapAccount.mutateAsync({
+                  cashFlowId: accountSwap.cashFlowId,
+                  parentTransactionId: tx.id,
+                  accountId: accountSwap.accountId,
+                });
+              }
+              setEditOpen(false);
+            }}
+            onCancel={() => setEditOpen(false)}
+          />
+        )}
       </Modal>
 
       <Modal
@@ -1181,6 +1244,415 @@ function InitialEditForm({
           className="flex-1"
           disabled={isPending}
           onClick={onCancel}
+        >
+          {t('common.cancel')}
+        </Button>
+        <Button
+          type="submit"
+          size="lg"
+          className="flex-1"
+          disabled={isPending}
+        >
+          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          {t('common.save')}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+/**
+ * One entry of the edit history that `updateActiveEvent` appends to
+ * `metadata.history`. Field-level diff with the actor + timestamp.
+ */
+interface AuditHistoryEntry {
+  at: string;
+  by: number | 'ai';
+  changes: Record<string, { from: unknown; to: unknown }>;
+}
+
+/**
+ * Pulls the audit log entries from a transaction's `metadata.history`
+ * array. Backend writes them as { at, by, changes } via
+ * `updateActiveEvent` — see modules/transactions/transactions.service.ts.
+ * Anything misshapen is silently dropped so a malformed legacy entry
+ * doesn't break the panel.
+ */
+function extractAuditHistory(
+  metadata: Record<string, unknown> | null,
+): AuditHistoryEntry[] {
+  if (!metadata || typeof metadata !== 'object') return [];
+  const raw = (metadata as { history?: unknown }).history;
+  if (!Array.isArray(raw)) return [];
+  const out: AuditHistoryEntry[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const rec = item as Record<string, unknown>;
+    if (typeof rec.at !== 'string') continue;
+    if (typeof rec.by !== 'number' && rec.by !== 'ai') continue;
+    if (!rec.changes || typeof rec.changes !== 'object') continue;
+    out.push({
+      at: rec.at,
+      by: rec.by as number | 'ai',
+      changes: rec.changes as Record<string, { from: unknown; to: unknown }>,
+    });
+  }
+  // Newest first — feels right for a chat-style activity feed.
+  return out.slice().reverse();
+}
+
+interface AuditHistorySectionProps {
+  history: AuditHistoryEntry[];
+  memberNameById: Map<number, string>;
+  accountNameById: Map<number, string>;
+  contacts: readonly Contact[];
+  categories: readonly MergedCategory[];
+}
+
+function AuditHistorySection({
+  history,
+  memberNameById,
+  contacts,
+  categories,
+}: AuditHistorySectionProps): React.ReactElement | null {
+  const { t } = useTranslation();
+  if (history.length === 0) return null;
+
+  function formatValue(field: string, raw: unknown): string {
+    if (raw === null || raw === undefined) return '—';
+    if (field === 'categoryId' && typeof raw === 'number') {
+      return categories.find((c) => c.id === raw)?.name ?? `#${raw}`;
+    }
+    if (field === 'contactId' && typeof raw === 'number') {
+      return contacts.find((c) => c.id === raw)?.name ?? `#${raw}`;
+    }
+    return String(raw);
+  }
+
+  function actorLabel(by: AuditHistoryEntry['by']): string {
+    if (by === 'ai') return t('tx_detail.audit.actor_ai');
+    return memberNameById.get(by) ?? `#${by}`;
+  }
+
+  return (
+    <section className="px-4 pt-4">
+      <h2 className="px-1 pb-1.5 text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
+        {t('tx_detail.audit.section_title')}
+      </h2>
+      <div className="overflow-hidden rounded-2xl bg-card">
+        <ul className="divide-y divide-border">
+          {history.map((entry, idx) => (
+            <li key={`${entry.at}-${idx}`} className="px-4 py-3">
+              <div className="flex items-center justify-between gap-2 text-[12px] text-muted-foreground">
+                <span className="truncate font-medium text-foreground">
+                  {actorLabel(entry.by)}
+                </span>
+                <span className="tabular-nums">
+                  {new Intl.DateTimeFormat('uz-UZ', {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  }).format(new Date(entry.at))}
+                </span>
+              </div>
+              <ul className="mt-1.5 space-y-1 text-[13px]">
+                {Object.entries(entry.changes).map(([field, change]) => (
+                  <li key={field} className="flex flex-wrap items-baseline gap-1">
+                    <span className="text-muted-foreground">
+                      {t(`tx_detail.audit.field.${field}` as const, {
+                        defaultValue: field,
+                      })}
+                      :
+                    </span>
+                    <span className="line-through opacity-60">
+                      {formatValue(field, change.from)}
+                    </span>
+                    <span>→</span>
+                    <span className="font-medium">
+                      {formatValue(field, change.to)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Inline editor for an `active` transaction. Covers the metadata-style
+ * fields the user can safely tweak post-confirm without re-running the
+ * money / inventory math:
+ *
+ *   description · date · dueDate · categoryId · contactId · account
+ *
+ * The first five flow through `PATCH /transactions/:id` (the same
+ * `updateActiveEvent` path the AI K3 update uses). The cash-flow
+ * account is a separate concern — there's no single account_id on the
+ * parent row, it lives on each cash_flow leg — so we route it through
+ * the dedicated `swapCashFlowAccount` mutation. The submitter shape
+ * lets the caller decide ordering and whether to skip empty diffs.
+ */
+interface AccountSwapPayload {
+  cashFlowId: number;
+  accountId: number;
+}
+
+interface ActiveEditFormSubmitInput {
+  body: {
+    date?: string;
+    description?: string | null;
+    dueDate?: string | null;
+    categoryId?: number | null;
+    contactId?: number | null;
+  };
+  accountSwap?: AccountSwapPayload;
+}
+
+interface ActiveEditFormProps {
+  transaction: Transaction;
+  accounts: Account[];
+  contacts: Contact[];
+  categories: MergedCategory[];
+  isPending: boolean;
+  error: unknown;
+  onSubmit: (next: ActiveEditFormSubmitInput) => Promise<void>;
+  onCancel: () => void;
+}
+
+function ActiveEditForm({
+  transaction,
+  accounts,
+  contacts,
+  categories,
+  isPending,
+  error,
+  onSubmit,
+  onCancel,
+}: ActiveEditFormProps): React.ReactElement {
+  const { t } = useTranslation();
+
+  // The single editable cash flow leg, when one is unambiguously
+  // attributable to the transaction. Transfers have two legs by design
+  // and need a separate flow — for now we omit the account picker on
+  // those types (keeping description / date / contact still editable).
+  const swapTarget = useMemo(() => {
+    const single =
+      transaction.type !== 'transfer' &&
+      (transaction.cashFlows ?? []).filter((cf) => cf.status === 'active');
+    if (!single || single.length !== 1) return null;
+    return single[0];
+  }, [transaction.cashFlows, transaction.type]);
+
+  const initialDateIso = transaction.date.slice(0, 10);
+  const initialDueDateIso = transaction.dueDate
+    ? transaction.dueDate.slice(0, 10)
+    : '';
+
+  const [description, setDescription] = useState<string>(
+    transaction.description ?? '',
+  );
+  const [date, setDate] = useState<string>(initialDateIso);
+  const [dueDate, setDueDate] = useState<string>(initialDueDateIso);
+  const [contactId, setContactId] = useState<number | null>(
+    transaction.contactId,
+  );
+  const [categoryId, setCategoryId] = useState<number | null>(
+    transaction.categoryId,
+  );
+  const [accountId, setAccountId] = useState<number | null>(
+    swapTarget?.accountId ?? null,
+  );
+
+  // Restrict the contact picker to the role that fits the txn type;
+  // mirrors the InitialEditForm filter so behaviour is consistent.
+  const relevantContacts = useMemo(() => {
+    if (transaction.type === 'sale') {
+      return contacts.filter(
+        (c) => c.type === 'customer' || c.type === 'partner',
+      );
+    }
+    if (transaction.type === 'purchase') {
+      return contacts.filter(
+        (c) => c.type === 'supplier' || c.type === 'partner',
+      );
+    }
+    return contacts;
+  }, [contacts, transaction.type]);
+
+  // Category picker is type-scoped to the cash-flow direction (income
+  // for sale/income/debt_in, expense for purchase/expense/debt_out).
+  // Transfer / adjustment / opening_balance / suspense don't carry
+  // user-facing categories.
+  const categoryDirection: 'income' | 'expense' | null = useMemo(() => {
+    switch (transaction.type) {
+      case 'sale':
+      case 'income':
+      case 'debt_in':
+        return 'income';
+      case 'purchase':
+      case 'expense':
+      case 'debt_out':
+        return 'expense';
+      default:
+        return null;
+    }
+  }, [transaction.type]);
+
+  const categoryOptions = useMemo(() => {
+    if (categoryDirection === null) return [];
+    return categories
+      .filter((c) => c.type === categoryDirection && !c.isArchived)
+      .flatMap((c) => {
+        if (c.id === null) return [];
+        return [
+          {
+            value: c.id,
+            label: c.name,
+            iconNode: (
+              <CategoryIcon
+                icon={c.icon}
+                color={c.color}
+                fallbackText={c.name}
+              />
+            ),
+          },
+        ];
+      });
+  }, [categories, categoryDirection]);
+
+  // Only show accounts in the transaction's currency so we don't
+  // accidentally re-point a UZS leg at a USD wallet. Mirror the
+  // EditTransactionAccountPage behaviour.
+  const accountOptions = useMemo(() => {
+    return accounts
+      .filter((a) => a.currency === transaction.currency)
+      .map((a) => ({
+        value: a.id,
+        label: a.name,
+        description: formatMoney(a.currentBalance, a.currency),
+        icon: ACCOUNT_TYPE_ICON[a.type],
+      }));
+  }, [accounts, transaction.currency]);
+
+  function handleSubmit(e: React.FormEvent): void {
+    e.preventDefault();
+    const body: ActiveEditFormSubmitInput['body'] = {};
+
+    if (description !== (transaction.description ?? '')) {
+      body.description = description.length > 0 ? description : null;
+    }
+    if (date && date !== initialDateIso) {
+      body.date = date;
+    }
+    if (dueDate !== initialDueDateIso) {
+      body.dueDate = dueDate.length > 0 ? dueDate : null;
+    }
+    if (contactId !== transaction.contactId) {
+      body.contactId = contactId;
+    }
+    if (categoryId !== transaction.categoryId) {
+      body.categoryId = categoryId;
+    }
+
+    const accountSwap: AccountSwapPayload | undefined =
+      swapTarget && accountId !== null && accountId !== swapTarget.accountId
+        ? { cashFlowId: swapTarget.id, accountId }
+        : undefined;
+
+    if (Object.keys(body).length === 0 && !accountSwap) {
+      onCancel();
+      return;
+    }
+
+    void onSubmit({ body, accountSwap });
+  }
+
+  const showDueDate =
+    transaction.type === 'sale' ||
+    transaction.type === 'purchase' ||
+    transaction.type === 'debt_in' ||
+    transaction.type === 'debt_out';
+
+  return (
+    <form className="space-y-3" onSubmit={handleSubmit}>
+      <div className="space-y-1.5">
+        <Label htmlFor="active-edit-description">
+          {t('tx_detail.field.description')}
+        </Label>
+        <Input
+          id="active-edit-description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={t('tx_detail.edit_form.description_placeholder')}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>{t('tx_detail.field.date')}</Label>
+        <DatePicker
+          value={date}
+          onChange={(v) => setDate(v ?? initialDateIso)}
+        />
+      </div>
+
+      {showDueDate ? (
+        <div className="space-y-1.5">
+          <Label>{t('tx_detail.field.due_date')}</Label>
+          <DatePicker
+            value={dueDate}
+            onChange={(v) => setDueDate(v ?? '')}
+            clearable
+          />
+        </div>
+      ) : null}
+
+      {categoryDirection !== null ? (
+        <SelectField<number>
+          id="active-edit-category"
+          label={t('tx_detail.field.category')}
+          value={categoryId}
+          onChange={setCategoryId}
+          options={categoryOptions}
+          clearable
+        />
+      ) : null}
+
+      <ContactPickerField
+        id="active-edit-contact"
+        label={t('tx_detail.field.contact')}
+        value={contactId ?? ''}
+        onChange={setContactId}
+        contacts={relevantContacts}
+        clearable
+      />
+
+      {swapTarget && accountOptions.length > 0 ? (
+        <SelectField<number>
+          id="active-edit-account"
+          label={t('tx_detail.field.account')}
+          value={accountId}
+          onChange={(v) => setAccountId(v ?? swapTarget.accountId)}
+          options={accountOptions}
+        />
+      ) : null}
+
+      {error ? (
+        <p className="text-[12px] text-destructive">
+          {getApiErrorMessage(error, t('errors.fallback'))}
+        </p>
+      ) : null}
+
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          className="flex-1"
+          onClick={onCancel}
+          disabled={isPending}
         >
           {t('common.cancel')}
         </Button>

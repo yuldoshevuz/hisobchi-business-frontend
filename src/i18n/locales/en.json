@@ -926,7 +926,16 @@
     "edit_form.contact_placeholder": "Pick a contact",
     "edit_form.contact_empty": "No matching contact for this type",
     "edit_form.contact_clear": "Clear",
-    "edit_form.due_date_label": "Due date (for debt records)"
+    "edit_form.due_date_label": "Due date (for debt records)",
+    "edit_form.description_placeholder": "Optional note",
+    "audit.section_title": "Edit history",
+    "audit.actor_ai": "AI",
+    "audit.field.description": "Description",
+    "audit.field.date": "Date",
+    "audit.field.dueDate": "Due date",
+    "audit.field.categoryId": "Category",
+    "audit.field.contactId": "Contact",
+    "audit.field.amount": "Amount"
   },
   "use_case": {
     "sale.label": "Sale",
