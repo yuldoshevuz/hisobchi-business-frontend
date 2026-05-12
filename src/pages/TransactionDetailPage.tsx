@@ -37,6 +37,7 @@ import { AccessDeniedView } from '@/components/AccessDeniedView';
 import { AddCashFlowForm } from '@/components/transactions/AddCashFlowForm';
 import { VoidConfirmDialog } from '@/components/transactions/VoidConfirmDialog';
 import { useCan, usePermissions } from '@/hooks/use-permissions';
+import { env } from '@/config/env';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { formatMoney } from '@/lib/format';
 import { PermissionSlug } from '@/lib/permission-slugs';
@@ -356,6 +357,20 @@ export function TransactionDetailPage(): React.ReactElement {
           />
         </div>
       </section>
+
+      {/* AI media — the bot stores the original voice memo / receipt
+          photo as `attachmentUrl`. Render the source so the user can
+          play / view what the AI saw, not just the transcript. */}
+      {tx.attachmentUrl ? (
+        <section className="px-4 pt-3">
+          <h2 className="px-1 pb-1.5 text-[12px] font-medium uppercase tracking-wide text-muted-foreground">
+            {t('tx_detail.attachment_section')}
+          </h2>
+          <div className="overflow-hidden rounded-2xl bg-card p-3">
+            <TransactionMediaPreview url={tx.attachmentUrl} />
+          </div>
+        </section>
+      ) : null}
 
       {/* Cash flows */}
       <section className="px-4 pt-4">
@@ -1792,6 +1807,46 @@ function ActiveEditForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+/**
+ * Inline player / preview for the AI source media attached to a
+ * transaction (voice memo, receipt photo). Backend stores the URL as
+ * a path relative to its origin (e.g. `/uploads/2026/04/abc.ogg`) —
+ * `useStaticAssets` serves the file directly. We sniff the extension
+ * to pick `<audio>` vs `<img>`, then drop a download link below so
+ * the user can save the original if they want.
+ */
+function TransactionMediaPreview({
+  url,
+}: {
+  url: string;
+}): React.ReactElement {
+  const absolute = url.startsWith('http')
+    ? url
+    : `${env.backendOrigin}${url}`;
+  const lower = url.toLowerCase();
+  const isAudio = /\.(ogg|oga|mp3|m4a|wav|aac|webm)(\?|$)/.test(lower);
+  const isImage = /\.(jpe?g|png|webp|heic|heif|gif)(\?|$)/.test(lower);
+
+  return (
+    <div className="space-y-2">
+      {isAudio ? (
+        <audio
+          controls
+          src={absolute}
+          preload="metadata"
+          className="w-full"
+        />
+      ) : isImage ? (
+        <img
+          src={absolute}
+          alt="attachment"
+          className="max-h-[420px] w-full rounded-xl object-contain"
+        />
+      ) : null}
+    </div>
   );
 }
 

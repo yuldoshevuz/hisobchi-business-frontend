@@ -871,6 +871,7 @@
     "edit": "Edit",
     "voided_at": "Cancelled",
     "items_section": "Items",
+    "attachment_section": "Voice / photo",
     "cash_flows_section": "Cash flow",
     "history_section": "History",
     "repayment_section": "Payments",
