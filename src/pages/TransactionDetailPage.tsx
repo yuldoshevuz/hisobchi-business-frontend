@@ -469,7 +469,7 @@ export function TransactionDetailPage(): React.ReactElement {
             <div className="flex w-full gap-2">
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 size="xl"
                 className="flex-1"
                 disabled={confirmTx.isPending || cancelTx.isPending}
@@ -508,7 +508,7 @@ export function TransactionDetailPage(): React.ReactElement {
             </div>
             <Button
               type="button"
-              variant="ghost"
+              variant="destructive"
               size="lg"
               disabled={confirmTx.isPending || cancelTx.isPending}
               onClick={() => {
@@ -542,7 +542,7 @@ export function TransactionDetailPage(): React.ReactElement {
               {canEdit && !isVoided ? (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   size="xl"
                   className="flex-1"
                   onClick={() => {
@@ -558,7 +558,7 @@ export function TransactionDetailPage(): React.ReactElement {
             {canVoid && !isVoided ? (
               <Button
                 type="button"
-                variant="ghost"
+                variant="destructive"
                 size="lg"
                 onClick={() => {
                   tgHapticImpact('medium');
