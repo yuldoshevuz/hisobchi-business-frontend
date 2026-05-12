@@ -890,6 +890,7 @@
     "field.category": "Kategoriya",
     "field.due_date": "Muddat",
     "field.created_by": "Yaratdi",
+    "field.account": "Hisob",
     "cash_flows.proposed_section": "Taklif qilingan to'lovlar",
     "cash_flows.empty_initial": "AI to'lov taklif qilmadi (qarzga deb hisoblanadi)",
     "cash_flows.empty": "Hali to'lovlar yo'q",

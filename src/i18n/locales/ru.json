@@ -890,6 +890,7 @@
     "field.category": "Категория",
     "field.due_date": "Срок",
     "field.created_by": "Создал",
+    "field.account": "Счёт",
     "cash_flows.proposed_section": "Предложенные платежи",
     "cash_flows.empty_initial": "AI не предложил платежей (считается в долг)",
     "cash_flows.empty": "Платежей пока нет",

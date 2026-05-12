@@ -890,6 +890,7 @@
     "field.category": "Category",
     "field.due_date": "Due date",
     "field.created_by": "Created by",
+    "field.account": "Account",
     "cash_flows.proposed_section": "Proposed payments",
     "cash_flows.empty_initial": "AI didn't propose a payment (treated as credit)",
     "cash_flows.empty": "No payments yet",
