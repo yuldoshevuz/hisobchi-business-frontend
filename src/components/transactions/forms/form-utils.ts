@@ -1,6 +1,33 @@
+import type { TFunction } from 'i18next';
+import type { Product } from '@/types/product.types';
+
 /** ISO date for today (UTC). Default for transaction date pickers. */
 export function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Build the SelectField `description` line for a product option — surfaces
+ * current stock and default price so the operator can pick the right row
+ * without diving into the catalog. Returns `undefined` when the product has
+ * neither piece of metadata (rare; brand-new product with empty defaults).
+ */
+export function formatProductMeta(
+  product: Product,
+  t: TFunction,
+): string | undefined {
+  const parts: string[] = [];
+  if (product.currentStock !== null) {
+    parts.push(
+      t('sale_form.product_meta_stock', {
+        n: formatAmountDisplay(product.currentStock),
+      }),
+    );
+  }
+  if (product.defaultPrice !== null && product.defaultPrice !== '0') {
+    parts.push(`${formatAmountDisplay(product.defaultPrice)} ${product.currency}`);
+  }
+  return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
 /**

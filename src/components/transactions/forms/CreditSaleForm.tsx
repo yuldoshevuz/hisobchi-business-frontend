@@ -22,7 +22,8 @@ import {
 } from '@/api/hooks/use-inline-create';
 import { AmountField, SelectField } from './form-primitives';
 import { ContactPickerField } from './ContactPickerField';
-import { formatAmountDisplay } from './form-utils';
+import { formatAmountDisplay, formatProductMeta } from './form-utils';
+import { StockShortfallWarning } from './StockShortfallWarning';
 import type { CreateSaleRequest } from '@/types/transaction.types';
 
 interface CreditSaleFormProps {
@@ -150,7 +151,8 @@ export function CreditSaleForm({
         onChange={setProductId}
         options={productList.map((p) => ({
           value: p.id,
-          label: `${p.name} · ${p.currency}`,
+          label: p.name,
+          description: formatProductMeta(p, t),
         }))}
         onCreate={async (name) => {
           const id = await inlineProduct.onCreate(name);
@@ -205,6 +207,11 @@ export function CreditSaleForm({
           ) : null}
         </div>
       ) : null}
+
+      <StockShortfallWarning
+        product={product}
+        requestedQuantity={effectiveQuantity}
+      />
 
       <AmountField
         id="credit-price"

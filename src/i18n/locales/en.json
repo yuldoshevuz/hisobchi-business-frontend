@@ -858,6 +858,7 @@
     "contact_helper_normal": "Optional. Sales without a customer are accepted too",
     "quantity": "Quantity",
     "stock_remaining": "In stock: {n}",
+    "product_meta_stock": "Stock: {n}",
     "unit_price": "Price (per unit)",
     "total_debt": "Total debt",
     "total_sum": "Total amount",
@@ -865,7 +866,10 @@
     "due_date_helper": "Optional. Used for reminders",
     "on_credit_title": "On credit",
     "on_credit_description": "No payment is recorded now. The customer can pay later.",
-    "fallback_label": "Sale"
+    "fallback_label": "Sale",
+    "stock_warning_title": "Stock is short",
+    "stock_warning_body": "Stock currently has {available} pcs, but you're selling {requested}. On confirm, the system will auto-create a purchase for the missing {missing} pcs (no supplier, unpaid) — fill it in later.",
+    "stock_warning_zero": "No {product} in stock. On confirm, the system will auto-create a purchase for {requested} pcs — add the supplier and payment afterwards."
   },
   "void_commission": {
     "reason": "Reason (optional)",

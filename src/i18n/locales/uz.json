@@ -858,6 +858,7 @@
     "contact_helper_normal": "Ixtiyoriy. Mijozsiz savdo ham qabul qilinadi",
     "quantity": "Soni",
     "stock_remaining": "Ombordagi qoldiq: {n}",
+    "product_meta_stock": "Qoldiq: {n}",
     "unit_price": "Narxi (1 dona uchun)",
     "total_debt": "Jami qarz",
     "total_sum": "Jami summa",
@@ -865,7 +866,10 @@
     "due_date_helper": "Ixtiyoriy. Eslatmalar uchun ishlatiladi",
     "on_credit_title": "Qarzga sotdim",
     "on_credit_description": "To'lov hozir tushmaydi. Mijoz keyinroq to'lashi mumkin.",
-    "fallback_label": "Sotuv"
+    "fallback_label": "Sotuv",
+    "stock_warning_title": "Ombor yetarli emas",
+    "stock_warning_body": "Hozir omborda {available} dona, lekin {requested} dona sotmoqchisiz. Sotuvni tasdiqlasangiz, tizim yetishmagan {missing} dona uchun avtomatik xarid (yetkazib beruvchisiz, to'lovsiz) yaratadi — keyinroq to'ldirib qo'yasiz.",
+    "stock_warning_zero": "Omborda {product} mavjud emas. Sotuvni tasdiqlasangiz, tizim {requested} dona uchun avtomatik xarid yaratadi — yetkazib beruvchi va to'lovni keyin to'ldirasiz."
   },
   "void_commission": {
     "reason": "Sabab (ixtiyoriy)",

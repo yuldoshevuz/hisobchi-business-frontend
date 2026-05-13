@@ -23,11 +23,12 @@ import {
 } from '@/api/hooks/use-inline-create';
 import { AmountField, SelectField } from './form-primitives';
 import { ContactPickerField } from './ContactPickerField';
-import { formatAmountDisplay } from './form-utils';
+import { formatAmountDisplay, formatProductMeta } from './form-utils';
 import type {
   CreateSaleRequest,
   PaymentLegRequest,
 } from '@/types/transaction.types';
+import { StockShortfallWarning } from './StockShortfallWarning';
 
 interface SaleFormProps {
   onCreated: (transactionId: number) => void;
@@ -170,7 +171,8 @@ export function SaleForm({
         onChange={setProductId}
         options={productList.map((p) => ({
           value: p.id,
-          label: `${p.name} · ${p.currency}`,
+          label: p.name,
+          description: formatProductMeta(p, t),
         }))}
         helperText={
           productList.length === 0 && !products.isPending
@@ -243,6 +245,11 @@ export function SaleForm({
           ) : null}
         </div>
       ) : null}
+
+      <StockShortfallWarning
+        product={product}
+        requestedQuantity={effectiveQuantity}
+      />
 
       <AmountField
         id="sotuv-price"
