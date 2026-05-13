@@ -7,9 +7,12 @@ import {
 } from '@tanstack/react-query';
 import { salesApi } from '@/api/sales.api';
 import { queryKeys } from '@/api/query-keys';
+import i18n from '@/i18n';
+import { tgShowAlert } from '@/lib/telegram';
 import { tokenStore } from '@/store/token-store';
 import type {
   AddPaymentRequest,
+  AutoBackfillProduct,
   CreateSaleRequest,
   ListSalesQuery,
   PaginatedTransactions,
@@ -91,8 +94,39 @@ export function useCreateSale(): ReturnType<
         created,
       );
       await invalidateAfterSale(queryContact);
+      if (
+        created.autoBackfilledProducts &&
+        created.autoBackfilledProducts.length > 0
+      ) {
+        tgShowAlert(buildAutoBackfillNotice(created.autoBackfilledProducts));
+      }
     },
   });
+}
+
+/**
+ * Composes the localized notice surfaced after a sale auto-creates one or
+ * more `purchase` rows to keep stock non-negative. Lists each backfilled
+ * product so the operator knows exactly which auto-purchases need a
+ * supplier and a payment.
+ */
+function buildAutoBackfillNotice(items: AutoBackfillProduct[]): string {
+  const header = i18n.t('sale_form.auto_backfill_notice', { count: items.length });
+  const bullets = items
+    .map((item) =>
+      i18n.t('sale_form.auto_backfill_line', {
+        product: item.productName,
+        quantity: trimZeros(item.shortfallQuantity),
+      }),
+    )
+    .join('\n');
+  const hint = i18n.t('sale_form.auto_backfill_hint');
+  return `${header}\n${bullets}\n\n${hint}`;
+}
+
+function trimZeros(value: string): string {
+  if (!value.includes('.')) return value;
+  return value.replace(/\.?0+$/, '');
 }
 
 interface AddSalePaymentVars {

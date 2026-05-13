@@ -19,6 +19,7 @@ interface TelegramWebApp {
   expand: () => void;
   close: () => void;
   disableVerticalSwipes?: () => void;
+  showAlert?: (message: string, callback?: () => void) => void;
   HapticFeedback?: {
     impactOccurred: (style: HapticImpactStyle) => void;
     notificationOccurred: (type: HapticNotificationType) => void;
@@ -87,6 +88,28 @@ export function tgHapticImpact(style: HapticImpactStyle = 'light'): void {
 export function tgHapticNotify(type: HapticNotificationType): void {
   try {
     getWebApp()?.HapticFeedback?.notificationOccurred(type);
+  } catch {
+    // No-op.
+  }
+}
+
+/**
+ * Show a blocking notice. Uses Telegram's native `showAlert` when running
+ * inside the WebApp (Telegram-styled modal), otherwise falls back to the
+ * browser's `alert()` so dev/mobile-web flows still see the message.
+ */
+export function tgShowAlert(message: string): void {
+  try {
+    const wa = getWebApp();
+    if (wa?.showAlert) {
+      wa.showAlert(message);
+      return;
+    }
+  } catch {
+    // Fall through to window.alert.
+  }
+  try {
+    window.alert(message);
   } catch {
     // No-op.
   }

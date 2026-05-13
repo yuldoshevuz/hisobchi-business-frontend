@@ -869,7 +869,10 @@
     "fallback_label": "Sale",
     "stock_warning_title": "Stock is short",
     "stock_warning_body": "Stock currently has {available} pcs, but you're selling {requested}. On confirm, the system will auto-create a purchase for the missing {missing} pcs (no supplier, unpaid) — fill it in later.",
-    "stock_warning_zero": "No {product} in stock. On confirm, the system will auto-create a purchase for {requested} pcs — add the supplier and payment afterwards."
+    "stock_warning_zero": "No {product} in stock. On confirm, the system will auto-create a purchase for {requested} pcs — add the supplier and payment afterwards.",
+    "auto_backfill_notice": "Stock was short, so {count} auto-purchase(s) were created:",
+    "auto_backfill_line": "• {product} — {quantity} pcs",
+    "auto_backfill_hint": "Open the auto-created purchases and fill in the supplier, cost and payment."
   },
   "void_commission": {
     "reason": "Reason (optional)",
