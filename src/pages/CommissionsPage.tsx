@@ -103,8 +103,8 @@ export function CommissionsPage(): React.ReactElement {
     ? rows.filter((row) => {
         const member = memberById.get(row.memberId);
         const haystack = [
-          member?.user.fullName ?? '',
-          member?.user.phoneNumber ?? '',
+          member?.name ?? '',
+          member?.phone ?? '',
           String(row.saleId),
           row.amount,
         ]
@@ -459,7 +459,7 @@ function CommissionRow({
 }: CommissionRowProps): React.ReactElement {
   const { t } = useTranslation();
   const isActive = commission.status === 'active';
-  const initials = computeInitials(member?.user.fullName ?? '');
+  const initials = computeInitials(member?.name ?? '');
 
   return (
     <ListItem
@@ -485,7 +485,7 @@ function CommissionRow({
       title={
         <span className="flex items-center gap-2">
           <span className="truncate">
-            {member?.user.fullName ??
+            {member?.name ??
               t('commissions_page.employee_fallback', { id: commission.memberId })}
           </span>
           {!isActive ? (
@@ -723,7 +723,7 @@ function FiltersForm({
     const q = memberQuery.trim().toLowerCase();
     if (q === '') return members;
     return members.filter((m) =>
-      [m.user.fullName, m.user.phoneNumber ?? '']
+      [m.name, m.phone ?? '']
         .join(' ')
         .toLowerCase()
         .includes(q),
@@ -810,12 +810,12 @@ function FiltersForm({
                 leading={
                   <Avatar className="h-10 w-10">
                     <AvatarFallback className="text-[12px]">
-                      {computeInitials(m.user.fullName) || '?'}
+                      {computeInitials(m.name) || '?'}
                     </AvatarFallback>
                   </Avatar>
                 }
-                title={m.user.fullName}
-                subtitle={m.user.phoneNumber ?? undefined}
+                title={m.name}
+                subtitle={m.phone ?? undefined}
                 trailing={
                   selected ? (
                     <span className="h-4 w-4 rounded-full bg-primary" />

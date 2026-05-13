@@ -31,7 +31,8 @@
     "show_less": "Show less",
     "retry": "Retry",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "apply": "Apply"
   },
   "nav": {
     "main": "Home",
@@ -369,6 +370,58 @@
     "action.remove": "Remove member",
     "action.remove_subtitle": "This action cannot be undone",
     "section.active": "Active and suspended",
+    "badge.staff_only": "name only",
+    "badge.pending": "pending",
+    "badge.suspended": "suspended",
+    "badge.tg_linked": "Telegram linked",
+    "search_placeholder": "Search by name, phone or role",
+    "empty_filtered": "No employees match the current filters",
+    "filter": {
+      "title": "Filter & sort",
+      "status_section": "Status",
+      "all": "All",
+      "active": "Active",
+      "suspended": "Suspended",
+      "pending": "Not registered",
+      "reset": "Reset",
+      "selected": "selected",
+      "result_count": "Showing {count} of {total} employees"
+    },
+    "sort": {
+      "label": "Sort",
+      "newest": "Newest first",
+      "name_asc": "Name A–Z",
+      "name_desc": "Name Z–A",
+      "salary_desc": "Salary (high → low)",
+      "commission_desc": "Commission (high → low)"
+    },
+    "row": {
+      "no_phone": "No phone",
+      "linked_user": "Account: {name}",
+      "salary_label": "Salary",
+      "commission_label": "Commission"
+    },
+    "detail": {
+      "invalid_id": "Invalid member id",
+      "load_failed": "Failed to load member data",
+      "pending_hint": "This employee hasn't registered yet. They'll be auto-linked when they sign up with this phone.",
+      "account_name": "Account name",
+      "account_phone": "Account phone",
+      "tg_id": "Telegram ID: {id}",
+      "sales_section": "Sales",
+      "sales_empty": "No sales yet",
+      "sales_total": "Sales total",
+      "sales_outstanding": "Outstanding",
+      "commissions_section": "Commissions earned",
+      "commissions_empty": "No commissions yet",
+      "commission_for_sale": "Sale #{saleId}",
+      "salaries_section": "Salary payments",
+      "salaries_empty": "No salary payments yet",
+      "payment_unpaid": "Outstanding: {amount}",
+      "view_all": "View all",
+      "total_count": "Total: {count}",
+      "archive_confirm": "Archive this employee?"
+    },
     "invite.title": "Invite member",
     "invite.description": "Send an invite by phone number",
     "edit.title": "Edit member",
@@ -700,7 +753,13 @@
     "price_placeholder": "12 000",
     "cost": "Cost",
     "cost_placeholder": "8 000",
-    "currency_locked": "Currency cannot be changed ({currency}). To change it, archive the product and create it again."
+    "currency_locked": "Currency cannot be changed ({currency}). To change it, archive the product and create it again.",
+    "track_stock": "Track stock",
+    "track_stock_helper_tracked": "Product — every sale/purchase updates the stock balance.",
+    "track_stock_helper_service": "Service — no stock is tracked.",
+    "track_stock_helper_enabling": "Switching from service to product. Enter the opening balance.",
+    "track_stock_helper_disabling": "Switching from product to service. The current balance will be cleared.",
+    "opening_stock": "Opening stock"
   },
   "expense_form": {
     "kind_label": "Expense type",
@@ -838,6 +897,9 @@
     "select": "Pick one...",
     "search": "Search",
     "no_options": "No options to pick",
+    "create_new": "Add new: {name}",
+    "search_or_create": "Search or add new",
+    "create_new_aria": "Add new",
     "clear_selection": "Clear selection",
     "contact": "Contact",
     "category": "Category",
@@ -892,6 +954,7 @@
     "field.date": "Date",
     "field.description": "Description",
     "field.contact": "Contact",
+    "field.employee": "Employee",
     "field.category": "Category",
     "field.due_date": "Due date",
     "field.created_by": "Created by",
@@ -941,6 +1004,7 @@
     "audit.field.dueDate": "Due date",
     "audit.field.categoryId": "Category",
     "audit.field.contactId": "Contact",
+    "audit.field.memberId": "Employee",
     "audit.field.amount": "Amount",
     "audit.change.set": "{field} set to {to}",
     "audit.change.cleared": "{field} cleared (was {from})",
@@ -1092,11 +1156,23 @@
   },
   "invite_member": {
     "phone": "Phone",
+    "phone_optional": "Phone (optional)",
+    "name": "Name",
     "name_optional": "Name (optional)",
     "name_placeholder": "Azizbek Karimov",
-    "submit": "Invite"
+    "hint": "The employee is added by name. Phone is optional — provide it if you know it, or add it later. When the phone is set, signing up with that number automatically links the user to this staff record so all salary / commission history transfers over.",
+    "submit": "Invite",
+    "submit_staff": "Add staff",
+    "mode": {
+      "invite": "Invite by phone",
+      "staff": "Add by name",
+      "invite_hint": "The employee receives an invite by phone and can sign into the app.",
+      "staff_hint": "A staff record is created by name only (no User account). Used for salary and commission entries."
+    }
   },
   "edit_employee": {
+    "name": "Name",
+    "phone_optional": "Phone (optional)",
     "salary_optional": "Salary (optional)",
     "currency": "Currency",
     "commission_optional": "Sales commission % (optional)",
@@ -1104,7 +1180,12 @@
     "roles": "Roles",
     "no_roles": "No roles defined in this organization yet",
     "permissions_count": "{count} permissions",
-    "system_badge": "system"
+    "system_badge": "system",
+    "summary_title": "Summary",
+    "summary": {
+      "commission_earned": "Commissions earned",
+      "salary_paid": "Salary paid"
+    }
   },
   "role_form": {
     "name": "Name",
@@ -1297,7 +1378,13 @@
     "SUBSCRIPTION_NOT_FOUND": "Subscription not found",
     "PLAN_NOT_FOUND": "Plan not found",
     "PLAN_INACTIVE": "Plan is inactive",
-    "DEFAULT_PLAN_NOT_CONFIGURED": "Default plan is not configured. Please contact your administrator"
+    "DEFAULT_PLAN_NOT_CONFIGURED": "Default plan is not configured. Please contact your administrator",
+    "MEMBER_NOT_FOUND": "Member not found",
+    "MEMBER_ALREADY_ACTIVE": "Member is already active",
+    "MEMBER_INVALID_STATUS": "Invalid member status",
+    "MEMBER_CANNOT_MODIFY_SELF": "You cannot modify yourself",
+    "MEMBER_CANNOT_REMOVE_OWNER": "The organization owner cannot be removed",
+    "MEMBER_PHONE_BELONGS_TO_EXISTING_MEMBER": "This phone number is already linked to another member in the organization"
   },
   "feature_meta": {
     "EMPLOYEES_LIMIT": {

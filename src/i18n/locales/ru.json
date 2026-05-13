@@ -31,7 +31,8 @@
     "show_less": "Показать меньше",
     "retry": "Повторить",
     "copy": "Копировать",
-    "copied": "Скопировано"
+    "copied": "Скопировано",
+    "apply": "Применить"
   },
   "nav": {
     "main": "Главная",
@@ -369,6 +370,58 @@
     "action.remove": "Удалить сотрудника",
     "action.remove_subtitle": "Это действие нельзя отменить",
     "section.active": "Активные и приостановленные",
+    "badge.staff_only": "по имени",
+    "badge.pending": "ожидает",
+    "badge.suspended": "приостановлен",
+    "badge.tg_linked": "Telegram привязан",
+    "search_placeholder": "Поиск по имени, телефону или роли",
+    "empty_filtered": "По выбранным фильтрам сотрудников нет",
+    "filter": {
+      "title": "Фильтр и сортировка",
+      "status_section": "Статус",
+      "all": "Все",
+      "active": "Активные",
+      "suspended": "Приостановленные",
+      "pending": "Не зарегистрированы",
+      "reset": "Сбросить",
+      "selected": "выбрано",
+      "result_count": "Показано {count} из {total} сотрудников"
+    },
+    "sort": {
+      "label": "Сортировка",
+      "newest": "Сначала новые",
+      "name_asc": "Имя А–Я",
+      "name_desc": "Имя Я–А",
+      "salary_desc": "Зарплата (от большей)",
+      "commission_desc": "Процент (от большего)"
+    },
+    "row": {
+      "no_phone": "Без телефона",
+      "linked_user": "Аккаунт: {name}",
+      "salary_label": "Зарплата",
+      "commission_label": "Процент"
+    },
+    "detail": {
+      "invalid_id": "Неверный ID сотрудника",
+      "load_failed": "Не удалось загрузить данные",
+      "pending_hint": "Сотрудник ещё не зарегистрирован. Когда он войдёт по этому номеру, запись будет связана автоматически.",
+      "account_name": "Имя в аккаунте",
+      "account_phone": "Телефон аккаунта",
+      "tg_id": "Telegram ID: {id}",
+      "sales_section": "Продажи",
+      "sales_empty": "Нет продаж",
+      "sales_total": "Сумма продаж",
+      "sales_outstanding": "Остаток долга",
+      "commissions_section": "Полученные проценты",
+      "commissions_empty": "Процентов нет",
+      "commission_for_sale": "Продажа #{saleId}",
+      "salaries_section": "Выплаченные зарплаты",
+      "salaries_empty": "Зарплат не было",
+      "payment_unpaid": "Осталось: {amount}",
+      "view_all": "Показать все",
+      "total_count": "Всего: {count}",
+      "archive_confirm": "Удалить сотрудника?"
+    },
     "invite.title": "Пригласить сотрудника",
     "invite.description": "Отправьте приглашение по номеру телефона",
     "edit.title": "Изменить сотрудника",
@@ -700,7 +753,13 @@
     "price_placeholder": "12 000",
     "cost": "Себестоимость",
     "cost_placeholder": "8 000",
-    "currency_locked": "Валюту изменить нельзя ({currency}). Для этого заархивируйте товар и создайте заново."
+    "currency_locked": "Валюту изменить нельзя ({currency}). Для этого заархивируйте товар и создайте заново.",
+    "track_stock": "Учёт склада",
+    "track_stock_helper_tracked": "Товар — каждая продажа/закупка обновляет склад.",
+    "track_stock_helper_service": "Услуга — склад не учитывается.",
+    "track_stock_helper_enabling": "Перевод из услуги в товар. Укажите начальный остаток.",
+    "track_stock_helper_disabling": "Перевод из товара в услугу. Текущий остаток будет очищен.",
+    "opening_stock": "Начальный остаток"
   },
   "expense_form": {
     "kind_label": "Тип расхода",
@@ -839,6 +898,9 @@
     "search": "Поиск",
     "no_options": "Нет вариантов для выбора",
     "clear_selection": "Очистить выбор",
+    "create_new": "Добавить: {name}",
+    "search_or_create": "Поиск или новый",
+    "create_new_aria": "Добавить новый",
     "contact": "Контакт",
     "category": "Категория",
     "account": "Счёт",
@@ -892,6 +954,7 @@
     "field.date": "Дата",
     "field.description": "Описание",
     "field.contact": "Контакт",
+    "field.employee": "Сотрудник",
     "field.category": "Категория",
     "field.due_date": "Срок",
     "field.created_by": "Создал",
@@ -941,6 +1004,7 @@
     "audit.field.dueDate": "Срок",
     "audit.field.categoryId": "Категория",
     "audit.field.contactId": "Контакт",
+    "audit.field.memberId": "Сотрудник",
     "audit.field.amount": "Сумма",
     "audit.change.set": "{field} установлено: {to}",
     "audit.change.cleared": "{field} удалено (было: {from})",
@@ -1092,11 +1156,23 @@
   },
   "invite_member": {
     "phone": "Телефон",
+    "phone_optional": "Телефон (необязательно)",
+    "name": "Имя",
     "name_optional": "Имя (необязательно)",
     "name_placeholder": "Азизбек Каримов",
-    "submit": "Пригласить"
+    "hint": "Сотрудник добавляется по имени. Телефон необязателен — введите, если знаете, или добавьте позже. Когда телефон есть и по нему регистрируется пользователь, его аккаунт автоматически связывается с этой записью, и вся история зарплат/процентов переходит к нему.",
+    "submit": "Пригласить",
+    "submit_staff": "Добавить сотрудника",
+    "mode": {
+      "invite": "По телефону",
+      "staff": "Только по имени",
+      "invite_hint": "Сотрудник получит приглашение по номеру и сможет войти в приложение.",
+      "staff_hint": "Сотрудник добавляется только по имени (аккаунт не создаётся). Используется для записей зарплаты и комиссии."
+    }
   },
   "edit_employee": {
+    "name": "Имя",
+    "phone_optional": "Телефон (необязательно)",
     "salary_optional": "Зарплата (необязательно)",
     "currency": "Валюта",
     "commission_optional": "Процент с продаж (необязательно)",
@@ -1104,7 +1180,12 @@
     "roles": "Роли",
     "no_roles": "В организации ещё нет ролей",
     "permissions_count": "{count} разрешений",
-    "system_badge": "система"
+    "system_badge": "система",
+    "summary_title": "Отчёт",
+    "summary": {
+      "commission_earned": "Получено комиссий",
+      "salary_paid": "Выплачено зарплат"
+    }
   },
   "role_form": {
     "name": "Название",
@@ -1297,7 +1378,13 @@
     "SUBSCRIPTION_NOT_FOUND": "Подписка не найдена",
     "PLAN_NOT_FOUND": "Тариф не найден",
     "PLAN_INACTIVE": "Тариф неактивен",
-    "DEFAULT_PLAN_NOT_CONFIGURED": "В системе не настроен тариф по умолчанию. Обратитесь к администратору"
+    "DEFAULT_PLAN_NOT_CONFIGURED": "В системе не настроен тариф по умолчанию. Обратитесь к администратору",
+    "MEMBER_NOT_FOUND": "Сотрудник не найден",
+    "MEMBER_ALREADY_ACTIVE": "Сотрудник уже активен",
+    "MEMBER_INVALID_STATUS": "Неверный статус сотрудника",
+    "MEMBER_CANNOT_MODIFY_SELF": "Вы не можете изменять самого себя",
+    "MEMBER_CANNOT_REMOVE_OWNER": "Владельца организации нельзя удалить",
+    "MEMBER_PHONE_BELONGS_TO_EXISTING_MEMBER": "Этот номер телефона уже привязан к другому сотруднику в организации"
   },
   "feature_meta": {
     "EMPLOYEES_LIMIT": {

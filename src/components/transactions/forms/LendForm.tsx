@@ -14,6 +14,7 @@ import {
   isDuplicateDetected,
 } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
+import { useInlineCreateContact } from '@/api/hooks/use-inline-create';
 import { AmountField, SelectField } from './form-primitives';
 import { ContactPickerField } from './ContactPickerField';
 import type { CreateDebtRequest } from '@/types/transaction.types';
@@ -42,6 +43,7 @@ export function LendForm({
 
   const [accountId, setAccountId] = useState<number | null>(null);
   const [contactId, setContactId] = useState<number | null>(null);
+  const inlineContact = useInlineCreateContact('partner');
   const [amount, setAmount] = useState<string>('');
   const [dueDate, setDueDate] = useState<string>('');
 
@@ -121,6 +123,11 @@ export function LendForm({
         onChange={setContactId}
         contacts={contactList}
         helperText={t('lend_form.borrower')}
+        onCreate={async (name) => {
+          const id = await inlineContact.onCreate(name);
+          if (id !== null) setContactId(id);
+        }}
+        creating={inlineContact.creating}
       />
 
       <div className="space-y-1.5">

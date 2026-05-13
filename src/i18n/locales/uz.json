@@ -31,7 +31,8 @@
     "show_less": "Kamroq ko'rsatish",
     "retry": "Qayta urinish",
     "copy": "Nusxalash",
-    "copied": "Nusxalandi"
+    "copied": "Nusxalandi",
+    "apply": "Qo'llash"
   },
   "nav": {
     "main": "Asosiy",
@@ -370,6 +371,58 @@
     "action.remove": "Xodimni o'chirish",
     "action.remove_subtitle": "Bu amal qaytarib bo'lmaydi",
     "section.active": "Faol va to'xtatilgan xodimlar",
+    "badge.staff_only": "ism bilan",
+    "badge.pending": "kutilmoqda",
+    "badge.suspended": "to'xtatilgan",
+    "badge.tg_linked": "Telegram ulangan",
+    "search_placeholder": "Ism, telefon yoki rol bo'yicha qidirish",
+    "empty_filtered": "Filtrlarga mos xodim topilmadi",
+    "filter": {
+      "title": "Filtr va saralash",
+      "status_section": "Holat",
+      "all": "Hammasi",
+      "active": "Faol",
+      "suspended": "To'xtatilgan",
+      "pending": "Ro'yxatdan o'tmagan",
+      "reset": "Tiklash",
+      "selected": "tanlangan",
+      "result_count": "{count} / {total} xodim ko'rsatilmoqda"
+    },
+    "sort": {
+      "label": "Saralash",
+      "newest": "Eng yangi",
+      "name_asc": "Ism A–Z",
+      "name_desc": "Ism Z–A",
+      "salary_desc": "Oylik (yuqori → past)",
+      "commission_desc": "Foiz (yuqori → past)"
+    },
+    "row": {
+      "no_phone": "Telefon yo'q",
+      "linked_user": "Akkaunt: {name}",
+      "salary_label": "Oylik",
+      "commission_label": "Foiz"
+    },
+    "detail": {
+      "invalid_id": "Noto'g'ri xodim ID",
+      "load_failed": "Ma'lumotlarni yuklashda xato",
+      "pending_hint": "Bu xodim hali ro'yxatdan o'tmagan. Telefoni bilan ro'yxatdan o'tsa, avtomatik bog'lanadi.",
+      "account_name": "Akkaunt ismi",
+      "account_phone": "Akkaunt telefoni",
+      "tg_id": "Telegram ID: {id}",
+      "sales_section": "Sotuvlar",
+      "sales_empty": "Sotuv tarixi yo'q",
+      "sales_total": "Sotuv summasi",
+      "sales_outstanding": "Qolgan qarz",
+      "commissions_section": "Olingan foizlar",
+      "commissions_empty": "Foiz olinmagan",
+      "commission_for_sale": "Sotuv #{saleId}",
+      "salaries_section": "To'langan oyliklar",
+      "salaries_empty": "Oylik to'lanmagan",
+      "payment_unpaid": "Qoldi: {amount}",
+      "view_all": "Hammasini ko'rsatish",
+      "total_count": "Jami: {count}",
+      "archive_confirm": "Xodimni o'chirishni tasdiqlaysizmi?"
+    },
     "invite.title": "Xodim taklif qilish",
     "invite.description": "Telefon raqami bo'yicha taklif yuboring",
     "edit.title": "Xodimni tahrirlash",
@@ -700,7 +753,13 @@
     "price_placeholder": "12 000",
     "cost": "Tannarx",
     "cost_placeholder": "8 000",
-    "currency_locked": "Valyuta o'zgartirilmaydi ({currency}). Buning uchun mahsulotni arxivlab, qaytadan yarating."
+    "currency_locked": "Valyuta o'zgartirilmaydi ({currency}). Buning uchun mahsulotni arxivlab, qaytadan yarating.",
+    "track_stock": "Ombor hisobi yuritilsin",
+    "track_stock_helper_tracked": "Mahsulot — har bir sotuv/xarid omborni yangilaydi.",
+    "track_stock_helper_service": "Servis — ombor hisoblanmaydi.",
+    "track_stock_helper_enabling": "Servisdan mahsulotga o'tkaziladi. Boshlang'ich qoldiqni kiriting.",
+    "track_stock_helper_disabling": "Mahsulotdan servisga o'tkaziladi. Hozirgi ombor qoldig'i o'chiriladi.",
+    "opening_stock": "Boshlang'ich qoldiq"
   },
   "expense_form": {
     "kind_label": "Xarajat turi",
@@ -839,6 +898,9 @@
     "search": "Qidiruv",
     "no_options": "Tanlash uchun variant yo'q",
     "clear_selection": "Tanlovni tozalash",
+    "create_new": "Yangi qo'sh: {name}",
+    "search_or_create": "Qidiruv yoki yangi qo'shish",
+    "create_new_aria": "Yangi qo'shish",
     "contact": "Kontakt",
     "category": "Kategoriya",
     "account": "Hisob",
@@ -892,6 +954,7 @@
     "field.date": "Sana",
     "field.description": "Izoh",
     "field.contact": "Kontakt",
+    "field.employee": "Xodim",
     "field.category": "Kategoriya",
     "field.due_date": "Muddat",
     "field.created_by": "Yaratdi",
@@ -941,6 +1004,7 @@
     "audit.field.dueDate": "Muddat",
     "audit.field.categoryId": "Kategoriya",
     "audit.field.contactId": "Kontakt",
+    "audit.field.memberId": "Xodim",
     "audit.field.amount": "Summa",
     "audit.change.set": "{field} kiritildi: {to}",
     "audit.change.cleared": "{field} olib tashlandi (avval: {from})",
@@ -1092,11 +1156,23 @@
   },
   "invite_member": {
     "phone": "Telefon",
+    "phone_optional": "Telefon (ixtiyoriy)",
+    "name": "Ism",
     "name_optional": "Ism (ixtiyoriy)",
     "name_placeholder": "Azizbek Karimov",
-    "submit": "Taklif qilish"
+    "hint": "Xodim ism bilan qo'shiladi. Telefon ixtiyoriy — agar bilsangiz kiriting; keyinroq tahrirlasangiz ham bo'ladi. Telefon mavjud yoki keyinroq qo'shilganda, shu raqam orqali ro'yxatdan o'tgan foydalanuvchiga avtomatik bog'lanadi va butun oylik/foiz tarixi unga o'tadi.",
+    "submit": "Taklif qilish",
+    "submit_staff": "Xodim qo'shish",
+    "mode": {
+      "invite": "Telefon orqali taklif",
+      "staff": "Ism bilan qo'shish",
+      "invite_hint": "Xodim raqami orqali taklif yuboriladi va u ilovaga kira oladi.",
+      "staff_hint": "Faqat ism bilan xodim qo'shiladi (User akkaunti yaratilmaydi). Oylik va komissiya yozishlar uchun ishlatiladi."
+    }
   },
   "edit_employee": {
+    "name": "Ism",
+    "phone_optional": "Telefon (ixtiyoriy)",
     "salary_optional": "Oylik (ixtiyoriy)",
     "currency": "Valyuta",
     "commission_optional": "Sotuvdan foiz (ixtiyoriy)",
@@ -1104,7 +1180,12 @@
     "roles": "Rollar",
     "no_roles": "Tashkilotda hali rol mavjud emas",
     "permissions_count": "{count} ruxsat",
-    "system_badge": "tizim"
+    "system_badge": "tizim",
+    "summary_title": "Hisobot",
+    "summary": {
+      "commission_earned": "Olingan foiz",
+      "salary_paid": "To'langan oylik"
+    }
   },
   "role_form": {
     "name": "Nomi",
@@ -1297,7 +1378,13 @@
     "SUBSCRIPTION_NOT_FOUND": "Obuna topilmadi",
     "PLAN_NOT_FOUND": "Tarif topilmadi",
     "PLAN_INACTIVE": "Tarif faol emas",
-    "DEFAULT_PLAN_NOT_CONFIGURED": "Tizimda default tarif sozlanmagan. Iltimos, administrator bilan bog'laning"
+    "DEFAULT_PLAN_NOT_CONFIGURED": "Tizimda default tarif sozlanmagan. Iltimos, administrator bilan bog'laning",
+    "MEMBER_NOT_FOUND": "Xodim topilmadi",
+    "MEMBER_ALREADY_ACTIVE": "Xodim allaqachon faol",
+    "MEMBER_INVALID_STATUS": "Xodim statusi noto'g'ri",
+    "MEMBER_CANNOT_MODIFY_SELF": "O'zingizni o'zgartira olmaysiz",
+    "MEMBER_CANNOT_REMOVE_OWNER": "Tashkilot egasini o'chirib bo'lmaydi",
+    "MEMBER_PHONE_BELONGS_TO_EXISTING_MEMBER": "Bu telefon raqami tashkilotdagi boshqa xodimga biriktirilgan"
   },
   "feature_meta": {
     "EMPLOYEES_LIMIT": {

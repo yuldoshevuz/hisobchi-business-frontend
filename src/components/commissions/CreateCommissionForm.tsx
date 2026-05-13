@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMembers } from '@/api/hooks/use-members';
+import { useInlineCreateMember } from '@/api/hooks/use-inline-create';
 import { useTransactions } from '@/api/hooks/use-transactions';
 import { useCreateCommission } from '@/api/hooks/use-commissions';
 import {
@@ -40,6 +41,7 @@ export function CreateCommissionForm({
 
   const [saleId, setSaleId] = useState<number | null>(defaultSaleId ?? null);
   const [memberId, setMemberId] = useState<number | null>(null);
+  const inlineMember = useInlineCreateMember();
   const [amount, setAmount] = useState<string>('');
   const [percentage, setPercentage] = useState<string>('');
 
@@ -132,8 +134,8 @@ export function CreateCommissionForm({
     () =>
       memberList.map((m) => ({
         value: m.id,
-        label: m.user.fullName,
-        description: m.user.phoneNumber ?? undefined,
+        label: m.name,
+        description: m.phone ?? undefined,
       })),
     [memberList],
   );
@@ -167,6 +169,11 @@ export function CreateCommissionForm({
         emptyText={
           members.isPending ? t('create_commission.loading') : t('create_commission.no_members')
         }
+        onCreate={async (name) => {
+          const id = await inlineMember.onCreate(name);
+          if (id !== null) setMemberId(id);
+        }}
+        creating={inlineMember.creating}
       />
 
       <div className="grid grid-cols-2 gap-3">

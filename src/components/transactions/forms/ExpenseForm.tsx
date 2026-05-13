@@ -18,6 +18,10 @@ import {
   isDuplicateDetected,
 } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
+import {
+  useInlineCreateContact,
+  useInlineCreateMember,
+} from '@/api/hooks/use-inline-create';
 import { ContactPickerField } from './ContactPickerField';
 import {
   AmountField,
@@ -100,6 +104,8 @@ export function ExpenseForm({
   const [accountId, setAccountId] = useState<number | null>(null);
   const [contactId, setContactId] = useState<number | null>(null);
   const [employeeMemberId, setEmployeeMemberId] = useState<number | null>(null);
+  const inlineContact = useInlineCreateContact('supplier');
+  const inlineMember = useInlineCreateMember();
   // `'system:<id>'` for not-yet-instantiated system categories. Resolved on
   // submit so the API receives either `categoryId` or `systemCategoryId`.
   const [categoryRef, setCategoryRef] = useState<string>('');
@@ -213,13 +219,18 @@ export function ExpenseForm({
           onChange={setEmployeeMemberId}
           options={memberList.map((m) => ({
             value: m.id,
-            label: m.user.fullName,
+            label: m.name,
           }))}
           helperText={
             memberList.length === 0 && !members.isPending
               ? t('expense_form.no_employees')
               : t('expense_form.salary_helper')
           }
+          onCreate={async (name) => {
+            const id = await inlineMember.onCreate(name);
+            if (id !== null) setEmployeeMemberId(id);
+          }}
+          creating={inlineMember.creating}
         />
       ) : (
         <>
@@ -261,6 +272,11 @@ export function ExpenseForm({
             contacts={contactList}
             helperText={t('expense_form.contact_helper')}
             clearable
+            onCreate={async (name) => {
+              const id = await inlineContact.onCreate(name);
+              if (id !== null) setContactId(id);
+            }}
+            creating={inlineContact.creating}
           />
         </>
       )}

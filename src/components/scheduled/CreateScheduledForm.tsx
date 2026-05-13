@@ -9,6 +9,7 @@ import {
   formatAmount,
   unformatAmount,
 } from '@/components/transactions/forms/form-utils';
+import { useInlineCreateContact } from '@/api/hooks/use-inline-create';
 import {
   ContactPickerField,
 } from '@/components/transactions/forms/ContactPickerField';
@@ -93,6 +94,7 @@ export function CreateScheduledForm({
   const [currency, setCurrency] = useState<string>('UZS');
   const [description, setDescription] = useState<string>('');
   const [contactId, setContactId] = useState<number | null>(null);
+  const inlineContact = useInlineCreateContact();
   const [accountId, setAccountId] = useState<number | null>(null);
   // Encoded as `id:N` for tenant-instantiated rows and `system:N` for system
   // defaults the org hasn't customised yet — backend accepts either, we
@@ -342,6 +344,11 @@ export function CreateScheduledForm({
         contacts={contactList}
         helperText={t('create_scheduled.contact_helper')}
         clearable
+        onCreate={async (name) => {
+          const id = await inlineContact.onCreate(name);
+          if (id !== null) setContactId(id);
+        }}
+        creating={inlineContact.creating}
       />
 
       <SelectField

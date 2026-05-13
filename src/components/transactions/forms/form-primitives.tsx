@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, ChevronDown, X, type LucideIcon } from 'lucide-react';
+import { Check, ChevronDown, Plus, X, type LucideIcon } from 'lucide-react';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Modal } from '@/components/ui/modal';
+import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { tgHapticImpact } from '@/lib/telegram';
 import { formatAmount, unformatAmount } from './form-utils';
@@ -69,6 +70,19 @@ interface SelectFieldProps<T extends string | number> {
    * account) so a stray pick can be reverted without re-loading the form.
    */
   clearable?: boolean;
+  /**
+   * Optional "create on miss" hook. When set, a `+ Yangi qo'sh: <search>`
+   * row is rendered as the LAST item in the modal's option list whenever
+   * the user has typed a non-empty search term that doesn't match any
+   * existing option verbatim. The parent owns the actual API call —
+   * SelectField just relays the trimmed search text and closes the modal
+   * after the callback resolves.
+   */
+  onCreate?: (text: string) => void | Promise<void>;
+  /** Label generator for the inline-create row. */
+  createLabel?: (text: string) => string;
+  /** Disable the create CTA while the parent is mid-mutation. */
+  creating?: boolean;
 }
 
 /**
@@ -94,6 +108,9 @@ export function SelectField<T extends string | number>({
   emptyText,
   searchSlot,
   clearable = false,
+  onCreate,
+  createLabel,
+  creating = false,
 }: SelectFieldProps<T>): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState<boolean>(false);
@@ -114,10 +131,44 @@ export function SelectField<T extends string | number>({
     return options.filter((o) => o.label.toLowerCase().includes(term));
   }, [options, search]);
 
-  // Forcing the search row when a `searchSlot` is provided keeps the slot
-  // reachable even for short lists (e.g. when a type filter has narrowed
-  // contacts down to 1-2 results).
-  const showSearch = options.length >= searchThreshold || searchSlot !== undefined;
+  const trimmedSearch = search.trim();
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  // The create CTA is always visible when the parent wired up `onCreate`.
+  // Two states:
+  //   - empty / too-short search → static "+ Yangi qo'sh" pill; clicking
+  //     it focuses the search input so the user can type the name
+  //     without leaving the picker.
+  //   - 2+ char search → "+ Yangi qo'sh: <text>" pill that creates
+  //     immediately on tap. We DON'T hide it on exact-match anymore —
+  //     the parent may genuinely want a same-named duplicate (e.g.
+  //     two employees both called "Aziz") and the picker shouldn't
+  //     second-guess that.
+  const showCreateCta = onCreate !== undefined;
+  const canCreateNow = onCreate !== undefined && trimmedSearch.length >= 2;
+
+  async function handleCreate(): Promise<void> {
+    if (!onCreate) return;
+    if (trimmedSearch.length < 2) {
+      // Empty / too-short: redirect to the search input so the user
+      // can type a name without an extra modal layer.
+      searchInputRef.current?.focus();
+      return;
+    }
+    tgHapticImpact('light');
+    await onCreate(trimmedSearch);
+    setOpen(false);
+    setSearch('');
+  }
+
+  // Forcing the search row when a `searchSlot` or an `onCreate` hook is
+  // provided keeps both slots reachable on tiny lists too (otherwise the
+  // user couldn't see the inline-create affordance under
+  // `searchThreshold` options, and the "type to create" loop would
+  // silently break).
+  const showSearch =
+    options.length >= searchThreshold ||
+    searchSlot !== undefined ||
+    onCreate !== undefined;
 
   function pick(next: SelectOption<T>): void {
     if (next.disabled) return;
@@ -209,13 +260,46 @@ export function SelectField<T extends string | number>({
           <div className="flex items-center gap-2 pb-3">
             <div className="flex-1 min-w-0">
               <Input
+                ref={searchInputRef}
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('form.search')}
+                onKeyDown={(e) => {
+                  // Submit on Enter when the create CTA is in
+                  // "ready-to-create" state — keeps the UX one-step.
+                  if (e.key === 'Enter' && canCreateNow) {
+                    e.preventDefault();
+                    void handleCreate();
+                  }
+                }}
+                placeholder={
+                  onCreate !== undefined
+                    ? t('form.search_or_create')
+                    : t('form.search')
+                }
               />
             </div>
             {searchSlot}
+            {showCreateCta ? (
+              <button
+                type="button"
+                onClick={() => void handleCreate()}
+                disabled={creating}
+                aria-label={t('form.create_new_aria')}
+                className={cn(
+                  'press flex h-10 w-10 shrink-0 items-center justify-center rounded-md border transition-colors disabled:opacity-60',
+                  canCreateNow
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-input bg-card text-muted-foreground hover:border-primary hover:text-primary',
+                )}
+              >
+                {creating ? (
+                  <Spinner className="h-4 w-4" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+              </button>
+            ) : null}
           </div>
         ) : null}
 
@@ -245,7 +329,34 @@ export function SelectField<T extends string | number>({
           <div className="py-8 text-center text-[14px] text-muted-foreground">
             {t('common.no_results')}
           </div>
-        ) : (
+        ) : null}
+
+        {/* Inline-create row — only shown when the user has typed a usable
+            name (≥ 2 chars). Mirrors the compact `+` button in the search
+            row so the action is reachable whether the user reads top-to-
+            bottom or focuses on the existing options first. */}
+        {canCreateNow ? (
+          <button
+            type="button"
+            onClick={() => void handleCreate()}
+            disabled={creating}
+            className="press -mx-4 mb-2 flex w-[calc(100%+2rem)] items-center gap-3 border-b border-border bg-primary/5 px-4 py-2.5 text-left active:bg-primary/10 disabled:opacity-60"
+          >
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Plus className="h-3.5 w-3.5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[13px] font-medium text-primary">
+                {createLabel
+                  ? createLabel(trimmedSearch)
+                  : t('form.create_new', { name: trimmedSearch })}
+              </div>
+            </div>
+            {creating ? <Spinner className="h-4 w-4" /> : null}
+          </button>
+        ) : null}
+
+        {filtered.length > 0 ? (
           <div className="-mx-4 divide-y divide-border bg-card">
             {filtered.map((o) => {
               const isSelected = o.value === normalizedValue;
@@ -284,7 +395,7 @@ export function SelectField<T extends string | number>({
               );
             })}
           </div>
-        )}
+        ) : null}
       </Modal>
     </div>
   );

@@ -17,6 +17,10 @@ import {
   isDuplicateDetected,
 } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
+import {
+  useInlineCreateContact,
+  useInlineCreateProduct,
+} from '@/api/hooks/use-inline-create';
 import { AmountField, SelectField } from './form-primitives';
 import { ContactPickerField } from './ContactPickerField';
 import { formatAmountDisplay } from './form-utils';
@@ -61,6 +65,13 @@ export function SaleForm({
   const [productId, setProductId] = useState<number | null>(null);
   const [contactId, setContactId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState<number | null>(null);
+  // Inline-create plumbing for the contact picker. New contacts default
+  // to `customer` since sale forms attribute revenue to a buyer.
+  const inlineContact = useInlineCreateContact('customer');
+  // Product inline-create uses the org base currency (UZS by default) —
+  // the picker's currency-filter on accounts narrows compatible
+  // accounts automatically once the user picks the new product.
+  const inlineProduct = useInlineCreateProduct();
   const [quantity, setQuantity] = useState<string>('1');
   const [unitPrice, setUnitPrice] = useState<string>('');
   const [isCredit, setIsCredit] = useState<boolean>(false);
@@ -118,7 +129,11 @@ export function SaleForm({
         {
           productId: product.id,
           name: product.name,
-          quantity: tracksStock ? quantity : null,
+          // Backend validator requires a numeric string — `null` is
+          // rejected with AMOUNT_INVALID. For service products
+          // (currentStock=null) we default to '1' so the line still
+          // posts; the UI just hides the quantity input.
+          quantity: tracksStock ? quantity : '1',
           unitPrice,
           cost: product.defaultCost ?? null,
         },
@@ -162,6 +177,11 @@ export function SaleForm({
             ? t('sale_form.no_products')
             : undefined
         }
+        onCreate={async (name) => {
+          const id = await inlineProduct.onCreate(name);
+          if (id !== null) setProductId(id);
+        }}
+        creating={inlineProduct.creating}
       />
 
       <SelectField
@@ -199,6 +219,11 @@ export function SaleForm({
             : t('sale_form.contact_helper_normal')
         }
         clearable={!isCredit}
+        onCreate={async (name) => {
+          const id = await inlineContact.onCreate(name);
+          if (id !== null) setContactId(id);
+        }}
+        creating={inlineContact.creating}
       />
 
       {tracksStock ? (

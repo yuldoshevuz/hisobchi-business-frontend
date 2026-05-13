@@ -30,7 +30,12 @@ import {
 import { useAccounts } from '@/api/hooks/use-accounts';
 import { useContacts } from '@/api/hooks/use-contacts';
 import { useCategories } from '@/api/hooks/use-categories';
-import { useMembers } from '@/api/hooks/use-members';
+import {
+  useInviteMember,
+  useMembers,
+} from '@/api/hooks/use-members';
+import { useCreateContact } from '@/api/hooks/use-contacts';
+import { useInlineCreateContact } from '@/api/hooks/use-inline-create';
 import { useProducts } from '@/api/hooks/use-products';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ScreenAction } from '@/components/layout/ScreenAction';
@@ -47,7 +52,7 @@ import { env } from '@/config/env';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { formatMoney } from '@/lib/format';
 import { PermissionSlug } from '@/lib/permission-slugs';
-import { tgHapticImpact } from '@/lib/telegram';
+import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import {
   PAYMENT_STATUS_LABEL,
   PAYMENT_STATUS_VARIANT,
@@ -67,6 +72,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/transactions/forms/form-primitives';
 import { ContactPickerField } from '@/components/transactions/forms/ContactPickerField';
+import { MemberPickerField } from '@/components/transactions/forms/MemberPickerField';
 import { ACCOUNT_TYPE_ICON } from '@/components/accounts/account-meta';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
 import type {
@@ -81,6 +87,7 @@ import type { Account } from '@/types/account.types';
 import type { Product } from '@/types/product.types';
 import type { Contact } from '@/types/contact.types';
 import type { MergedCategory } from '@/types/category.types';
+import type { Member } from '@/types/member.types';
 
 export function TransactionDetailPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -124,13 +131,14 @@ export function TransactionDetailPage(): React.ReactElement {
   const members = useMembers({ all: true }, { enabled: Boolean(tx) });
 
   // Audit log + `transaction.createdBy` both key the actor by `users.id`
-  // (NOT `members.id`). We map user id → fullName for both the detail
-  // "Yaratdi" row and the audit panel; without this both fall through to
-  // the `#id` placeholder when the org has more than one member.
+  // (NOT `members.id`). We map user id → display name. Staff-only members
+  // (user === null) cannot have authored a transaction, so skipping them
+  // here is safe and keeps the map keyed by the correct id space.
   const userNameById = useMemo(() => {
     const m = new Map<number, string>();
     for (const member of members.data?.data ?? []) {
-      m.set(member.user.id, member.user.fullName);
+      if (!member.user) continue;
+      m.set(member.user.id, member.name);
     }
     return m;
   }, [members.data]);
@@ -157,6 +165,38 @@ export function TransactionDetailPage(): React.ReactElement {
     ? ((categories.data?.data ?? []).find((c) => c.id === tx.categoryId)
         ?.name ?? null)
     : null;
+
+  // Member attribution lives in `metadata` under two keys with subtly
+  // different semantics. Either is resolved to the staff name so the
+  // detail page renders "Xodim: Aziz" / "Sotuvchi: Jamila" instead of
+  // an opaque id.
+  //   • `employeeMemberId` — set on EXPENSE salary payouts (the payee).
+  //   • `commissionMemberId` — set on SALES (the seller, for commission
+  //     attribution). Used by `AutoCreateCommissionOnSaleListener`.
+  // For a given transaction only one of the two should be present; we
+  // prefer `employeeMemberId` for expenses and `commissionMemberId`
+  // otherwise, falling through if neither is set.
+  const memberAttribution = (() => {
+    const raw = (tx?.metadata ?? null) as Record<string, unknown> | null;
+    if (!raw) return null;
+    function parseId(value: unknown): number | null {
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      if (typeof value === 'string' && /^\d+$/.test(value)) return Number(value);
+      return null;
+    }
+    const employeeId = parseId(raw.employeeMemberId);
+    const commissionId = parseId(raw.commissionMemberId);
+    const pickedId = employeeId ?? commissionId;
+    if (pickedId === null) return null;
+    const member =
+      (members.data?.data ?? []).find((m) => m.id === pickedId) ?? null;
+    if (!member) return null;
+    return {
+      member,
+      // Tells the UI which label to use in the detail row.
+      role: employeeId !== null ? ('employee' as const) : ('seller' as const),
+    };
+  })();
 
   // Deep-link query params: action=add-cash-flow / void; suggestedAmount.
   const action = searchParams.get('action');
@@ -186,6 +226,31 @@ export function TransactionDetailPage(): React.ReactElement {
   const cancelTx = useCancelTransaction();
   const updateTx = useUpdateTransaction();
   const swapAccount = useSwapCashFlowAccount();
+  // Inline-create mutations wired into the picker fields. Each returns
+  // the new id so the edit form can auto-select what the user just
+  // created without an extra tap.
+  const createContact = useCreateContact();
+  const createMember = useInviteMember();
+  async function handleCreateContact(name: string): Promise<number | null> {
+    try {
+      const created = await createContact.mutateAsync({ name });
+      tgHapticNotify('success');
+      return created.id;
+    } catch {
+      tgHapticNotify('error');
+      return null;
+    }
+  }
+  async function handleCreateMember(name: string): Promise<number | null> {
+    try {
+      const created = await createMember.mutateAsync({ fullName: name });
+      tgHapticNotify('success');
+      return created.id;
+    } catch {
+      tgHapticNotify('error');
+      return null;
+    }
+  }
 
   if (isReady && !canRead) {
     return (
@@ -355,6 +420,27 @@ export function TransactionDetailPage(): React.ReactElement {
             label={t('tx_detail.field.description')}
             value={transactionDescription(tx)}
           />
+          {memberAttribution ? (
+            <DetailRow
+              label={
+                memberAttribution.role === 'seller'
+                  ? t('tx_detail.field.seller')
+                  : t('tx_detail.field.employee')
+              }
+              value={
+                <button
+                  type="button"
+                  onClick={() => {
+                    tgHapticImpact('light');
+                    navigate(`/members/${memberAttribution.member.id}`);
+                  }}
+                  className="press text-right text-primary underline-offset-2 hover:underline"
+                >
+                  {memberAttribution.member.name}
+                </button>
+              }
+            />
+          ) : null}
           {contactName ? (
             <DetailRow label={t('tx_detail.field.contact')} value={contactName} />
           ) : null}
@@ -500,6 +586,7 @@ export function TransactionDetailPage(): React.ReactElement {
         userNameById={userNameById}
         contacts={contacts.data?.data ?? []}
         categories={categories.data?.data ?? []}
+        members={members.data?.data ?? []}
       />
 
       {isInitial ? (
@@ -685,6 +772,11 @@ export function TransactionDetailPage(): React.ReactElement {
             accounts={accounts.data ?? []}
             contacts={contacts.data?.data ?? []}
             categories={categories.data?.data ?? []}
+            members={members.data?.data ?? []}
+            onCreateContact={handleCreateContact}
+            onCreateMember={handleCreateMember}
+            creatingContact={createContact.isPending}
+            creatingMember={createMember.isPending}
             isPending={updateTx.isPending || swapAccount.isPending}
             error={updateTx.error ?? swapAccount.error}
             onSubmit={async ({ body, accountSwap }) => {
@@ -815,6 +907,16 @@ function InitialEditForm({
   onCancel: () => void;
 }): React.ReactElement {
   const { t } = useTranslation();
+  // Inline-create plumbing — defaults to `customer` when the parent
+  // transaction is a sale, `supplier` for purchases, otherwise null so
+  // the new contact stays unclassified and the user can edit later.
+  const inlineContactType =
+    transaction.type === 'sale'
+      ? ('customer' as const)
+      : transaction.type === 'purchase'
+        ? ('supplier' as const)
+        : null;
+  const inlineContact = useInlineCreateContact(inlineContactType);
   const initialDrafts = useMemo(
     () => buildInitialItemDrafts(transaction),
     [transaction],
@@ -1244,6 +1346,11 @@ function InitialEditForm({
             label: c.name,
           }))}
           emptyText={t('tx_detail.edit_form.contact_empty')}
+          onCreate={async (name) => {
+            const id = await inlineContact.onCreate(name);
+            if (id !== null) setContactId(id);
+          }}
+          creating={inlineContact.creating}
         />
         {contactId !== null ? (
           <button
@@ -1403,6 +1510,7 @@ interface AuditHistorySectionProps {
   userNameById: Map<number, string>;
   contacts: readonly Contact[];
   categories: readonly MergedCategory[];
+  members: readonly Member[];
 }
 
 function AuditHistorySection({
@@ -1410,6 +1518,7 @@ function AuditHistorySection({
   userNameById,
   contacts,
   categories,
+  members,
 }: AuditHistorySectionProps): React.ReactElement | null {
   const { t } = useTranslation();
   if (history.length === 0) return null;
@@ -1427,6 +1536,9 @@ function AuditHistorySection({
     }
     if (field === 'contactId' && typeof raw === 'number') {
       return contacts.find((c) => c.id === raw)?.name ?? `#${raw}`;
+    }
+    if (field === 'memberId' && typeof raw === 'number') {
+      return members.find((m) => m.id === raw)?.name ?? `#${raw}`;
     }
     if ((field === 'date' || field === 'dueDate') && typeof raw === 'string') {
       const date = new Date(raw);
@@ -1574,6 +1686,7 @@ interface ActiveEditFormSubmitInput {
     dueDate?: string | null;
     categoryId?: number | null;
     contactId?: number | null;
+    memberId?: number | null;
   };
   accountSwap?: AccountSwapPayload;
 }
@@ -1583,10 +1696,17 @@ interface ActiveEditFormProps {
   accounts: Account[];
   contacts: Contact[];
   categories: MergedCategory[];
+  members: readonly Member[];
   isPending: boolean;
   error: unknown;
   onSubmit: (next: ActiveEditFormSubmitInput) => Promise<void>;
   onCancel: () => void;
+  /** Inline-create handlers for the pickers. Each returns the new id so
+   *  the form can auto-select the row it just made. */
+  onCreateContact: (name: string) => Promise<number | null>;
+  onCreateMember: (name: string) => Promise<number | null>;
+  creatingContact: boolean;
+  creatingMember: boolean;
 }
 
 function ActiveEditForm({
@@ -1594,6 +1714,11 @@ function ActiveEditForm({
   accounts,
   contacts,
   categories,
+  members,
+  onCreateContact,
+  onCreateMember,
+  creatingContact,
+  creatingMember,
   isPending,
   error,
   onSubmit,
@@ -1632,6 +1757,19 @@ function ActiveEditForm({
   const [accountId, setAccountId] = useState<number | null>(
     swapTarget?.accountId ?? null,
   );
+  // Seed memberId from `metadata.employeeMemberId` (the convention shared
+  // with the AI ingest path) so re-opening the edit modal shows the
+  // currently linked staff member. Falls back to null when missing /
+  // unparseable.
+  const initialMemberId = useMemo(() => {
+    const raw = (transaction.metadata ?? null) as Record<string, unknown> | null;
+    if (!raw) return null;
+    const value = raw.employeeMemberId;
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string' && /^\d+$/.test(value)) return Number(value);
+    return null;
+  }, [transaction.metadata]);
+  const [memberId, setMemberId] = useState<number | null>(initialMemberId);
 
   // Restrict the contact picker to the role that fits the txn type;
   // mirrors the InitialEditForm filter so behaviour is consistent.
@@ -1723,6 +1861,9 @@ function ActiveEditForm({
     if (categoryId !== transaction.categoryId) {
       body.categoryId = categoryId;
     }
+    if (memberId !== initialMemberId) {
+      body.memberId = memberId;
+    }
 
     const accountSwap: AccountSwapPayload | undefined =
       swapTarget && accountId !== null && accountId !== swapTarget.accountId
@@ -1794,6 +1935,25 @@ function ActiveEditForm({
         onChange={setContactId}
         contacts={relevantContacts}
         clearable
+        onCreate={async (name) => {
+          const id = await onCreateContact(name);
+          if (id !== null) setContactId(id);
+        }}
+        creating={creatingContact}
+      />
+
+      <MemberPickerField
+        id="active-edit-member"
+        label={t('tx_detail.field.employee')}
+        value={memberId ?? ''}
+        onChange={setMemberId}
+        members={members}
+        clearable
+        onCreate={async (name) => {
+          const id = await onCreateMember(name);
+          if (id !== null) setMemberId(id);
+        }}
+        creating={creatingMember}
       />
 
       {swapTarget && accountOptions.length > 0 ? (

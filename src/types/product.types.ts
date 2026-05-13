@@ -64,6 +64,11 @@ export interface UpdateProductRequest {
   defaultPrice?: string | null;
   defaultCost?: string | null;
   status?: ProductStatus;
+  /** Toggle stock tracking. Pass a numeric string to enable (with that
+   *  opening balance) or `null` to convert the product into a service.
+   *  Same-mode edits are ignored server-side — stock changes within
+   *  tracked mode go through the dedicated AdjustStock flow. */
+  currentStock?: string | null;
 }
 
 export interface AdjustStockRequest {

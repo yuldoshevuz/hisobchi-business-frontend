@@ -16,6 +16,10 @@ import {
   isDuplicateDetected,
 } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
+import {
+  useInlineCreateContact,
+  useInlineCreateProduct,
+} from '@/api/hooks/use-inline-create';
 import { AmountField, SelectField } from './form-primitives';
 import { ContactPickerField } from './ContactPickerField';
 import { formatAmountDisplay } from './form-utils';
@@ -55,6 +59,8 @@ export function CreditSaleForm({
   const [productId, setProductId] = useState<number | null>(null);
   const [accountId, setAccountId] = useState<number | null>(null);
   const [contactId, setContactId] = useState<number | null>(null);
+  const inlineContact = useInlineCreateContact('customer');
+  const inlineProduct = useInlineCreateProduct();
   const [quantity, setQuantity] = useState<string>('1');
   const [unitPrice, setUnitPrice] = useState<string>('');
   const [dueDate, setDueDate] = useState<string>('');
@@ -103,7 +109,7 @@ export function CreditSaleForm({
         {
           productId: product.id,
           name: product.name,
-          quantity: tracksStock ? quantity : null,
+          quantity: tracksStock ? quantity : '1',
           unitPrice,
           cost: product.defaultCost ?? null,
         },
@@ -146,6 +152,11 @@ export function CreditSaleForm({
           value: p.id,
           label: `${p.name} · ${p.currency}`,
         }))}
+        onCreate={async (name) => {
+          const id = await inlineProduct.onCreate(name);
+          if (id !== null) setProductId(id);
+        }}
+        creating={inlineProduct.creating}
       />
 
       <SelectField
@@ -170,6 +181,11 @@ export function CreditSaleForm({
         onChange={setContactId}
         contacts={contactList}
         helperText={t('credit_sale_form.customer_helper')}
+        onCreate={async (name) => {
+          const id = await inlineContact.onCreate(name);
+          if (id !== null) setContactId(id);
+        }}
+        creating={inlineContact.creating}
       />
 
       {tracksStock ? (

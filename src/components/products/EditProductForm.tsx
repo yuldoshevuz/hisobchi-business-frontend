@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useUpdateProduct } from '@/api/hooks/use-products';
+import { useFeature } from '@/api/hooks/use-subscription';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
 import { SelectField } from '@/components/transactions/forms/form-primitives';
 import {
@@ -9,6 +10,7 @@ import {
   unformatAmount,
 } from '@/components/transactions/forms/form-utils';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -56,6 +58,15 @@ export function EditProductForm({
   const [defaultCost, setDefaultCost] = useState<string>(
     product.defaultCost ?? '',
   );
+  // Stock-tracking toggle. `currentStock === null` → service; any
+  // numeric → tracked product. Switching tracked → service wipes the
+  // balance on the server side; switching service → tracked opens a
+  // fresh ledger seeded with the user-entered opening stock.
+  const inventoryGate = useFeature('INVENTORY_MANAGEMENT');
+  const canTrackStock = inventoryGate.isEnabled;
+  const initialTrackStock = product.currentStock !== null;
+  const [trackStock, setTrackStock] = useState<boolean>(initialTrackStock);
+  const [openingStock, setOpeningStock] = useState<string>('0');
 
   const trimmedName = name.trim();
   const isNameValid =
@@ -89,11 +100,14 @@ export function EditProductForm({
   const categoryChanged =
     selected !== null && selected.key !== initialKey;
 
+  const trackStockChanged = trackStock !== initialTrackStock;
+
   const hasChanges =
     trimmedName !== product.name ||
     categoryChanged ||
     trimmedPrice !== initialPrice ||
-    trimmedCost !== initialCost;
+    trimmedCost !== initialCost ||
+    trackStockChanged;
 
   const submit = useCallback((): void => {
     if (!isNameValid || !hasChanges) return;
@@ -111,6 +125,9 @@ export function EditProductForm({
     }
     if (trimmedCost !== initialCost) {
       body.defaultCost = trimmedCost === '' ? null : trimmedCost;
+    }
+    if (trackStockChanged) {
+      body.currentStock = trackStock ? openingStock.trim() || '0' : null;
     }
     update.mutate(
       { id: product.id, body },
@@ -136,6 +153,9 @@ export function EditProductForm({
     isNameValid,
     hasChanges,
     onClose,
+    trackStockChanged,
+    trackStock,
+    openingStock,
   ]);
 
   return (
@@ -206,6 +226,60 @@ export function EditProductForm({
       <p className="text-[12px] text-muted-foreground">
         {t('edit_product.currency_locked', { currency: product.currency })}
       </p>
+
+      {/* Stock-tracking toggle. Service ↔ Product is a structural switch
+          on the server, so we surface a clear hint for both directions
+          to set expectations before the user saves. */}
+      <label
+        htmlFor="edit-track-stock"
+        className={`press flex items-center gap-3 rounded-xl bg-card px-4 py-3 ${
+          canTrackStock || initialTrackStock
+            ? 'cursor-pointer'
+            : 'cursor-not-allowed opacity-70'
+        }`}
+      >
+        <Checkbox
+          id="edit-track-stock"
+          checked={trackStock}
+          disabled={!canTrackStock && !initialTrackStock}
+          onCheckedChange={(v) => {
+            if (!canTrackStock && !initialTrackStock) return;
+            setTrackStock(v === true);
+          }}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-medium">
+            {t('edit_product.track_stock')}
+          </div>
+          <div className="text-[12px] text-muted-foreground">
+            {trackStock
+              ? trackStockChanged && !initialTrackStock
+                ? t('edit_product.track_stock_helper_enabling')
+                : t('edit_product.track_stock_helper_tracked')
+              : trackStockChanged && initialTrackStock
+                ? t('edit_product.track_stock_helper_disabling')
+                : t('edit_product.track_stock_helper_service')}
+          </div>
+        </div>
+      </label>
+
+      {/* Opening-stock input — only relevant when flipping service →
+          tracked. We don't surface it when the user is already tracked
+          (use the dedicated AdjustStock flow) or staying in service mode. */}
+      {trackStock && trackStockChanged && !initialTrackStock ? (
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-opening-stock">
+            {t('edit_product.opening_stock')}
+          </Label>
+          <Input
+            id="edit-opening-stock"
+            value={formatAmount(openingStock)}
+            onChange={(e) => setOpeningStock(unformatAmount(e.target.value))}
+            inputMode="decimal"
+            placeholder="0"
+          />
+        </div>
+      ) : null}
 
       {update.isError ? (
         <p className="text-[13px] text-destructive">

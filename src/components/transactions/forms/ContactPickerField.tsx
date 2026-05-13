@@ -43,6 +43,11 @@ interface ContactPickerFieldProps {
    *  so users can drop an optional contact selection. Defaults to false
    *  to preserve required-picker behaviour at existing call sites. */
   clearable?: boolean;
+  /** Optional inline-create hook. When set, the modal renders a
+   *  "Yangi qo'sh: <typed text>" row at the bottom when the typed
+   *  search has no exact match. Parent owns the create API call. */
+  onCreate?: (text: string) => void | Promise<void>;
+  creating?: boolean;
 }
 
 /**
@@ -69,6 +74,8 @@ export function ContactPickerField({
   defaultTypeFilter = 'all',
   emptyText,
   clearable = false,
+  onCreate,
+  creating = false,
 }: ContactPickerFieldProps): React.ReactElement {
   const { t } = useTranslation();
   const [typeFilter, setTypeFilter] = useState<TypeFilter>(defaultTypeFilter);
@@ -103,6 +110,8 @@ export function ContactPickerField({
       modalTitle={modalTitle}
       emptyText={computedEmpty}
       clearable={clearable}
+      onCreate={onCreate}
+      creating={creating}
       // The search threshold is intentionally low so users with even a small
       // address book can still narrow by name.
       searchThreshold={4}

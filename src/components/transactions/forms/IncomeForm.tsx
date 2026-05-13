@@ -14,6 +14,7 @@ import {
   isDuplicateDetected,
 } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
+import { useInlineCreateContact } from '@/api/hooks/use-inline-create';
 import { ContactPickerField } from './ContactPickerField';
 import {
   AmountField,
@@ -51,6 +52,7 @@ export function IncomeForm({
 
   const [accountId, setAccountId] = useState<number | null>(null);
   const [contactId, setContactId] = useState<number | null>(null);
+  const inlineContact = useInlineCreateContact('partner');
   const [categoryRef, setCategoryRef] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -168,6 +170,11 @@ export function IncomeForm({
         contacts={contactList}
         helperText={t('income_form.contact_helper')}
         clearable
+        onCreate={async (name) => {
+          const id = await inlineContact.onCreate(name);
+          if (id !== null) setContactId(id);
+        }}
+        creating={inlineContact.creating}
       />
 
       <DescriptionField

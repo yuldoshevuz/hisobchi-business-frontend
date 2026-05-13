@@ -79,6 +79,9 @@ export interface UpdateTransactionRequest {
   dueDate?: string | null;
   categoryId?: number | null;
   contactId?: number | null;
+  /** Attach / clear `metadata.employeeMemberId` — surfaces the staff
+   *  member on salary / commission rows. Pass `null` to detach. */
+  memberId?: number | null;
   /** Initial-only: replaces all sale_items, server recomputes parent amount. */
   items?: UpdateTransactionItem[];
   /** Initial-only: replaces all deferred cash-flow legs. Direction is server-inferred. */
