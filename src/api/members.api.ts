@@ -4,9 +4,13 @@ import type {
   InviteMemberRequest,
   ListMembersQuery,
   Member,
+  MemberProfile,
+  MemberSummary,
+  OrgEmployeeReport,
   PaginatedResponse,
   UpdateEmployeeDefaultsRequest,
   UpdateMemberStatusRequest,
+  UpdateStaffMemberRequest,
 } from '@/types/member.types';
 
 const BASE = '/web/members';
@@ -20,6 +24,13 @@ export const membersApi = {
   },
   async invite(body: InviteMemberRequest): Promise<Member> {
     const { data } = await api.post<Member>(BASE, body);
+    return data;
+  },
+  async updateStaff(
+    id: number,
+    body: UpdateStaffMemberRequest,
+  ): Promise<Member> {
+    const { data } = await api.patch<Member>(`${BASE}/${id}`, body);
     return data;
   },
   async updateStatus(
@@ -41,6 +52,18 @@ export const membersApi = {
       `${BASE}/${id}/employee-defaults`,
       body,
     );
+    return data;
+  },
+  async getSummary(id: number): Promise<MemberSummary> {
+    const { data } = await api.get<MemberSummary>(`${BASE}/${id}/summary`);
+    return data;
+  },
+  async getProfile(id: number): Promise<MemberProfile> {
+    const { data } = await api.get<MemberProfile>(`${BASE}/${id}/profile`);
+    return data;
+  },
+  async getOrgSummary(): Promise<OrgEmployeeReport> {
+    const { data } = await api.get<OrgEmployeeReport>(`${BASE}/summary`);
     return data;
   },
   async remove(id: number): Promise<void> {

@@ -3,6 +3,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { DevImpersonatePage } from '@/pages/DevImpersonatePage';
 import { LoginPage } from '@/pages/LoginPage';
+import { MemberDetailPage } from '@/pages/MemberDetailPage';
 import { OrganizationsPage } from '@/pages/OrganizationsPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ContactsPage } from '@/pages/ContactsPage';
@@ -76,6 +77,7 @@ export const router = createBrowserRouter([
                 path: 'members',
                 element: <Navigate to="/sozlamalar" replace />,
               },
+              { path: 'members/:id', element: <MemberDetailPage /> },
               {
                 path: 'roles',
                 element: <Navigate to="/sozlamalar?tab=roles" replace />,

@@ -7,9 +7,13 @@ import type {
   InviteMemberRequest,
   ListMembersQuery,
   Member,
+  MemberProfile,
+  MemberSummary,
+  OrgEmployeeReport,
   PaginatedResponse,
   UpdateEmployeeDefaultsRequest,
   UpdateMemberStatusRequest,
+  UpdateStaffMemberRequest,
 } from '@/types/member.types';
 
 export function useMembers(
@@ -24,6 +28,43 @@ export function useMembers(
   });
 }
 
+export function useMemberSummary(
+  id: number | null,
+  options: { enabled?: boolean } = {},
+): ReturnType<typeof useQuery<MemberSummary, Error>> {
+  const callerEnabled = options.enabled ?? true;
+  return useQuery<MemberSummary, Error>({
+    queryKey: queryKeys.members.summary(id ?? 0),
+    queryFn: () => membersApi.getSummary(id as number),
+    enabled:
+      Boolean(tokenStore.getActiveOrgId()) && callerEnabled && id !== null,
+  });
+}
+
+export function useMemberProfile(
+  id: number | null,
+  options: { enabled?: boolean } = {},
+): ReturnType<typeof useQuery<MemberProfile, Error>> {
+  const callerEnabled = options.enabled ?? true;
+  return useQuery<MemberProfile, Error>({
+    queryKey: queryKeys.members.profile(id ?? 0),
+    queryFn: () => membersApi.getProfile(id as number),
+    enabled:
+      Boolean(tokenStore.getActiveOrgId()) && callerEnabled && id !== null,
+  });
+}
+
+export function useOrgEmployeeReport(
+  options: { enabled?: boolean } = {},
+): ReturnType<typeof useQuery<OrgEmployeeReport, Error>> {
+  const callerEnabled = options.enabled ?? true;
+  return useQuery<OrgEmployeeReport, Error>({
+    queryKey: queryKeys.members.orgSummary,
+    queryFn: () => membersApi.getOrgSummary(),
+    enabled: Boolean(tokenStore.getActiveOrgId()) && callerEnabled,
+  });
+}
+
 export function useInviteMember(): ReturnType<
   typeof useMutation<Member, Error, InviteMemberRequest>
 > {
@@ -34,6 +75,23 @@ export function useInviteMember(): ReturnType<
       void queryContact.invalidateQueries({
         queryKey: queryKeys.members.all,
       });
+    },
+  });
+}
+
+interface UpdateStaffVars {
+  id: number;
+  body: UpdateStaffMemberRequest;
+}
+
+export function useUpdateStaffMember(): ReturnType<
+  typeof useMutation<Member, Error, UpdateStaffVars>
+> {
+  const qc = useQueryClient();
+  return useMutation<Member, Error, UpdateStaffVars>({
+    mutationFn: ({ id, body }) => membersApi.updateStaff(id, body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.members.all });
     },
   });
 }

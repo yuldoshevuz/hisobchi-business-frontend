@@ -31,6 +31,9 @@ export const queryKeys = {
       'list',
       query,
     ],
+    summary: (id: number): readonly unknown[] => ['members', 'summary', id],
+    profile: (id: number): readonly unknown[] => ['members', 'profile', id],
+    orgSummary: ['members', 'org-summary'] as const,
   },
   rbac: {
     permissions: ['rbac', 'permissions'] as const,
