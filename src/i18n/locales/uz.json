@@ -872,7 +872,9 @@
     "stock_warning_zero": "Omborda {product} mavjud emas. Sotuvni tasdiqlasangiz, tizim {requested} dona uchun avtomatik xarid yaratadi — yetkazib beruvchi va to'lovni keyin to'ldirasiz.",
     "auto_backfill_notice": "Ombordagi qoldiq yetmagani uchun tizim {count} ta avtomatik xarid yaratdi:",
     "auto_backfill_line": "• {product} — {quantity} dona",
-    "auto_backfill_hint": "Yetkazib beruvchi, narx va to'lovni qo'shish uchun yaratilgan xaridlarni oching va to'ldiring."
+    "auto_backfill_hint": "Yetkazib beruvchi, narx va to'lovni qo'shish uchun yaratilgan xaridlarni oching va to'ldiring.",
+    "auto_backfill_badge": "Avto-xarid",
+    "auto_backfill_banner": "Bu yozuv sotuv paytida ombor yetishmagani uchun tizim tomonidan avtomatik yaratilgan. Yetkazib beruvchini, tannarxni va to'lovni to'ldiring."
   },
   "void_commission": {
     "reason": "Sabab (ixtiyoriy)",
@@ -966,6 +968,7 @@
     "field.due_date": "Muddat",
     "field.created_by": "Yaratdi",
     "field.account": "Hisob",
+    "field.seller": "Sotuvchi",
     "cash_flows.proposed_section": "Taklif qilingan to'lovlar",
     "cash_flows.empty_initial": "AI to'lov taklif qilmadi (qarzga deb hisoblanadi)",
     "cash_flows.empty": "Hali to'lovlar yo'q",

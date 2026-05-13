@@ -39,6 +39,13 @@ export function TransactionListItem({
   const Icon = TRANSACTION_TYPE_ICON[transaction.type];
   const sign = TRANSACTION_TYPE_SIGN[transaction.type];
   const isVoided = transaction.status === 'voided';
+  const isAutoBackfill = (() => {
+    const meta = transaction.metadata as
+      | { autoBackfill?: unknown }
+      | null
+      | undefined;
+    return meta?.autoBackfill !== undefined && meta.autoBackfill !== null;
+  })();
 
   const amountClass = cn(
     'tabular-nums text-[15px] font-semibold',
@@ -129,6 +136,11 @@ export function TransactionListItem({
                 className="text-[10px]"
               >
                 {PAYMENT_STATUS_LABEL[transaction.paymentStatus]}
+              </Badge>
+            ) : null}
+            {isAutoBackfill ? (
+              <Badge variant="outline" className="text-[10px]">
+                {t('sale_form.auto_backfill_badge')}
               </Badge>
             ) : null}
           </div>

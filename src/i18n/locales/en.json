@@ -872,7 +872,9 @@
     "stock_warning_zero": "No {product} in stock. On confirm, the system will auto-create a purchase for {requested} pcs — add the supplier and payment afterwards.",
     "auto_backfill_notice": "Stock was short, so {count} auto-purchase(s) were created:",
     "auto_backfill_line": "• {product} — {quantity} pcs",
-    "auto_backfill_hint": "Open the auto-created purchases and fill in the supplier, cost and payment."
+    "auto_backfill_hint": "Open the auto-created purchases and fill in the supplier, cost and payment.",
+    "auto_backfill_badge": "Auto-purchase",
+    "auto_backfill_banner": "This record was auto-created by the system because stock was short at the time of sale. Please fill in the supplier, cost and payment."
   },
   "void_commission": {
     "reason": "Reason (optional)",
@@ -966,6 +968,7 @@
     "field.due_date": "Due date",
     "field.created_by": "Created by",
     "field.account": "Account",
+    "field.seller": "Seller",
     "cash_flows.proposed_section": "Proposed payments",
     "cash_flows.empty_initial": "AI didn't propose a payment (treated as credit)",
     "cash_flows.empty": "No payments yet",
