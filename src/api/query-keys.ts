@@ -159,4 +159,8 @@ export const queryKeys = {
     plans: ['subscription', 'plans'] as const,
     current: ['subscription', 'current'] as const,
   },
+  payments: {
+    all: ['payments'] as const,
+    invoice: (id: number): readonly unknown[] => ['payments', 'invoice', id],
+  },
 };

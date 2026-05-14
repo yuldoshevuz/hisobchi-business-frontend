@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import {
@@ -6,16 +6,19 @@ import {
   Check,
   CreditCard,
   Infinity as InfinityIcon,
+  Loader2,
   Sparkles,
   Star,
   X,
 } from 'lucide-react';
+import { useCreateInvoice } from '@/api/hooks/use-payments';
 import {
   useCurrentSubscription,
   usePlans,
 } from '@/api/hooks/use-subscription';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ListItem, Section } from '@/components/ui/list-item';
 import { Spinner } from '@/components/ui/spinner';
 import { getApiErrorMessage } from '@/lib/api-error';
@@ -25,7 +28,20 @@ import {
   getFeatureLabel,
 } from '@/lib/feature-i18n';
 import { cn } from '@/lib/utils';
-import type { CurrentSubscription, Plan } from '@/types/subscription.types';
+import type { PaymentProvider } from '@/types/payment.types';
+import type {
+  CurrentSubscription,
+  Plan,
+  PlanPrice,
+} from '@/types/subscription.types';
+
+/**
+ * Click and Payme only handle one-time payments for plan tiers of at
+ * least 60 days (3-month, 6-month, yearly). Monthly tiers are routed to
+ * a separate provider (VIA/Atmos) that ships in a later phase; the
+ * `Coming soon` placeholder marks those rows in the UI.
+ */
+const CLICK_PAYME_MIN_DURATION_DAYS = 60;
 
 const SUBSCRIPTION_STATUS_KEY: Record<string, string> = {
   active: 'plans_page.status.active',
@@ -60,8 +76,6 @@ export function PlansPage(): React.ReactElement {
           error={plans.error}
           currentPlanId={current.data?.plan?.id ?? null}
         />
-
-        <UpgradeNoteCard />
       </div>
     </div>
   );
@@ -352,19 +366,14 @@ function PlanCard({
       </div>
 
       {activePrices.length > 0 ? (
-        <div className="mt-3 space-y-1.5">
+        <div className="mt-3 space-y-2">
           {activePrices.map((price) => (
-            <div
+            <PlanPriceRow
               key={price.id}
-              className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-1.5 text-[13px]"
-            >
-              <span className="text-muted-foreground">
-                {t('plans_page.duration_days', { count: price.durationDays })}
-              </span>
-              <span className="font-semibold tabular-nums">
-                {Number(price.price).toLocaleString('uz-UZ')} {price.currency}
-              </span>
-            </div>
+              plan={plan}
+              price={price}
+              isCurrent={isCurrent}
+            />
           ))}
         </div>
       ) : (
@@ -398,28 +407,105 @@ function PlanCard({
   );
 }
 
-// ─── Upgrade note ──────────────────────────────────────────────────────────
+// ─── Price row + checkout buttons ─────────────────────────────────────────
 
-function UpgradeNoteCard(): React.ReactElement {
+/**
+ * One PlanPrice (e.g. 3-month, 6-month, yearly) with its provider
+ * checkout buttons. Monthly tiers (`durationDays < 60`) are not
+ * offered through Click or Payme — they show a "coming soon" hint
+ * because the monthly auto-renewal provider lives in a different
+ * module that ships later.
+ */
+function PlanPriceRow({
+  plan,
+  price,
+  isCurrent,
+}: {
+  plan: Plan;
+  price: PlanPrice;
+  isCurrent: boolean;
+}): React.ReactElement {
   const { t } = useTranslation();
+  const createInvoice = useCreateInvoice();
+  const [pendingProvider, setPendingProvider] =
+    useState<PaymentProvider | null>(null);
+  const [errorText, setErrorText] = useState<string | null>(null);
+
+  const supportsOneShot = price.durationDays >= CLICK_PAYME_MIN_DURATION_DAYS;
+
+  const onPay = (provider: PaymentProvider) => {
+    setErrorText(null);
+    setPendingProvider(provider);
+    createInvoice.mutate(
+      { planId: plan.id, planPriceId: price.id, provider },
+      {
+        onSuccess: (session) => {
+          // Provider hosted checkout — full navigation, not pushState, so
+          // the browser handles the cross-origin redirect cleanly.
+          window.location.href = session.checkoutUrl;
+        },
+        onError: (err) => {
+          setPendingProvider(null);
+          setErrorText(getApiErrorMessage(err));
+        },
+      },
+    );
+  };
+
   return (
-    <Section>
-      <div className="px-4 py-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
-            <CreditCard className="h-4 w-4" />
-          </div>
-          <div className="flex-1 space-y-1">
-            <div className="text-[14px] font-medium">
-              {t('plans_page.upgrade_title')}
-            </div>
-            <p className="text-[13px] text-muted-foreground">
-              {t('plans_page.upgrade_description')}
-            </p>
-          </div>
-        </div>
+    <div className="rounded-md bg-muted/40 px-3 py-2">
+      <div className="flex items-center justify-between text-[13px]">
+        <span className="text-muted-foreground">
+          {t('plans_page.duration_days', { count: price.durationDays })}
+        </span>
+        <span className="font-semibold tabular-nums">
+          {Number(price.price).toLocaleString('uz-UZ')} {price.currency}
+        </span>
       </div>
-    </Section>
+
+      {isCurrent ? null : supportsOneShot ? (
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="default"
+            className="h-8 flex-1 text-[12px]"
+            onClick={() => onPay('click')}
+            disabled={createInvoice.isPending}
+          >
+            {pendingProvider === 'click' ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <CreditCard className="h-3.5 w-3.5" />
+            )}
+            {t('plans_page.pay_with_click')}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-8 flex-1 text-[12px]"
+            onClick={() => onPay('payme')}
+            disabled={createInvoice.isPending}
+          >
+            {pendingProvider === 'payme' ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <CreditCard className="h-3.5 w-3.5" />
+            )}
+            {t('plans_page.pay_with_payme')}
+          </Button>
+        </div>
+      ) : (
+        <div className="mt-2 rounded-sm bg-amber-50 px-2 py-1 text-[11px] text-amber-700">
+          {t('plans_page.monthly_coming_soon')}
+        </div>
+      )}
+
+      {errorText ? (
+        <div className="mt-1.5 text-[11px] text-destructive">{errorText}</div>
+      ) : null}
+    </div>
   );
 }
 

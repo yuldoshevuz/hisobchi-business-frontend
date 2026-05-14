@@ -11,6 +11,7 @@ import { ContactDetailPage } from '@/pages/ContactDetailPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { KatalogPage } from '@/pages/KatalogPage';
 import { PlansPage } from '@/pages/PlansPage';
+import { CheckoutReturnPage } from '@/pages/CheckoutReturnPage';
 import { ReportsPage } from '@/pages/ReportsPage';
 import { ScheduledPage } from '@/pages/ScheduledPage';
 import { CommissionsPage } from '@/pages/CommissionsPage';
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
               { path: 'commissions', element: <CommissionsPage /> },
               { path: 'reports', element: <ReportsPage /> },
               { path: 'plans', element: <PlansPage /> },
+              { path: 'plans/checkout-return', element: <CheckoutReturnPage /> },
               { path: 'transactions', element: <TransactionsListPage /> },
               { path: 'sales', element: <SalesListPage /> },
               {
