@@ -413,12 +413,15 @@ function ColumnRow({
     [sourceFields, t],
   );
 
+  // Format: "A • Summa" — letter anchors the row (always one or two
+  // chars, easy to scan), header follows. Both the modal rows and the
+  // trigger pill render the same combined string. Columns with an
+  // empty header (blank row-1 cell) collapse to just the letter.
   const targetColumnOptions: SelectOption<string>[] = useMemo(
     () =>
       availableColumns.map((c) => ({
         value: c.column,
-        label: c.column,
-        description: c.header || undefined,
+        label: c.header ? `${c.column} • ${c.header}` : c.column,
       })),
     [availableColumns],
   );
@@ -479,8 +482,7 @@ function SmallSelect({
     () =>
       Object.entries(options).map(([col, header]) => ({
         value: col,
-        label: col,
-        description: header || undefined,
+        label: header ? `${col} • ${header}` : col,
       })),
     [options],
   );
