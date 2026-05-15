@@ -4,6 +4,10 @@ import { Plus, Trash2, Play, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import {
+  SelectField,
+  type SelectOption,
+} from '@/components/transactions/forms/form-primitives';
+import {
   useDeleteSheetMapping,
   useGoogleSheetHeaders,
   useGoogleSheetsTabs,
@@ -245,6 +249,7 @@ function TypeMappingForm({ type, existing }: FormProps): React.ReactElement {
                   <ColumnRow
                     key={idx}
                     column={col}
+                    rowIndex={idx}
                     sourceFields={fieldsQuery.data?.fields ?? []}
                     availableColumns={headersQuery.data ?? []}
                     onChange={(patch) => updateColumn(idx, patch)}
@@ -275,12 +280,14 @@ function TypeMappingForm({ type, existing }: FormProps): React.ReactElement {
         </p>
         <div className="mt-2 grid grid-cols-2 gap-2">
           <SmallSelect
+            id={`tracking-column-${type}`}
             label={t('integrations.sheets.editor.trackingColumn')}
             value={trackingColumn}
             onChange={setTrackingColumn}
             options={headerByColumn}
           />
           <SmallSelect
+            id={`void-column-${type}`}
             label={t('integrations.sheets.editor.voidColumn')}
             value={voidMarkerColumn}
             onChange={setVoidMarkerColumn}
@@ -375,60 +382,71 @@ function TabSelector({
 
 function ColumnRow({
   column,
+  rowIndex,
   sourceFields,
   availableColumns,
   onChange,
   onRemove,
 }: {
   column: ColumnMapping;
-  sourceFields: Array<{ key: string; label: string; format: ColumnMapping['format'] | string }>;
+  rowIndex: number;
+  sourceFields: Array<{
+    key: string;
+    label: string;
+    format: ColumnMapping['format'] | string;
+  }>;
   availableColumns: Array<{ column: string; header: string }>;
   onChange: (patch: Partial<ColumnMapping>) => void;
   onRemove: () => void;
 }): React.ReactElement {
   const { t } = useTranslation();
+
+  const sourceFieldOptions: SelectOption<string>[] = useMemo(
+    () =>
+      sourceFields.map((f) => {
+        const i18nKey = SOURCE_FIELD_LABEL_KEYS[f.key];
+        const label = i18nKey
+          ? t(i18nKey, { defaultValue: f.label })
+          : f.label;
+        return { value: f.key, label };
+      }),
+    [sourceFields, t],
+  );
+
+  const targetColumnOptions: SelectOption<string>[] = useMemo(
+    () =>
+      availableColumns.map((c) => ({
+        value: c.column,
+        label: c.column,
+        description: c.header || undefined,
+      })),
+    [availableColumns],
+  );
+
   return (
     <div className="rounded-xl border border-border p-3">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <div>
-          <label className="text-[12px] text-muted-foreground">
-            {t('integrations.sheets.editor.hisobchiField')}
-          </label>
-          <select
-            className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-[14px]"
-            value={column.sourceField}
-            onChange={(e) => onChange({ sourceField: e.target.value })}
-          >
-            <option value="">—</option>
-            {sourceFields.map((f) => {
-              const i18nKey = SOURCE_FIELD_LABEL_KEYS[f.key];
-              const label = i18nKey ? t(i18nKey, { defaultValue: f.label }) : f.label;
-              return (
-                <option key={f.key} value={f.key}>
-                  {label}
-                </option>
-              );
-            })}
-          </select>
-        </div>
+        <SelectField<string>
+          id={`mapping-source-${rowIndex}`}
+          label={t('integrations.sheets.editor.hisobchiField')}
+          value={column.sourceField || null}
+          onChange={(next) => onChange({ sourceField: next ?? '' })}
+          options={sourceFieldOptions}
+          placeholder="—"
+          modalTitle={t('integrations.sheets.editor.hisobchiField')}
+          clearable
+        />
 
-        <div>
-          <label className="text-[12px] text-muted-foreground">
-            {t('integrations.sheets.editor.sheetColumn')}
-          </label>
-          <select
-            className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-[14px]"
-            value={column.targetColumn}
-            onChange={(e) => onChange({ targetColumn: e.target.value })}
-          >
-            <option value="">—</option>
-            {availableColumns.map((c) => (
-              <option key={c.column} value={c.column}>
-                {c.column} {c.header ? `· ${c.header}` : ''}
-              </option>
-            ))}
-          </select>
-        </div>
+        <SelectField<string>
+          id={`mapping-target-${rowIndex}`}
+          label={t('integrations.sheets.editor.sheetColumn')}
+          value={column.targetColumn || null}
+          onChange={(next) => onChange({ targetColumn: next ?? '' })}
+          options={targetColumnOptions}
+          placeholder="—"
+          modalTitle={t('integrations.sheets.editor.sheetColumn')}
+          clearable
+        />
       </div>
       <div className="mt-2 flex justify-end">
         <button
@@ -445,32 +463,38 @@ function ColumnRow({
 }
 
 function SmallSelect({
+  id,
   label,
   value,
   onChange,
   options,
 }: {
+  id: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: Record<string, string>;
 }): React.ReactElement {
+  const items: SelectOption<string>[] = useMemo(
+    () =>
+      Object.entries(options).map(([col, header]) => ({
+        value: col,
+        label: col,
+        description: header || undefined,
+      })),
+    [options],
+  );
   return (
-    <div>
-      <label className="text-[12px] text-muted-foreground">{label}</label>
-      <select
-        className="mt-1 w-full rounded-lg border border-input bg-card px-3 py-2 text-[13px]"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">—</option>
-        {Object.entries(options).map(([col, header]) => (
-          <option key={col} value={col}>
-            {col} {header ? `· ${header}` : ''}
-          </option>
-        ))}
-      </select>
-    </div>
+    <SelectField<string>
+      id={id}
+      label={label}
+      value={value || null}
+      onChange={(next) => onChange(next ?? '')}
+      options={items}
+      placeholder="—"
+      modalTitle={label}
+      clearable
+    />
   );
 }
 
