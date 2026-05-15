@@ -40,6 +40,8 @@ export const PermissionSlug = {
 
   AI_MANAGE: 'ai.manage',
 
+  INTEGRATIONS_MANAGE: 'integrations.manage',
+
   PLANS_MANAGE: 'plans.manage',
 } as const;
 

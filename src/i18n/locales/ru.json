@@ -351,7 +351,95 @@
   "settings": {
     "members": "Сотрудники",
     "roles": "Роли",
-    "organization": "Организация"
+    "organization": "Организация",
+    "integrations": "Интеграции"
+  },
+  "integrations": {
+    "errors": {
+      "oauthGeneric": "Ошибка подключения",
+      "oauthFailed": "Подключение к Google прервано: {{reason}}"
+    },
+    "sheets": {
+      "title": "Google Sheets",
+      "subtitle": "Автоматически писать транзакции Hisobchi в вашу таблицу",
+      "description": "Подключите Google-аккаунт и выберите, в какие столбцы вашей таблицы попадут поля Hisobchi.",
+      "unavailable": "Интеграция пока не сконфигурирована. Обратитесь к администратору.",
+      "connect": "Подключить Google",
+      "configure": "Настроить",
+      "pause": "Приостановить",
+      "resume": "Продолжить",
+      "disconnect": "Отключить",
+      "disconnectConfirm": "Отключить интеграцию? Маппинги будут удалены.",
+      "account": "Аккаунт",
+      "spreadsheet": "Таблица",
+      "spreadsheetNotPicked": "Не выбрана",
+      "lastSync": "Последняя синхронизация",
+      "status": {
+        "active": "Активна — синхронизация работает",
+        "paused": "Приостановлена",
+        "error": "Ошибка — синхронизация остановлена",
+        "revoked": "Подключение отозвано — переподключите"
+      },
+      "wizard": {
+        "title": "Настройка Google Sheets",
+        "subtitle": "Выберите таблицу и сопоставьте поля",
+        "step": {
+          "spreadsheet": "Таблица",
+          "mappings": "Поля",
+          "logs": "История"
+        }
+      },
+      "picker": {
+        "help": "Выберите одну из своих Google-таблиц.",
+        "searchPlaceholder": "Поиск",
+        "empty": "Таблиц не найдено"
+      },
+      "editor": {
+        "needSpreadsheet": "Сначала выберите таблицу.",
+        "tabSection": "В какой лист писать",
+        "columnsSection": "Сопоставление полей",
+        "addColumn": "Добавить поле",
+        "hisobchiField": "Поле Hisobchi",
+        "sheetColumn": "Ваша колонка",
+        "pickTab": "Выберите лист",
+        "atLeastOne": "Нужно хотя бы одно поле",
+        "advanced": "Дополнительно",
+        "trackingHint": "Tracking-колонка — скрытая колонка с ID транзакции Hisobchi. Нужна для редактирования и отмены.",
+        "trackingColumn": "Tracking-колонка",
+        "voidColumn": "Колонка отмены",
+        "testPush": "Тестовая отправка",
+        "testOk": "Готово — записано в строку {row}",
+        "testFail": "Не удалось",
+        "deleteConfirm": "Удалить этот маппинг?"
+      },
+      "logs": {
+        "empty": "Синхронизаций пока не было",
+        "operation": {
+          "append": "Добавлено",
+          "update": "Изменено",
+          "delete": "Отменено"
+        }
+      },
+      "fields": {
+        "transactionId": "ID транзакции",
+        "date": "Дата",
+        "amount": "Сумма",
+        "currency": "Валюта",
+        "paidAmount": "Оплачено",
+        "paymentStatus": "Статус оплаты",
+        "description": "Комментарий",
+        "status": "Статус",
+        "createdAt": "Время создания",
+        "createdByName": "Кто создал",
+        "contactName": "Контакт",
+        "contactPhone": "Телефон контакта",
+        "contactType": "Тип контакта",
+        "categoryName": "Категория",
+        "accountName": "Счёт",
+        "saleItemsSummary": "Товары",
+        "saleItemsQuantity": "Общее кол-во"
+      }
+    }
   },
   "members": {
     "title": "Сотрудники",
@@ -1421,7 +1509,18 @@
     "MEMBER_INVALID_STATUS": "Неверный статус сотрудника",
     "MEMBER_CANNOT_MODIFY_SELF": "Вы не можете изменять самого себя",
     "MEMBER_CANNOT_REMOVE_OWNER": "Владельца организации нельзя удалить",
-    "MEMBER_PHONE_BELONGS_TO_EXISTING_MEMBER": "Этот номер телефона уже привязан к другому сотруднику в организации"
+    "MEMBER_PHONE_BELONGS_TO_EXISTING_MEMBER": "Этот номер телефона уже привязан к другому сотруднику в организации",
+    "GOOGLE_SHEETS_NOT_CONFIGURED": "Интеграция Google Sheets ещё не настроена. Обратитесь к администратору",
+    "GOOGLE_SHEETS_OAUTH_STATE_INVALID": "Сессия подключения недействительна. Попробуйте ещё раз",
+    "GOOGLE_SHEETS_OAUTH_FAILED": "Подключение к Google прервано: {reason}",
+    "GOOGLE_SHEETS_INTEGRATION_NOT_FOUND": "Google Sheets не подключён. Сначала подключите Google-аккаунт",
+    "GOOGLE_SHEETS_INTEGRATION_REVOKED": "Доступ Google отозван. Подключите заново",
+    "GOOGLE_SHEETS_SPREADSHEET_NOT_FOUND": "Таблица не найдена. Возможно, она была удалена",
+    "GOOGLE_SHEETS_TAB_NOT_FOUND": "Лист \"{tabName}\" не найден. Проверьте, существует ли он в таблице",
+    "GOOGLE_SHEETS_MAPPING_NOT_FOUND": "Сопоставление для этого типа транзакции не настроено",
+    "GOOGLE_SHEETS_MAPPING_INVALID": "Ошибка в сопоставлении: {reason}",
+    "GOOGLE_SHEETS_API_ERROR": "Связь с Google прервана: {message}",
+    "GOOGLE_SHEETS_TEST_PUSH_NO_DATA": "Нет данных для тестовой отправки — сначала создайте хотя бы одну транзакцию"
   },
   "feature_meta": {
     "EMPLOYEES_LIMIT": {

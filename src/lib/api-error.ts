@@ -79,6 +79,18 @@ const KNOWN_API_ERROR_CODES = new Set<string>([
   "MEMBER_CANNOT_MODIFY_SELF",
   "MEMBER_CANNOT_REMOVE_OWNER",
   "MEMBER_PHONE_BELONGS_TO_EXISTING_MEMBER",
+  // Google Sheets integration
+  "GOOGLE_SHEETS_NOT_CONFIGURED",
+  "GOOGLE_SHEETS_OAUTH_STATE_INVALID",
+  "GOOGLE_SHEETS_OAUTH_FAILED",
+  "GOOGLE_SHEETS_INTEGRATION_NOT_FOUND",
+  "GOOGLE_SHEETS_INTEGRATION_REVOKED",
+  "GOOGLE_SHEETS_SPREADSHEET_NOT_FOUND",
+  "GOOGLE_SHEETS_TAB_NOT_FOUND",
+  "GOOGLE_SHEETS_MAPPING_NOT_FOUND",
+  "GOOGLE_SHEETS_MAPPING_INVALID",
+  "GOOGLE_SHEETS_API_ERROR",
+  "GOOGLE_SHEETS_TEST_PUSH_NO_DATA",
 ]);
 
 export function getApiErrorCode(error: unknown): string | undefined {
@@ -139,7 +151,15 @@ export function getApiErrorMessage(error: unknown, fallback?: string): string {
     const body = error.response?.data as ApiErrorBody | undefined;
     const code = body?.code ?? body?.messageKey;
     if (code && KNOWN_API_ERROR_CODES.has(code)) {
-      return i18n.t(`api_error.${code}`);
+      // Pass `details` as interpolation values so translations can
+      // reference {{tabName}}, {{reason}}, {{count}} etc. — surfaces
+      // backend context (e.g. "Column A cannot be used for tracking")
+      // in the user's locale.
+      const details =
+        body?.details && typeof body.details === "object"
+          ? (body.details as Record<string, unknown>)
+          : {};
+      return i18n.t(`api_error.${code}`, details);
     }
     if (body?.message) {
       if (Array.isArray(body.message)) return body.message.join(", ");

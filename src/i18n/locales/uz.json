@@ -351,7 +351,95 @@
   "settings": {
     "members": "Xodimlar",
     "roles": "Rollar",
-    "organization": "Tashkilot"
+    "organization": "Tashkilot",
+    "integrations": "Integratsiyalar"
+  },
+  "integrations": {
+    "errors": {
+      "oauthGeneric": "Ulanishda xatolik",
+      "oauthFailed": "Google bilan ulanish bekor qilindi: {{reason}}"
+    },
+    "sheets": {
+      "title": "Google Sheets",
+      "subtitle": "Hisobchi tranzaksiyalarini sizning jadvalingizga avtomatik yozish",
+      "description": "Google hisobingizni ulang va o'z jadvalingizdagi qaysi ustunlarga Hisobchining qaysi maydonlari yozilishini belgilang.",
+      "unavailable": "Bu integratsiya hozircha sozlanmagan. Administratorga murojaat qiling.",
+      "connect": "Google hisobni ulash",
+      "configure": "Sozlash",
+      "pause": "To'xtatib turish",
+      "resume": "Davom ettirish",
+      "disconnect": "Uzish",
+      "disconnectConfirm": "Google Sheets integratsiyasini uzasizmi? Mappinglar yo'qoladi.",
+      "account": "Hisob",
+      "spreadsheet": "Jadval",
+      "spreadsheetNotPicked": "Tanlanmagan",
+      "lastSync": "So'nggi sync",
+      "status": {
+        "active": "Faol — sync ishlamoqda",
+        "paused": "To'xtatilgan",
+        "error": "Xatolik bo'ldi — sync to'xtatilgan",
+        "revoked": "Ulanish bekor qilingan — qayta ulang"
+      },
+      "wizard": {
+        "title": "Google Sheets sozlash",
+        "subtitle": "Jadvalingizni tanlang va maydonlarni biriktiring",
+        "step": {
+          "spreadsheet": "Jadval",
+          "mappings": "Maydonlar",
+          "logs": "Tarix"
+        }
+      },
+      "picker": {
+        "help": "O'zingizning Google jadvallaringizdan birini tanlang.",
+        "searchPlaceholder": "Qidirish",
+        "empty": "Jadval topilmadi"
+      },
+      "editor": {
+        "needSpreadsheet": "Avval jadvalni tanlang.",
+        "tabSection": "Qaysi tab'ga yozamiz",
+        "columnsSection": "Maydonlar moslashuvi",
+        "addColumn": "Maydon qo'shish",
+        "hisobchiField": "Hisobchi maydoni",
+        "sheetColumn": "Sizning ustun",
+        "pickTab": "Tab tanlang",
+        "atLeastOne": "Kamida bitta maydon kerak",
+        "advanced": "Qo'shimcha",
+        "trackingHint": "Tracking ustun — Hisobchi tranzaksiya ID si yoziladigan yashirin ustun. Tahrirlash va bekor qilish uchun kerak.",
+        "trackingColumn": "Tracking ustun",
+        "voidColumn": "Bekor qilingan belgisi",
+        "testPush": "Test yuborish",
+        "testOk": "Muvaffaqiyatli — qator {row} ga yozildi",
+        "testFail": "Test bajarilmadi",
+        "deleteConfirm": "Bu mappingni o'chiramizmi?"
+      },
+      "logs": {
+        "empty": "Hozircha sync bo'lmadi",
+        "operation": {
+          "append": "Qo'shildi",
+          "update": "O'zgartirildi",
+          "delete": "Bekor qilindi"
+        }
+      },
+      "fields": {
+        "transactionId": "Tranzaksiya ID",
+        "date": "Sana",
+        "amount": "Summa",
+        "currency": "Valyuta",
+        "paidAmount": "To'langan",
+        "paymentStatus": "To'lov holati",
+        "description": "Izoh",
+        "status": "Holati",
+        "createdAt": "Yaratilgan vaqti",
+        "createdByName": "Kim yaratdi",
+        "contactName": "Kontakt",
+        "contactPhone": "Kontakt telefoni",
+        "contactType": "Kontakt turi",
+        "categoryName": "Kategoriya",
+        "accountName": "Hisob",
+        "saleItemsSummary": "Mahsulotlar",
+        "saleItemsQuantity": "Umumiy soni"
+      }
+    }
   },
   "members": {
     "title": "Xodimlar",
@@ -1421,7 +1509,18 @@
     "MEMBER_INVALID_STATUS": "Xodim statusi noto'g'ri",
     "MEMBER_CANNOT_MODIFY_SELF": "O'zingizni o'zgartira olmaysiz",
     "MEMBER_CANNOT_REMOVE_OWNER": "Tashkilot egasini o'chirib bo'lmaydi",
-    "MEMBER_PHONE_BELONGS_TO_EXISTING_MEMBER": "Bu telefon raqami tashkilotdagi boshqa xodimga biriktirilgan"
+    "MEMBER_PHONE_BELONGS_TO_EXISTING_MEMBER": "Bu telefon raqami tashkilotdagi boshqa xodimga biriktirilgan",
+    "GOOGLE_SHEETS_NOT_CONFIGURED": "Google Sheets integratsiyasi hali sozlanmagan. Administratorga murojaat qiling",
+    "GOOGLE_SHEETS_OAUTH_STATE_INVALID": "Ulanish sessiyasi yaroqsiz. Qaytadan urinib ko'ring",
+    "GOOGLE_SHEETS_OAUTH_FAILED": "Google bilan ulanish bekor qilindi: {reason}",
+    "GOOGLE_SHEETS_INTEGRATION_NOT_FOUND": "Google Sheets ulanmagan. Avval Google hisobini ulang",
+    "GOOGLE_SHEETS_INTEGRATION_REVOKED": "Google ruxsati bekor qilingan. Qaytadan ulang",
+    "GOOGLE_SHEETS_SPREADSHEET_NOT_FOUND": "Jadval topilmadi. O'chirilgan bo'lishi mumkin",
+    "GOOGLE_SHEETS_TAB_NOT_FOUND": "\"{tabName}\" nomli tab topilmadi. Jadvalda mavjudligini tekshiring",
+    "GOOGLE_SHEETS_MAPPING_NOT_FOUND": "Bu tranzaksiya turi uchun moslik sozlanmagan",
+    "GOOGLE_SHEETS_MAPPING_INVALID": "Moslik sozlamasida xatolik: {reason}",
+    "GOOGLE_SHEETS_API_ERROR": "Google bilan aloqa muvaffaqiyatsiz: {message}",
+    "GOOGLE_SHEETS_TEST_PUSH_NO_DATA": "Test yuborish uchun ma'lumot yo'q — avval bitta tranzaksiya yarating"
   },
   "feature_meta": {
     "EMPLOYEES_LIMIT": {

@@ -48,6 +48,21 @@ export function useDeepLink(): void {
 
     const fromUrl = new URLSearchParams(window.location.search);
     const startParam = readStartParam();
+
+    // Flat-token start_params (e.g. `integrations_connected`,
+    // `integrations_error`) — Telegram's `startapp` only allows
+    // alphanumerics + `_-`, so OAuth callbacks can't pack a full
+    // querystring. Handle these as a separate fast path.
+    if (startParam && /^integrations_/.test(startParam)) {
+      consumedRef.current = true;
+      const status = startParam.slice('integrations_'.length);
+      navigate(
+        `/sozlamalar?tab=integrations&google_sheets=${encodeURIComponent(status)}`,
+        { replace: true },
+      );
+      return;
+    }
+
     const fromTelegram = startParam
       ? new URLSearchParams(startParam)
       : new URLSearchParams();

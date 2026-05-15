@@ -4,20 +4,23 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { MembersPage } from './MembersPage';
 import { OrganizationSettingsPage } from './OrganizationSettingsPage';
 import { RolesPage } from './RolesPage';
+import { IntegrationsPage } from './IntegrationsPage';
 import { cn } from '@/lib/utils';
 import { tgHapticSelection } from '@/lib/telegram';
 
-type SozlamalarTab = 'members' | 'roles' | 'organization';
+type SozlamalarTab = 'members' | 'roles' | 'organization' | 'integrations';
 
 const TABS: ReadonlyArray<{ id: SozlamalarTab; labelKey: string }> = [
   { id: 'members', labelKey: 'settings.members' },
   { id: 'roles', labelKey: 'settings.roles' },
   { id: 'organization', labelKey: 'settings.organization' },
+  { id: 'integrations', labelKey: 'settings.integrations' },
 ];
 
 function readTab(value: string | null): SozlamalarTab {
   if (value === 'roles') return 'roles';
   if (value === 'organization') return 'organization';
+  if (value === 'integrations') return 'integrations';
   return 'members';
 }
 
@@ -44,7 +47,7 @@ export function SozlamalarPage(): React.ReactElement {
       />
 
       <div className="px-4 pb-3">
-        <div className="flex gap-1 rounded-xl bg-muted p-1">
+        <div className="flex gap-1 overflow-x-auto rounded-xl bg-muted p-1">
           {TABS.map((tab_) => {
             const active = tab_.id === tab;
             return (
@@ -53,7 +56,7 @@ export function SozlamalarPage(): React.ReactElement {
                 type="button"
                 onClick={() => selectTab(tab_.id)}
                 className={cn(
-                  'press flex-1 rounded-lg px-3 py-2 text-[14px] font-medium transition-colors',
+                  'press flex-1 shrink-0 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
                   active
                     ? 'bg-card text-foreground shadow-sm'
                     : 'text-muted-foreground',
@@ -70,6 +73,8 @@ export function SozlamalarPage(): React.ReactElement {
         <MembersPage embedded />
       ) : tab === 'roles' ? (
         <RolesPage embedded />
+      ) : tab === 'integrations' ? (
+        <IntegrationsPage />
       ) : (
         <OrganizationSettingsPage />
       )}

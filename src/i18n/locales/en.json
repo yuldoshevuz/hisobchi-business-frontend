@@ -351,7 +351,95 @@
   "settings": {
     "members": "Team",
     "roles": "Roles",
-    "organization": "Organisation"
+    "organization": "Organisation",
+    "integrations": "Integrations"
+  },
+  "integrations": {
+    "errors": {
+      "oauthGeneric": "Connection error",
+      "oauthFailed": "Google connection failed: {{reason}}"
+    },
+    "sheets": {
+      "title": "Google Sheets",
+      "subtitle": "Auto-push Hisobchi transactions into your sheet",
+      "description": "Connect a Google account and map Hisobchi fields onto your existing sheet columns.",
+      "unavailable": "Integration is not configured on this deployment. Contact your administrator.",
+      "connect": "Connect Google",
+      "configure": "Configure",
+      "pause": "Pause",
+      "resume": "Resume",
+      "disconnect": "Disconnect",
+      "disconnectConfirm": "Disconnect Google Sheets? Mappings will be removed.",
+      "account": "Account",
+      "spreadsheet": "Spreadsheet",
+      "spreadsheetNotPicked": "Not selected",
+      "lastSync": "Last sync",
+      "status": {
+        "active": "Active — sync is running",
+        "paused": "Paused",
+        "error": "Errored — sync stopped",
+        "revoked": "Connection revoked — reconnect required"
+      },
+      "wizard": {
+        "title": "Set up Google Sheets",
+        "subtitle": "Pick your spreadsheet and map fields to columns",
+        "step": {
+          "spreadsheet": "Spreadsheet",
+          "mappings": "Fields",
+          "logs": "History"
+        }
+      },
+      "picker": {
+        "help": "Pick one of your existing Google spreadsheets.",
+        "searchPlaceholder": "Search",
+        "empty": "No spreadsheets found"
+      },
+      "editor": {
+        "needSpreadsheet": "Pick a spreadsheet first.",
+        "tabSection": "Which tab to write to",
+        "columnsSection": "Field mapping",
+        "addColumn": "Add field",
+        "hisobchiField": "Hisobchi field",
+        "sheetColumn": "Your column",
+        "pickTab": "Pick a tab",
+        "atLeastOne": "At least one field is required",
+        "advanced": "Advanced",
+        "trackingHint": "Tracking column — a hidden column for the Hisobchi transaction id. Required for reliable update / void.",
+        "trackingColumn": "Tracking column",
+        "voidColumn": "Void marker column",
+        "testPush": "Test push",
+        "testOk": "Success — wrote into row {row}",
+        "testFail": "Test failed",
+        "deleteConfirm": "Delete this mapping?"
+      },
+      "logs": {
+        "empty": "No sync attempts yet",
+        "operation": {
+          "append": "Appended",
+          "update": "Updated",
+          "delete": "Voided"
+        }
+      },
+      "fields": {
+        "transactionId": "Transaction ID",
+        "date": "Date",
+        "amount": "Amount",
+        "currency": "Currency",
+        "paidAmount": "Paid",
+        "paymentStatus": "Payment status",
+        "description": "Description",
+        "status": "Status",
+        "createdAt": "Created at",
+        "createdByName": "Created by",
+        "contactName": "Contact",
+        "contactPhone": "Contact phone",
+        "contactType": "Contact type",
+        "categoryName": "Category",
+        "accountName": "Account",
+        "saleItemsSummary": "Items",
+        "saleItemsQuantity": "Total quantity"
+      }
+    }
   },
   "members": {
     "title": "Team",
@@ -1421,7 +1509,18 @@
     "MEMBER_INVALID_STATUS": "Invalid member status",
     "MEMBER_CANNOT_MODIFY_SELF": "You cannot modify yourself",
     "MEMBER_CANNOT_REMOVE_OWNER": "The organization owner cannot be removed",
-    "MEMBER_PHONE_BELONGS_TO_EXISTING_MEMBER": "This phone number is already linked to another member in the organization"
+    "MEMBER_PHONE_BELONGS_TO_EXISTING_MEMBER": "This phone number is already linked to another member in the organization",
+    "GOOGLE_SHEETS_NOT_CONFIGURED": "Google Sheets integration is not configured on this deployment. Contact your administrator",
+    "GOOGLE_SHEETS_OAUTH_STATE_INVALID": "Connection session is invalid. Please try again",
+    "GOOGLE_SHEETS_OAUTH_FAILED": "Google connection failed: {reason}",
+    "GOOGLE_SHEETS_INTEGRATION_NOT_FOUND": "Google Sheets is not connected. Connect a Google account first",
+    "GOOGLE_SHEETS_INTEGRATION_REVOKED": "Google access has been revoked. Please reconnect",
+    "GOOGLE_SHEETS_SPREADSHEET_NOT_FOUND": "Spreadsheet not found. It may have been deleted",
+    "GOOGLE_SHEETS_TAB_NOT_FOUND": "Tab \"{tabName}\" not found. Check that it still exists in the spreadsheet",
+    "GOOGLE_SHEETS_MAPPING_NOT_FOUND": "No mapping configured for this transaction type",
+    "GOOGLE_SHEETS_MAPPING_INVALID": "Mapping is invalid: {reason}",
+    "GOOGLE_SHEETS_API_ERROR": "Google API error: {message}",
+    "GOOGLE_SHEETS_TEST_PUSH_NO_DATA": "No transaction available for test push — create at least one first"
   },
   "feature_meta": {
     "EMPLOYEES_LIMIT": {

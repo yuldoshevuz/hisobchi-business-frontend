@@ -10,7 +10,16 @@ type HapticNotificationType = 'error' | 'success' | 'warning';
 // global, it freezes a `null`/mock and never re-checks. Lazy access fixes that.
 interface TelegramWebApp {
   initData: string;
-  initDataUnsafe?: { user?: { id: number; username?: string } };
+  initDataUnsafe?: {
+    user?: { id: number; username?: string };
+    /**
+     * Value of the `startapp=<param>` deep-link parameter that opened
+     * this mini-app session. Telegram surfaces it in initData so
+     * bootstrap code can route the user back to where they were
+     * before an out-of-app round trip (e.g. Google OAuth).
+     */
+    start_param?: string;
+  };
   version?: string;
   platform?: string;
   colorScheme?: string;
@@ -43,6 +52,16 @@ interface TelegramWebApp {
     onClick: (cb: () => void) => void;
     offClick: (cb: () => void) => void;
   };
+  /**
+   * Opens `url` in the user's OS browser. WebApp's webview is sandboxed
+   * and many providers (Google, Apple, Microsoft) block embedded
+   * browsers for auth — `openLink` is the only way to land them in a
+   * real browser where the OAuth consent screen actually runs.
+   */
+  openLink?: (
+    url: string,
+    options?: { try_instant_view?: boolean },
+  ) => void;
 }
 
 function getWebApp(): TelegramWebApp | null {
@@ -211,4 +230,50 @@ export function isInsideTelegram(): boolean {
   const wa = getWebApp();
   if (!wa) return false;
   return Boolean(wa.initData) && wa.platform !== 'unknown';
+}
+
+/**
+ * Reads the `start_param` (deep-link payload) the mini-app was opened
+ * with. Used to resume flows that round-trip out of Telegram — e.g.
+ * the Google OAuth callback redirects to
+ * `https://t.me/<bot>?startapp=integrations_connected`, Telegram opens
+ * the mini-app, and we navigate to the integrations tab on boot.
+ *
+ * Note: Telegram preserves `start_param` for the entire WebApp
+ * session — clear it from app state once consumed so a later soft
+ * reload doesn't re-trigger the deep-link action.
+ */
+export function getTelegramStartParam(): string | null {
+  const wa = getWebApp();
+  return wa?.initDataUnsafe?.start_param ?? null;
+}
+
+/**
+ * Opens an external URL in the user's OS browser.
+ *
+ * Why this exists: Google (and other major OAuth providers) refuse to
+ * render their consent screen inside embedded webviews — they detect
+ * the Telegram WebView's user agent and return "This browser or app
+ * may not be secure". The fix is `WebApp.openLink(url)`, which
+ * delegates to the OS browser (Safari / Chrome) where the user is
+ * already logged into Google.
+ *
+ * Outside Telegram (web build) we fall back to `window.open` with a
+ * new tab; if that's blocked by a popup blocker we use
+ * `window.location.href` as a last resort.
+ */
+export function tgOpenExternal(url: string): void {
+  const wa = getWebApp();
+  if (wa?.openLink) {
+    try {
+      wa.openLink(url);
+      return;
+    } catch {
+      // Fall through to the browser-native paths.
+    }
+  }
+  const opened = window.open(url, '_blank', 'noopener,noreferrer');
+  if (!opened) {
+    window.location.href = url;
+  }
 }
