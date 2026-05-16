@@ -737,7 +737,15 @@
     "feature_list_label": "Mavjud imkoniyatlar",
     "pay_with_click": "Click",
     "pay_with_payme": "Payme",
-    "monthly_coming_soon": "Oylik to'lovlar tez orada — Click/Payme orqali faqat 3 oylik, 6 oylik va yillik tariflar mavjud."
+    "monthly_coming_soon": "Oylik to'lovlar tez orada — Click/Payme orqali faqat 3 oylik, 6 oylik va yillik tariflar mavjud.",
+    "cancel": {
+      "action": "Obunani bekor qilish",
+      "confirm_title": "Obunani bekor qilish",
+      "confirm_description": "{plan} tarifidagi obunangiz bekor qilinadi.",
+      "confirm_hint": "Obuna bekor qilingach, siz bepul tarifga qaytasiz. Kiritilgan to'lovlar qaytarilmaydi.",
+      "confirm_action": "Ha, bekor qilish",
+      "error": "Obunani bekor qilib bo'lmadi"
+    }
   },
   "checkout_return": {
     "title": "To'lov holati",

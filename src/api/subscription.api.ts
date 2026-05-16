@@ -24,4 +24,12 @@ export const subscriptionApi = {
     );
     return data;
   },
+  /**
+   * Cancel the caller's own paid subscription. The server marks it
+   * cancelled and falls back to the default plan; user keeps free-tier
+   * access. Returns 204 with no body.
+   */
+  async cancel(): Promise<void> {
+    await api.post<void>(`${BASE}/subscription/cancel`);
+  },
 };

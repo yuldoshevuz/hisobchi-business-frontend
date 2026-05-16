@@ -13,9 +13,11 @@ import {
 } from 'lucide-react';
 import { useCreateInvoice } from '@/api/hooks/use-payments';
 import {
+  useCancelSubscription,
   useCurrentSubscription,
   usePlans,
 } from '@/api/hooks/use-subscription';
+import { Modal } from '@/components/ui/modal';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -168,7 +170,92 @@ function CurrentSubscriptionCard({
       />
 
       {plan ? <FeaturesPreview plan={plan} /> : null}
+
+      {sub && sub.status === 'active' && sub.planPriceId !== null ? (
+        <CancelSubscriptionRow planName={plan?.name ?? ''} />
+      ) : null}
     </Section>
+  );
+}
+
+function CancelSubscriptionRow({
+  planName,
+}: {
+  planName: string;
+}): React.ReactElement {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const cancel = useCancelSubscription();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  async function handleConfirm(): Promise<void> {
+    setErrorMessage(null);
+    try {
+      await cancel.mutateAsync();
+      setOpen(false);
+    } catch (err) {
+      setErrorMessage(getApiErrorMessage(err, t('plans_page.cancel.error')));
+    }
+  }
+
+  return (
+    <>
+      <div className="border-t px-4 py-3">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full text-destructive hover:bg-destructive/5"
+          onClick={() => {
+            setErrorMessage(null);
+            setOpen(true);
+          }}
+        >
+          <X className="mr-1.5 h-4 w-4" />
+          {t('plans_page.cancel.action')}
+        </Button>
+      </div>
+
+      <Modal
+        open={open}
+        onOpenChange={(o) => {
+          if (!cancel.isPending) setOpen(o);
+        }}
+        title={t('plans_page.cancel.confirm_title')}
+        description={t('plans_page.cancel.confirm_description', {
+          plan: planName,
+        })}
+        footer={
+          <div className="flex flex-col gap-2">
+            {errorMessage ? (
+              <p className="text-center text-sm text-destructive">
+                {errorMessage}
+              </p>
+            ) : null}
+            <Button
+              variant="destructive"
+              onClick={handleConfirm}
+              disabled={cancel.isPending}
+            >
+              {cancel.isPending ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : null}
+              {t('plans_page.cancel.confirm_action')}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setOpen(false)}
+              disabled={cancel.isPending}
+            >
+              {t('common.cancel')}
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-center text-sm text-muted-foreground">
+          {t('plans_page.cancel.confirm_hint')}
+        </p>
+      </Modal>
+    </>
   );
 }
 

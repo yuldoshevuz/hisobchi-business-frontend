@@ -737,7 +737,15 @@
     "feature_list_label": "Included features",
     "pay_with_click": "Click",
     "pay_with_payme": "Payme",
-    "monthly_coming_soon": "Monthly billing is coming soon — Click/Payme currently only cover 3-month, 6-month, and yearly plans."
+    "monthly_coming_soon": "Monthly billing is coming soon — Click/Payme currently only cover 3-month, 6-month, and yearly plans.",
+    "cancel": {
+      "action": "Cancel subscription",
+      "confirm_title": "Cancel subscription",
+      "confirm_description": "Your subscription to the {plan} plan will be cancelled.",
+      "confirm_hint": "After cancellation, you'll fall back to the free plan. Past payments are not refunded.",
+      "confirm_action": "Yes, cancel",
+      "error": "Couldn't cancel the subscription"
+    }
   },
   "checkout_return": {
     "title": "Payment status",

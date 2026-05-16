@@ -1,4 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseMutationResult,
+} from '@tanstack/react-query';
 import { subscriptionApi } from '@/api/subscription.api';
 import { queryKeys } from '@/api/query-keys';
 import i18n from '@/i18n';
@@ -7,6 +12,20 @@ import type {
   FeatureCode,
   Plan,
 } from '@/types/subscription.types';
+
+export function useCancelSubscription(): UseMutationResult<
+  void,
+  Error,
+  void
+> {
+  const qc = useQueryClient();
+  return useMutation<void, Error, void>({
+    mutationFn: () => subscriptionApi.cancel(),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.subscription.current });
+    },
+  });
+}
 
 export function usePlans(): ReturnType<typeof useQuery<Plan[], Error>> {
   return useQuery<Plan[], Error>({
