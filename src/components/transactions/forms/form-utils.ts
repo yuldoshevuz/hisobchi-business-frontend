@@ -7,27 +7,15 @@ export function todayIso(): string {
 }
 
 /**
- * Build the SelectField `description` line for a product option — surfaces
- * current stock and default price so the operator can pick the right row
- * without diving into the catalog. Returns `undefined` when the product has
- * neither piece of metadata (rare; brand-new product with empty defaults).
+ * Build the SelectField `description` line for a product option. Products
+ * are tags only now — stock is no longer surfaced to end users, so this
+ * returns undefined to suppress the description.
  */
 export function formatProductMeta(
-  product: Product,
-  t: TFunction,
+  _product: Product,
+  _t: TFunction,
 ): string | undefined {
-  const parts: string[] = [];
-  if (product.currentStock !== null) {
-    parts.push(
-      t('sale_form.product_meta_stock', {
-        n: formatAmountDisplay(product.currentStock),
-      }),
-    );
-  }
-  if (product.defaultPrice !== null && product.defaultPrice !== '0') {
-    parts.push(`${formatAmountDisplay(product.defaultPrice)} ${product.currency}`);
-  }
-  return parts.length > 0 ? parts.join(' · ') : undefined;
+  return undefined;
 }
 
 /**

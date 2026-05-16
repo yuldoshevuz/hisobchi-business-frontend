@@ -2,14 +2,12 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Archive,
-  Boxes,
   Filter,
   Package,
   Pencil,
   Plus,
   RotateCcw,
   Search,
-  Sliders,
   Trash2,
 } from 'lucide-react';
 import { useCategories } from '@/api/hooks/use-categories';
@@ -28,7 +26,6 @@ import { ListItem, Section } from '@/components/ui/list-item';
 import { Modal } from '@/components/ui/modal';
 import { Spinner } from '@/components/ui/spinner';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
-import { AdjustStockForm } from '@/components/products/AdjustStockForm';
 import { CreateProductForm } from '@/components/products/CreateProductForm';
 import { EditProductForm } from '@/components/products/EditProductForm';
 import { AccessDeniedView } from '@/components/AccessDeniedView';
@@ -38,7 +35,6 @@ import {
 } from '@/hooks/use-infinite-scroll';
 import { useCan, usePermissions } from '@/hooks/use-permissions';
 import { getApiErrorMessage } from '@/lib/api-error';
-import { formatMoney } from '@/lib/format';
 import { PermissionSlug } from '@/lib/permission-slugs';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import type { Product } from '@/types/product.types';
@@ -61,7 +57,6 @@ export function ProductsPage({
   const [archiveOpen, setArchiveOpen] = useState<boolean>(false);
   const [actionProduct, setActionProduct] = useState<Product | null>(null);
   const [editing, setEditing] = useState<Product | null>(null);
-  const [adjusting, setAdjusting] = useState<Product | null>(null);
   const [filterCategoryId, setFilterCategoryId] = useState<number | null>(null);
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
 
@@ -274,15 +269,7 @@ export function ProductsPage({
           if (!o) setActionProduct(null);
         }}
         title={actionProduct?.name}
-        description={
-          actionProduct
-            ? `${actionProduct.currency}${
-                actionProduct.defaultPrice
-                  ? ` · ${formatMoney(actionProduct.defaultPrice)}`
-                  : ''
-              }`
-            : undefined
-        }
+        description={actionProduct ? actionProduct.currency : undefined}
       >
         {actionProduct ? (
           <ProductActions
@@ -291,10 +278,6 @@ export function ProductsPage({
             onClose={() => setActionProduct(null)}
             onEdit={() => {
               setEditing(actionProduct);
-              setActionProduct(null);
-            }}
-            onAdjust={() => {
-              setAdjusting(actionProduct);
               setActionProduct(null);
             }}
           />
@@ -313,22 +296,6 @@ export function ProductsPage({
           <EditProductForm
             product={editing}
             onClose={() => setEditing(null)}
-          />
-        ) : null}
-      </Modal>
-
-      <Modal
-        open={Boolean(adjusting)}
-        onOpenChange={(o) => {
-          if (!o) setAdjusting(null);
-        }}
-        title={t('products.adjust_stock_title')}
-        description={adjusting?.name}
-      >
-        {adjusting ? (
-          <AdjustStockForm
-            product={adjusting}
-            onClose={() => setAdjusting(null)}
           />
         ) : null}
       </Modal>
@@ -447,21 +414,6 @@ function ProductRow({
       }
       subtitle={
         <span className="flex flex-wrap items-center gap-1.5">
-          {product.defaultPrice ? (
-            <span className="tabular-nums">
-              {formatMoney(product.defaultPrice, product.currency)}
-            </span>
-          ) : (
-            <span className="text-muted-foreground/70">narx kiritilmagan</span>
-          )}
-          {!isService ? (
-            <span className="flex items-center gap-1 text-muted-foreground">
-              <Boxes className="h-3 w-3" />
-              <span className="tabular-nums">
-                {formatMoney(product.currentStock ?? '0')}
-              </span>
-            </span>
-          ) : null}
           {category ? (
             <Badge variant="secondary" className="text-[10px]">
               {category.name}
@@ -478,7 +430,6 @@ interface ProductActionsProps {
   canManage: boolean;
   onClose: () => void;
   onEdit: () => void;
-  onAdjust: () => void;
 }
 
 function ProductActions({
@@ -486,14 +437,12 @@ function ProductActions({
   canManage,
   onClose,
   onEdit,
-  onAdjust,
 }: ProductActionsProps): React.ReactElement {
   const { t } = useTranslation();
   const update = useUpdateProduct();
   const remove = useDeleteProduct();
 
   const isArchived = product.status === 'archived';
-  const trackStock = product.currentStock !== null;
   const pending = update.isPending || remove.isPending;
   const error = update.error ?? remove.error;
 
@@ -555,14 +504,6 @@ function ProductActions({
             subtitle={t('products.action.edit_subtitle')}
             onClick={onEdit}
             icon={<Pencil className="h-4 w-4 text-muted-foreground" />}
-          />
-        ) : null}
-        {!isArchived && trackStock ? (
-          <ActionRow
-            title={t('products.action.adjust')}
-            subtitle={t('products.action.adjust_subtitle')}
-            onClick={onAdjust}
-            icon={<Sliders className="h-4 w-4 text-muted-foreground" />}
           />
         ) : null}
         {!isArchived ? (
@@ -653,10 +594,7 @@ function ArchivedProducts({
           </div>
           <div className="min-w-0 flex-1">
             <div className="truncate text-[15px] font-medium">{p.name}</div>
-            <div className="text-[12px] text-muted-foreground">
-              {p.currency}
-              {p.defaultPrice ? ` · ${formatMoney(p.defaultPrice)}` : ''}
-            </div>
+            <div className="text-[12px] text-muted-foreground">{p.currency}</div>
           </div>
         </button>
       ))}

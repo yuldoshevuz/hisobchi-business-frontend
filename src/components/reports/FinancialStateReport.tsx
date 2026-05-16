@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import {
-  Boxes,
   Briefcase,
   ChevronDown,
   ChevronRight,
@@ -153,21 +152,6 @@ function CurrencyCard({ row, tFn }: CurrencyCardProps): React.ReactElement {
           bucket={row.assets.receivables}
           tone="success"
           tFn={tFn}
-        />
-        <ListItem
-          leading={
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-              <Boxes className="h-4 w-4" />
-            </div>
-          }
-          title={tFn('report.financial_state.inventory')}
-          subtitle={tFn('report.financial_state.inventory_subtitle')}
-          trailing={
-            <span className="text-[15px] font-semibold tabular-nums text-foreground">
-              {formatMoney(row.assets.inventory.total, row.currency)}
-            </span>
-          }
-          asStatic
         />
         <ListItem
           asStatic

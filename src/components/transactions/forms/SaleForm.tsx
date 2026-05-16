@@ -28,7 +28,6 @@ import type {
   CreateSaleRequest,
   PaymentLegRequest,
 } from '@/types/transaction.types';
-import { StockShortfallWarning } from './StockShortfallWarning';
 
 interface SaleFormProps {
   onCreated: (transactionId: number) => void;
@@ -82,16 +81,9 @@ export function SaleForm({
   const account = accountList.find((a) => a.id === accountId) ?? null;
   const currency = account?.currency ?? product?.currency ?? 'UZS';
 
-  // When the user picks a product, prefill the price with its default.
-  const [seenProductId, setSeenProductId] = useState<number | null>(null);
-  if (productId !== seenProductId) {
-    setSeenProductId(productId);
-    if (product?.defaultPrice) setUnitPrice(product.defaultPrice);
-  }
-
-  const tracksStock = product?.currentStock !== null;
-  // Service-style products (currentStock = null) don't take a quantity.
-  const effectiveQuantity = tracksStock ? quantity : '1';
+  // Empty input defaults to 1 so a single-unit sale doesn't require the user
+  // to type the qty — applies to both products and services.
+  const effectiveQuantity = quantity.trim() === '' ? '1' : quantity;
 
   const totalAmount = useMemo(() => {
     const q = Number(effectiveQuantity || '0');
@@ -106,7 +98,7 @@ export function SaleForm({
     Boolean(productId) &&
     Boolean(accountId) &&
     isAmountValid &&
-    (!tracksStock || Number(quantity) > 0) &&
+    Number(effectiveQuantity) > 0 &&
     // Credit mode requires a contact — there's no other anchor for who owes.
     (!isCredit || Boolean(contactId));
 
@@ -130,13 +122,8 @@ export function SaleForm({
         {
           productId: product.id,
           name: product.name,
-          // Backend validator requires a numeric string — `null` is
-          // rejected with AMOUNT_INVALID. For service products
-          // (currentStock=null) we default to '1' so the line still
-          // posts; the UI just hides the quantity input.
-          quantity: tracksStock ? quantity : '1',
+          quantity: effectiveQuantity,
           unitPrice,
-          cost: product.defaultCost ?? null,
         },
       ],
     };
@@ -228,28 +215,16 @@ export function SaleForm({
         creating={inlineContact.creating}
       />
 
-      {tracksStock ? (
-        <div className="space-y-1.5">
-          <Label htmlFor="sotuv-qty">{`${t('sale_form.quantity')} *`}</Label>
-          <Input
-            id="sotuv-qty"
-            inputMode="decimal"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            placeholder="1"
-          />
-          {product && product.currentStock !== null ? (
-            <p className="text-[12px] text-muted-foreground">
-              {t('sale_form.stock_remaining', { n: product.currentStock })}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      <StockShortfallWarning
-        product={product}
-        requestedQuantity={effectiveQuantity}
-      />
+      <div className="space-y-1.5">
+        <Label htmlFor="sotuv-qty">{t('sale_form.quantity')}</Label>
+        <Input
+          id="sotuv-qty"
+          inputMode="decimal"
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
+          placeholder="1"
+        />
+      </div>
 
       <AmountField
         id="sotuv-price"
@@ -259,7 +234,7 @@ export function SaleForm({
         currencyDisplay={currency}
       />
 
-      {tracksStock && Number(quantity) > 1 ? (
+      {Number(effectiveQuantity) > 1 ? (
         <div className="rounded-xl bg-muted/40 px-3 py-2 text-[13px]">
           <div className="flex justify-between">
             <span className="text-muted-foreground">

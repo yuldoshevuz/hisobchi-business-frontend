@@ -68,12 +68,6 @@ export function PurchaseForm({
   const account = accountList.find((a) => a.id === accountId) ?? null;
   const currency = account?.currency ?? product?.currency ?? 'UZS';
 
-  const [seenProductId, setSeenProductId] = useState<number | null>(null);
-  if (productId !== seenProductId) {
-    setSeenProductId(productId);
-    if (product?.defaultCost) setUnitCost(product.defaultCost);
-  }
-
   const totalAmount = useMemo(() => {
     const q = Number(quantity || '0');
     const c = Number(unitCost || '0');
@@ -114,7 +108,6 @@ export function PurchaseForm({
         const created = await createProduct.mutateAsync({
           name: newProductName.trim(),
           currency: account.currency,
-          defaultCost: unitCost,
           ...(refKind === 'org'
             ? { categoryId: refId }
             : { systemCategoryId: refId }),

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
-  AlertCircle,
   ArrowDownLeft,
   ArrowUpRight,
   Check,
@@ -296,21 +295,13 @@ export function TransactionDetailPage(): React.ReactElement {
   // (cash flows, balance, stock) yet. The UI surfaces the deferred legs from
   // metadata so the user can review what WILL happen on confirm.
   const isInitial = tx.status === 'initial';
-  // Auto-backfill purchases are created by the system when a sale runs into
-  // a stock shortfall. They land with no contact / no cash flow and need
-  // the operator to fill those in — badge + banner make that visible.
-  const isAutoBackfill = isAutoBackfillPurchase(tx.metadata);
 
   const showAddCashFlowAction =
     canCreateCashFlow &&
     !isVoided &&
     !isInitial &&
     typeHasPaymentLifecycle(tx.type) &&
-    // Auto-backfill purchases are born with amount=0 + paymentStatus=paid
-    // (since 0 paid == 0 due). The operator still needs to add the real
-    // payment once they fill in the unit cost, so the gate is relaxed for
-    // them — `metadata.autoBackfill` flags those rows specifically.
-    (tx.paymentStatus !== 'paid' || isAutoBackfill);
+    tx.paymentStatus !== 'paid';
 
   return (
     <div className="pb-32">
@@ -335,27 +326,6 @@ export function TransactionDetailPage(): React.ReactElement {
                 <div className="text-muted-foreground">
                   {t('tx_detail.ai_banner.body')}
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {/* Auto-backfill banner — only on purchase rows the system created to
-          keep stock non-negative. Tells the operator they need to fill in
-          the supplier + payment. */}
-      {isAutoBackfill ? (
-        <section className="px-4 pt-2">
-          <div className="flex gap-3 rounded-2xl border border-amber-300/70 bg-card px-4 py-3 shadow-sm dark:border-amber-500/40">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400">
-              <AlertCircle className="h-5 w-5" strokeWidth={2.2} />
-            </div>
-            <div className="min-w-0 flex-1 space-y-1">
-              <div className="text-[14px] font-semibold leading-tight text-foreground">
-                {t('sale_form.auto_backfill_badge')}
-              </div>
-              <div className="text-[13px] leading-snug text-muted-foreground">
-                {t('sale_form.auto_backfill_banner')}
               </div>
             </div>
           </div>
@@ -398,11 +368,6 @@ export function TransactionDetailPage(): React.ReactElement {
                 {isVoided ? (
                   <Badge variant="destructive" className="text-[11px]">
                     {t('tx_detail.badge.voided')}
-                  </Badge>
-                ) : null}
-                {isAutoBackfill ? (
-                  <Badge variant="outline" className="text-[11px]">
-                    {t('sale_form.auto_backfill_badge')}
                   </Badge>
                 ) : null}
                 {!isInitial && typeHasPaymentLifecycle(tx.type) ? (
@@ -1192,10 +1157,7 @@ function InitialEditForm({
                               updateItem(idx, {
                                 productId: p.id,
                                 name: p.name,
-                                unitPrice:
-                                  it.unitPrice && it.unitPrice !== '0'
-                                    ? it.unitPrice
-                                    : (p.defaultPrice ?? '0'),
+                                unitPrice: it.unitPrice ?? '0',
                               });
                             }}
                             options={[
@@ -2370,19 +2332,6 @@ interface DeferredCashFlow {
  * `initial` rows). Returns [] for any other shape — defensive against
  * missing/malformed metadata coming back from older AI runs.
  */
-/**
- * True when this transaction's metadata carries the `autoBackfill` marker
- * the backend writes onto system-created purchases (sale shortfall). Used
- * to surface the badge + banner on the detail screen.
- */
-function isAutoBackfillPurchase(
-  metadata: Record<string, unknown> | null,
-): boolean {
-  if (!metadata || typeof metadata !== 'object') return false;
-  const raw = (metadata as { autoBackfill?: unknown }).autoBackfill;
-  return typeof raw === 'object' && raw !== null;
-}
-
 function extractDeferredCashFlows(
   metadata: Record<string, unknown> | null,
 ): DeferredCashFlow[] {

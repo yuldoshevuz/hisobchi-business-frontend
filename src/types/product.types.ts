@@ -11,8 +11,6 @@ export interface Product {
   name: string;
   categoryId: number | null;
   currency: string;
-  defaultPrice: string | null;
-  defaultCost: string | null;
   /** `null` ⇒ stock is not tracked (services / digital goods). */
   currentStock: string | null;
   status: ProductStatus;
@@ -49,8 +47,6 @@ export interface CreateProductRequest {
   /** Global `system_categories.id`. Backend lazily instantiates the org row. */
   systemCategoryId?: number;
   currency: string;
-  defaultPrice?: string;
-  defaultCost?: string;
   /** Pass `null` (or omit) to mark as non-tracked. */
   currentStock?: string | null;
 }
@@ -61,8 +57,6 @@ export interface UpdateProductRequest {
   categoryId?: number;
   /** Move to (and lazily instantiate) the org row linked to this system category. */
   systemCategoryId?: number;
-  defaultPrice?: string | null;
-  defaultCost?: string | null;
   status?: ProductStatus;
   /** Toggle stock tracking. Pass a numeric string to enable (with that
    *  opening balance) or `null` to convert the product into a service.

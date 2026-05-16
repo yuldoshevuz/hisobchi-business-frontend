@@ -23,7 +23,6 @@ import {
 import { AmountField, SelectField } from './form-primitives';
 import { ContactPickerField } from './ContactPickerField';
 import { formatAmountDisplay, formatProductMeta } from './form-utils';
-import { StockShortfallWarning } from './StockShortfallWarning';
 import type { CreateSaleRequest } from '@/types/transaction.types';
 
 interface CreditSaleFormProps {
@@ -69,15 +68,9 @@ export function CreditSaleForm({
   const product = productList.find((p) => p.id === productId) ?? null;
   const account = accountList.find((a) => a.id === accountId) ?? null;
   const currency = account?.currency ?? product?.currency ?? 'UZS';
-  const tracksStock = product?.currentStock !== null;
 
-  const [seenProductId, setSeenProductId] = useState<number | null>(null);
-  if (productId !== seenProductId) {
-    setSeenProductId(productId);
-    if (product?.defaultPrice) setUnitPrice(product.defaultPrice);
-  }
-
-  const effectiveQuantity = tracksStock ? quantity : '1';
+  // Empty input defaults to 1 — applies to both products and services.
+  const effectiveQuantity = quantity.trim() === '' ? '1' : quantity;
   const totalAmount = useMemo(() => {
     const q = Number(effectiveQuantity || '0');
     const p = Number(unitPrice || '0');
@@ -92,7 +85,7 @@ export function CreditSaleForm({
     Boolean(contactId) &&
     Number.isFinite(numericTotal) &&
     numericTotal > 0 &&
-    (!tracksStock || Number(quantity) > 0);
+    Number(effectiveQuantity) > 0;
 
   const create = useCreateSale();
 
@@ -110,9 +103,8 @@ export function CreditSaleForm({
         {
           productId: product.id,
           name: product.name,
-          quantity: tracksStock ? quantity : '1',
+          quantity: effectiveQuantity,
           unitPrice,
-          cost: product.defaultCost ?? null,
         },
       ],
     };
@@ -190,28 +182,16 @@ export function CreditSaleForm({
         creating={inlineContact.creating}
       />
 
-      {tracksStock ? (
-        <div className="space-y-1.5">
-          <Label htmlFor="credit-qty">{`${t('credit_sale_form.quantity')} *`}</Label>
-          <Input
-            id="credit-qty"
-            inputMode="decimal"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            placeholder="1"
-          />
-          {product && product.currentStock !== null ? (
-            <p className="text-[12px] text-muted-foreground">
-              {t('credit_sale_form.stock_left')}: {product.currentStock}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      <StockShortfallWarning
-        product={product}
-        requestedQuantity={effectiveQuantity}
-      />
+      <div className="space-y-1.5">
+        <Label htmlFor="credit-qty">{t('credit_sale_form.quantity')}</Label>
+        <Input
+          id="credit-qty"
+          inputMode="decimal"
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
+          placeholder="1"
+        />
+      </div>
 
       <AmountField
         id="credit-price"
@@ -221,7 +201,7 @@ export function CreditSaleForm({
         currencyDisplay={currency}
       />
 
-      {tracksStock && Number(quantity) > 1 ? (
+      {Number(effectiveQuantity) > 1 ? (
         <div className="rounded-xl bg-muted/40 px-3 py-2 text-[13px]">
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t('credit_sale_form.total_debt')}</span>

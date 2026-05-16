@@ -122,23 +122,6 @@ export interface SaleItem {
   lineTotal: string;
 }
 
-/**
- * One auto-created `purchase` produced by the stock-shortfall gate. Only
- * present on the `POST /sales` (and `PATCH /:id/confirm`) response — never
- * on list / detail reads. Frontend uses it to render a toast and a
- * deep-link to each auto-backfill purchase so the operator can fill in
- * the supplier and payment.
- */
-export interface AutoBackfillProduct {
-  purchaseTransactionId: number;
-  productId: number;
-  productName: string;
-  shortfallQuantity: string;
-  unitCost: string;
-  amount: string;
-  currency: string;
-}
-
 export interface Transaction {
   id: number;
   type: TransactionType;
@@ -160,9 +143,6 @@ export interface Transaction {
   createdAt: string;
   /** `users.id` of the member who recorded the event. */
   createdBy: number;
-  /** Present only on sale-create / confirm responses when the gate
-   *  auto-created purchases to keep stock non-negative. */
-  autoBackfilledProducts?: AutoBackfillProduct[];
 }
 
 export type PaginatedTransactions = PaginatedResponse<Transaction>;
