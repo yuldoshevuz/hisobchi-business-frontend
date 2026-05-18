@@ -309,7 +309,11 @@
     "field.currency": "Valyuta",
     "create": "Yaratish",
     "logout": "Chiqish",
-    "limit_reached_caption": "Tarif chegarasi tugadi"
+    "limit_reached_caption": "Tarif chegarasi tugadi",
+    "membership_error": {
+      "title": "Bu tashkilotga a'zo emassiz",
+      "description": "Bot havolasidagi tashkilot (#{{id}}) sizning a'zoligingizda topilmadi. Davom etish uchun mavjud tashkilotni tanlang."
+    }
   },
   "access_denied": {
     "title": "Ruxsat yo'q",

@@ -309,7 +309,11 @@
     "field.currency": "Currency",
     "create": "Create",
     "logout": "Sign out",
-    "limit_reached_caption": "Plan limit reached"
+    "limit_reached_caption": "Plan limit reached",
+    "membership_error": {
+      "title": "You're not a member of this organization",
+      "description": "The organization (#{{id}}) from the bot link is not in your memberships. Pick one of yours below."
+    }
   },
   "access_denied": {
     "title": "Access denied",
