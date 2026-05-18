@@ -392,11 +392,12 @@ function ProductRow({
 }: ProductRowProps): React.ReactElement {
   const { t } = useTranslation();
   const isService = product.currentStock === null;
-  // Render stock as `120 kg`, `50 dona`, `2 t` … — locale-aware short
-  // suffix per the product's unit. Hidden when stock isn't tracked.
-  const stockLabel = isService
-    ? null
-    : `${formatStock(product.currentStock)} ${t(`units.short.${product.unit}` as const)}`;
+  // Stock balance is INTENTIONALLY not surfaced here — inventory live
+  // quantity belongs in the dedicated product-detail / stock screens,
+  // not in every list. The product's unit still rides along as a
+  // small caption so the user knows kg vs dona without opening
+  // the row.
+  const unitLabel = isService ? null : t(`units.short.${product.unit}` as const);
   return (
     <ListItem
       onClick={onTap}
@@ -425,20 +426,13 @@ function ProductRow({
               {category.name}
             </Badge>
           ) : null}
-          {stockLabel ? (
-            <span className="text-[11px] text-muted-foreground">{stockLabel}</span>
+          {unitLabel ? (
+            <span className="text-[11px] text-muted-foreground">{unitLabel}</span>
           ) : null}
         </span>
       }
     />
   );
-}
-
-function formatStock(raw: string | null): string {
-  if (raw === null) return '';
-  const n = Number(raw);
-  if (!Number.isFinite(n)) return raw;
-  return Number.isInteger(n) ? String(n) : String(parseFloat(n.toFixed(4)));
 }
 
 interface ProductActionsProps {
