@@ -1,7 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { organizationsApi } from '@/api/organizations.api';
-import { tokenStore } from '@/store/token-store';
 
 interface TelegramWebAppLite {
   initDataUnsafe?: { start_param?: string };
@@ -70,63 +68,11 @@ export function useDeepLink(): void {
       : new URLSearchParams();
 
     const screen = fromUrl.get('screen') ?? fromTelegram.get('screen');
-    const organizationIdParam =
-      fromUrl.get('organizationId') ?? fromTelegram.get('organizationId');
-    // Bot deeplinks carry the tenant id when they point at a specific
-    // transaction / contact / category so the mini-app can skip the
-    // manual "Tashkilotni tanlang" detour. Validate the user is still
-    // an active member before switching: a stale link to a tenant the
-    // user was kicked from must NOT silently re-route them; instead we
-    // bounce to /organizations with a banner ("you're not a member").
-    if (organizationIdParam) {
-      const targetOrgId = Number(organizationIdParam);
-      if (Number.isFinite(targetOrgId) && targetOrgId > 0) {
-        const currentOrgId = tokenStore.getActiveOrgId();
-        if (currentOrgId !== targetOrgId) {
-          consumedRef.current = true;
-          void (async (): Promise<void> => {
-            let isMember = false;
-            try {
-              const memberships = await organizationsApi.list();
-              isMember = memberships.some((m) => m.id === targetOrgId);
-            } catch {
-              isMember = false;
-            }
-            if (isMember) {
-              tokenStore.setActiveOrgId(targetOrgId);
-              // Drop the org param from the URL so a refresh doesn't
-              // re-trigger this branch, then fall through to the
-              // regular `screen=...` deep-link navigation below by
-              // resetting consumedRef and forcing the effect to
-              // re-run via a fresh history entry.
-              fromUrl.delete('organizationId');
-              const remaining = fromUrl.toString();
-              window.history.replaceState(
-                null,
-                '',
-                `${window.location.pathname}${remaining ? `?${remaining}` : ''}`,
-              );
-              consumedRef.current = false;
-              // Reload to re-evaluate the deep-link with the new
-              // activeOrgId in the store. Simpler than orchestrating
-              // a React state-driven re-run while React-Query refetches.
-              window.location.reload();
-            } else {
-              navigate('/organizations', {
-                replace: true,
-                state: {
-                  membershipError: {
-                    organizationId: targetOrgId,
-                  },
-                },
-              });
-            }
-          })();
-          return;
-        }
-      }
-    }
     if (!screen) return;
+    // organizationId is consumed upstream in ProtectedRoute — by the
+    // time this hook runs it has already triggered the activeOrgId
+    // swap (or the redirect-to-/organizations on a stale link). We
+    // just ignore it here.
 
     const transactionId =
       fromUrl.get('transactionId') ?? fromTelegram.get('transactionId');
