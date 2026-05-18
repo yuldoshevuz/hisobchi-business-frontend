@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useCreateProduct } from '@/api/hooks/use-products';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
+import { UnitPicker } from '@/components/products/UnitPicker';
 import { SelectField } from '@/components/transactions/forms/form-primitives';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,8 +13,10 @@ import { ACCOUNT_CURRENCY_VALUES } from '@/types/account.types';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { tgHapticImpact, tgHapticNotify } from '@/lib/telegram';
 import {
+  DEFAULT_UNIT_OF_MEASURE,
   PRODUCT_NAME_MAX_LENGTH,
   PRODUCT_NAME_MIN_LENGTH,
+  type UnitOfMeasure,
 } from '@/types/product.types';
 import type { AccountCurrency } from '@/types/account.types';
 
@@ -48,6 +51,7 @@ export function CreateProductForm({
   const [productType, setProductType] = useState<'product' | 'service'>(
     'product',
   );
+  const [unit, setUnit] = useState<UnitOfMeasure>(DEFAULT_UNIT_OF_MEASURE);
 
   const trimmedName = name.trim();
   const isNameValid =
@@ -87,6 +91,7 @@ export function CreateProductForm({
             ? { systemCategoryId: selected.systemCategoryId }
             : {}),
         currentStock: productType === 'product' ? '0' : null,
+        unit,
       },
       {
         onSuccess: () => {
@@ -96,7 +101,16 @@ export function CreateProductForm({
         onError: () => tgHapticNotify('error'),
       },
     );
-  }, [create, isValid, selected, trimmedName, currency, productType, onClose]);
+  }, [
+    create,
+    isValid,
+    selected,
+    trimmedName,
+    currency,
+    productType,
+    unit,
+    onClose,
+  ]);
 
   return (
     <form
@@ -205,6 +219,8 @@ export function CreateProductForm({
           })}
         </div>
       </div>
+
+      <UnitPicker value={unit} onChange={setUnit} />
 
       {create.isError ? (
         <p className="text-[13px] text-destructive">

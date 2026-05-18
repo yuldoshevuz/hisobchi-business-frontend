@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useCategories } from '@/api/hooks/use-categories';
 import { useUpdateProduct } from '@/api/hooks/use-products';
 import { CategoryIcon } from '@/components/categories/CategoryIcon';
+import { UnitPicker } from '@/components/products/UnitPicker';
 import { SelectField } from '@/components/transactions/forms/form-primitives';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ import {
   PRODUCT_NAME_MAX_LENGTH,
   PRODUCT_NAME_MIN_LENGTH,
   type Product,
+  type UnitOfMeasure,
   type UpdateProductRequest,
 } from '@/types/product.types';
 
@@ -51,6 +53,7 @@ export function EditProductForm({
   const [name, setName] = useState<string>(product.name);
   const [categoryKey, setCategoryKey] = useState<string>(initialKey);
   const [productType, setProductType] = useState<ProductKind>(initialKind);
+  const [unit, setUnit] = useState<UnitOfMeasure>(product.unit);
 
   const trimmedName = name.trim();
   const isNameValid =
@@ -78,9 +81,13 @@ export function EditProductForm({
 
   const categoryChanged = selected !== null && selected.key !== initialKey;
   const kindChanged = productType !== initialKind;
+  const unitChanged = unit !== product.unit;
 
   const hasChanges =
-    trimmedName !== product.name || categoryChanged || kindChanged;
+    trimmedName !== product.name ||
+    categoryChanged ||
+    kindChanged ||
+    unitChanged;
 
   const submit = useCallback((): void => {
     if (!isNameValid || !hasChanges) return;
@@ -96,6 +103,7 @@ export function EditProductForm({
     if (kindChanged) {
       body.currentStock = productType === 'product' ? '0' : null;
     }
+    if (unitChanged) body.unit = unit;
     update.mutate(
       { id: product.id, body },
       {
@@ -118,6 +126,8 @@ export function EditProductForm({
     onClose,
     kindChanged,
     productType,
+    unitChanged,
+    unit,
   ]);
 
   return (
@@ -193,6 +203,8 @@ export function EditProductForm({
           })}
         </div>
       </div>
+
+      <UnitPicker value={unit} onChange={setUnit} />
 
       <p className="text-[12px] text-muted-foreground">
         {t('edit_product.currency_locked', { currency: product.currency })}

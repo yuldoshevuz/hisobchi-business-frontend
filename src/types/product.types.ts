@@ -2,6 +2,38 @@ import type { PaginatedResponse } from './member.types';
 
 export type ProductStatus = 'active' | 'archived';
 
+/**
+ * English enum keys mirroring the backend `UnitOfMeasure`. The UI
+ * resolves a localised label per the active tenant locale at render
+ * time (see `i18n.units.*`); the wire format is always English.
+ */
+export const UNIT_OF_MEASURE_VALUES = [
+  'piece',
+  'kilogram',
+  'gram',
+  'ton',
+  'liter',
+  'milliliter',
+  'meter',
+  'centimeter',
+  'kilometer',
+  'square_meter',
+  'cubic_meter',
+  'pack',
+  'box',
+  'bag',
+  'bottle',
+  'carton',
+  'pair',
+  'set',
+  'service',
+  'hour',
+  'day',
+  'month',
+] as const;
+export type UnitOfMeasure = (typeof UNIT_OF_MEASURE_VALUES)[number];
+export const DEFAULT_UNIT_OF_MEASURE: UnitOfMeasure = 'piece';
+
 export const PRODUCT_NAME_MIN_LENGTH = 1;
 export const PRODUCT_NAME_MAX_LENGTH = 255;
 export const STOCK_ADJUSTMENT_REASON_MAX_LENGTH = 255;
@@ -14,6 +46,7 @@ export interface Product {
   /** `null` ⇒ stock is not tracked (services / digital goods). */
   currentStock: string | null;
   status: ProductStatus;
+  unit: UnitOfMeasure;
   createdAt: string;
   updatedAt: string;
 }
@@ -49,6 +82,8 @@ export interface CreateProductRequest {
   currency: string;
   /** Pass `null` (or omit) to mark as non-tracked. */
   currentStock?: string | null;
+  /** Unit of measure. Defaults server-side to `piece` when omitted. */
+  unit?: UnitOfMeasure;
 }
 
 export interface UpdateProductRequest {
@@ -63,6 +98,8 @@ export interface UpdateProductRequest {
    *  Same-mode edits are ignored server-side — stock changes within
    *  tracked mode go through the dedicated AdjustStock flow. */
   currentStock?: string | null;
+  /** Change the product's unit of measure. */
+  unit?: UnitOfMeasure;
 }
 
 export interface AdjustStockRequest {

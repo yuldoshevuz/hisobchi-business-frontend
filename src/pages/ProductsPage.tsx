@@ -390,7 +390,13 @@ function ProductRow({
   category,
   onTap,
 }: ProductRowProps): React.ReactElement {
+  const { t } = useTranslation();
   const isService = product.currentStock === null;
+  // Render stock as `120 kg`, `50 dona`, `2 t` … — locale-aware short
+  // suffix per the product's unit. Hidden when stock isn't tracked.
+  const stockLabel = isService
+    ? null
+    : `${formatStock(product.currentStock)} ${t(`units.short.${product.unit}` as const)}`;
   return (
     <ListItem
       onClick={onTap}
@@ -419,10 +425,20 @@ function ProductRow({
               {category.name}
             </Badge>
           ) : null}
+          {stockLabel ? (
+            <span className="text-[11px] text-muted-foreground">{stockLabel}</span>
+          ) : null}
         </span>
       }
     />
   );
+}
+
+function formatStock(raw: string | null): string {
+  if (raw === null) return '';
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return raw;
+  return Number.isInteger(n) ? String(n) : String(parseFloat(n.toFixed(4)));
 }
 
 interface ProductActionsProps {
