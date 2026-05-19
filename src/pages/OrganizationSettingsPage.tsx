@@ -146,17 +146,13 @@ export function OrganizationSettingsPage(): React.ReactElement {
               canManage && setSmsRemindersEnabled((prev) => !prev)
             }
             disabled={!canManage}
-            className={`press relative h-7 w-12 shrink-0 rounded-full border transition-colors disabled:opacity-50 ${
+            className={`press inline-flex h-7 w-12 shrink-0 items-center rounded-full border px-0.5 transition-colors disabled:opacity-50 ${
               smsRemindersEnabled
-                ? 'border-primary bg-primary'
-                : 'border-border bg-muted'
+                ? 'justify-end border-primary bg-primary'
+                : 'justify-start border-border bg-muted'
             }`}
           >
-            <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                smsRemindersEnabled ? 'translate-x-[22px]' : 'translate-x-0.5'
-              }`}
-            />
+            <span className="h-5 w-5 rounded-full bg-white shadow" />
           </button>
         </div>
       </div>
