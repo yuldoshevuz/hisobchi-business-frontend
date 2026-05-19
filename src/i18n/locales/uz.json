@@ -604,6 +604,8 @@
     "field.currency": "Asosiy valyuta",
     "field.language": "Til",
     "currency_change_warning": "⚠️ Yangi valyuta faqat keyingi tranzaksiyalarga ta'sir qiladi. Mavjud yozuvlar o'z valyutalarida qoladi.",
+    "field.sms_reminders": "SMS qarz eslatmalari",
+    "sms_reminders.description": "Qarz to'lov muddati kelganda kontaktga avtomatik SMS yuboriladi. Telefon raqami kontaktda saqlangan bo'lishi kerak.",
     "edit_permission_required": "Tahrirlash uchun «tashkilot boshqarish» ruxsati kerak.",
     "delete.title": "Tashkilotni o'chirish",
     "delete.subtitle": "Bu amal barcha ma'lumotlarni o'chiradi",

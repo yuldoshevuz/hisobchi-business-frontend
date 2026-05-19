@@ -33,6 +33,7 @@ export function OrganizationSettingsPage(): React.ReactElement {
 
   const [name, setName] = useState<string>('');
   const [baseCurrency, setBaseCurrency] = useState<string>('UZS');
+  const [smsRemindersEnabled, setSmsRemindersEnabled] = useState<boolean>(false);
 
   // Sync form when the query result first lands (or refreshes after save).
   useEffect(() => {
@@ -40,6 +41,7 @@ export function OrganizationSettingsPage(): React.ReactElement {
     if (!data) return;
     setName(data.name);
     setBaseCurrency(data.baseCurrency);
+    setSmsRemindersEnabled(data.smsRemindersEnabled);
   }, [currentOrgQuery.data]);
 
   if (currentOrgQuery.isPending) {
@@ -62,7 +64,8 @@ export function OrganizationSettingsPage(): React.ReactElement {
   const isValid = trimmedName.length >= 1 && trimmedName.length <= 255;
   const hasChanges =
     trimmedName !== org.name ||
-    baseCurrency !== org.baseCurrency;
+    baseCurrency !== org.baseCurrency ||
+    smsRemindersEnabled !== org.smsRemindersEnabled;
 
   function handleSubmit(e: React.FormEvent): void {
     e.preventDefault();
@@ -70,9 +73,13 @@ export function OrganizationSettingsPage(): React.ReactElement {
     const body: {
       name?: string;
       baseCurrency?: string;
+      smsRemindersEnabled?: boolean;
     } = {};
     if (trimmedName !== org.name) body.name = trimmedName;
     if (baseCurrency !== org.baseCurrency) body.baseCurrency = baseCurrency;
+    if (smsRemindersEnabled !== org.smsRemindersEnabled) {
+      body.smsRemindersEnabled = smsRemindersEnabled;
+    }
     updateMutation.mutate(body, {
       onSuccess: () => tgHapticNotify('success'),
       onError: () => tgHapticNotify('error'),
@@ -119,6 +126,39 @@ export function OrganizationSettingsPage(): React.ReactElement {
             {t('org_settings.currency_change_warning')}
           </p>
         ) : null}
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-3">
+          <div className="min-w-0 flex-1">
+            <Label className="text-[13px] font-medium">
+              {t('org_settings.field.sms_reminders')}
+            </Label>
+            <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+              {t('org_settings.sms_reminders.description')}
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={smsRemindersEnabled}
+            onClick={() =>
+              canManage && setSmsRemindersEnabled((prev) => !prev)
+            }
+            disabled={!canManage}
+            className={`press relative h-7 w-12 shrink-0 rounded-full border transition-colors disabled:opacity-50 ${
+              smsRemindersEnabled
+                ? 'border-primary bg-primary'
+                : 'border-border bg-muted'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                smsRemindersEnabled ? 'translate-x-[22px]' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       {!canManage ? (

@@ -6,6 +6,7 @@ export interface Organization {
   baseCurrency: string;
   locale: string;
   status: OrganizationStatus;
+  smsRemindersEnabled: boolean;
   createdBy: number;
   createdAt: string;
   updatedAt: string;
@@ -36,4 +37,5 @@ export interface UpdateOrganizationRequest {
   name?: string;
   baseCurrency?: string;
   locale?: string;
+  smsRemindersEnabled?: boolean;
 }

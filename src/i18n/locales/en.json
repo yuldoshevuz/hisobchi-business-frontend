@@ -604,6 +604,8 @@
     "field.currency": "Base currency",
     "field.language": "Language",
     "currency_change_warning": "⚠️ The new currency only applies to future transactions. Existing records keep their original currency.",
+    "field.sms_reminders": "SMS debt reminders",
+    "sms_reminders.description": "Automatically text the debtor when their due date arrives. The contact must have a phone number on file.",
     "edit_permission_required": "You need the \"manage organisation\" permission to edit this.",
     "delete.title": "Delete organisation",
     "delete.subtitle": "This removes all data permanently",
